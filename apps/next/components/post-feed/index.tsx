@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { useBalance } from '@/hooks/use-balance'
 import { TOKEN_CONFIG } from '@anon/api/lib/config'
-import { DeletePostProvider, useDeletePost } from './context'
+import { PostProvider, usePost } from './context'
 import { useToast } from '@/hooks/use-toast'
 import { Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
@@ -67,8 +67,13 @@ export default function PostFeed({
     !!balance &&
     balance >= BigInt(TOKEN_CONFIG[tokenAddress].deleteAmount)
 
+  const canPromote =
+    !!userAddress &&
+    !!balance &&
+    balance >= BigInt(TOKEN_CONFIG[tokenAddress].promoteAmount)
+
   return (
-    <DeletePostProvider
+    <PostProvider
       tokenAddress={tokenAddress}
       userAddress={userAddress}
       getSignature={getSignature}
@@ -107,29 +112,34 @@ export default function PostFeed({
           )}
         </div>
         {selected === 'new' ? (
-          <Posts canDelete={canDelete} data={newPosts} />
+          <Posts canDelete={canDelete} canPromote={canPromote} data={newPosts} />
         ) : (
-          <Posts canDelete={canDelete} data={trendingPosts} />
+          <Posts canDelete={canDelete} canPromote={canPromote} data={trendingPosts} />
         )}
       </div>
-    </DeletePostProvider>
+    </PostProvider>
   )
 }
 
 function Posts({
   data,
   canDelete,
-}: { canDelete: boolean; data: GetCastsResponse | undefined }) {
+  canPromote,
+}: { canDelete: boolean; canPromote: boolean; data: GetCastsResponse | undefined }) {
   return (
     <div className="flex flex-col gap-4">
       {data?.casts.map((cast) => (
-        <Post key={cast.hash} cast={cast} canDelete={canDelete} />
+        <Post key={cast.hash} cast={cast} canDelete={canDelete} canPromote={canPromote} />
       ))}
     </div>
   )
 }
 
-export function Post({ cast, canDelete }: { cast: Cast; canDelete: boolean }) {
+export function Post({
+  cast,
+  canDelete,
+  canPromote,
+}: { cast: Cast; canDelete: boolean; canPromote: boolean }) {
   return (
     <a
       href={`https://warpcast.com/~/conversations/${cast.hash}`}
@@ -185,11 +195,10 @@ export function Post({ cast, canDelete }: { cast: Cast; canDelete: boolean }) {
             </div>
           </div>
         </div>
-        {canDelete && (
-          <div className="absolute top-2 right-2">
-            <DeleteButton cast={cast} />
-          </div>
-        )}
+        <div className="absolute top-2 right-2 flex flex-row gap-2">
+          {canDelete && <DeleteButton cast={cast} />}
+          {canPromote && <PromoteButton cast={cast} />}
+        </div>
       </div>
     </a>
   )
@@ -221,7 +230,7 @@ function timeAgo(timestamp: string): string {
 
 function DeleteButton({ cast }: { cast: Cast }) {
   const { toast } = useToast()
-  const { deletePost, state } = useDeletePost()
+  const { deletePost, deleteState } = usePost()
   const [open, setOpen] = useState(false)
 
   const handleDelete = async () => {
@@ -251,25 +260,78 @@ function DeleteButton({ cast }: { cast: Cast }) {
           <Button
             variant="destructive"
             onClick={handleDelete}
-            disabled={state.status !== 'idle'}
+            disabled={deleteState.status !== 'idle'}
           >
-            {state.status === 'deleting' ? (
+            {deleteState.status === 'deleting' ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Deleting</p>
               </div>
-            ) : state.status === 'generating' ? (
+            ) : deleteState.status === 'generating' ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Generating proof</p>
               </div>
-            ) : state.status === 'signature' ? (
+            ) : deleteState.status === 'signature' ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Awaiting signature</p>
               </div>
             ) : (
               'Delete'
+            )}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
+function PromoteButton({ cast }: { cast: Cast }) {
+  const { toast } = useToast()
+  const { promotePost, promoteState } = usePost()
+  const [open, setOpen] = useState(false)
+
+  const handlePromote = async () => {
+    await promotePost(cast.hash)
+    toast({
+      title: 'Post promoted',
+    })
+    setOpen(false)
+  }
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <Button>Promote</Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Promote to X/Twitter?</AlertDialogTitle>
+          <AlertDialogDescription>
+            You will need to delete the post if you want to remove it from X/Twitter.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <Button onClick={handlePromote} disabled={promoteState.status !== 'idle'}>
+            {promoteState.status === 'promoting' ? (
+              <div className="flex flex-row items-center gap-2">
+                <Loader2 className="animate-spin" />
+                <p>Promoting</p>
+              </div>
+            ) : promoteState.status === 'generating' ? (
+              <div className="flex flex-row items-center gap-2">
+                <Loader2 className="animate-spin" />
+                <p>Generating proof</p>
+              </div>
+            ) : promoteState.status === 'signature' ? (
+              <div className="flex flex-row items-center gap-2">
+                <Loader2 className="animate-spin" />
+                <p>Awaiting signature</p>
+              </div>
+            ) : (
+              'Promote'
             )}
           </Button>
         </AlertDialogFooter>

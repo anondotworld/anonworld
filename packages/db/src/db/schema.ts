@@ -5,3 +5,8 @@ export const signersTable = pgTable('signers', {
   address: varchar({ length: 255 }).notNull().unique(),
   signerUuid: varchar({ length: 255 }).notNull().unique(),
 })
+
+export const postMappingTable = pgTable('post_mapping', {
+  castHash: varchar({ length: 255 }).primaryKey(),
+  tweetId: varchar({ length: 255 }).notNull(),
+})

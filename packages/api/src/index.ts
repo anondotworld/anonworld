@@ -3,33 +3,85 @@ import Redis from 'ioredis'
 import { buildMimc7 as buildMimc } from 'circomlibjs'
 import { MerkleTreeMiMC, MiMC7 } from '../lib/merkle-tree'
 import { fetchTopOwners, Owner } from '../lib/simplehash'
-import { verifyProofForCreate, verifyProofForDelete } from '../lib/proof'
+import {
+  verifyProofForCreate,
+  verifyProofForDelete,
+  verifyProofForPromote,
+} from '../lib/proof'
 import cors from '@elysiajs/cors'
 import { Logestic } from 'logestic'
-import { createSignerForAddress, getSignerForAddress } from '@anon/db'
-import { GetCastsResponse, PostCastResponse } from './types'
+import {
+  createPostMapping,
+  createSignerForAddress,
+  getPostMapping,
+  getSignerForAddress,
+} from '@anon/db'
+import { GetCastResponse, PostCastResponse } from './types'
 import crypto from 'crypto'
 import { TOKEN_CONFIG } from '../lib/config'
+import { TwitterApi } from 'twitter-api-v2'
+import * as https from 'https'
+
+const twitterClient = new TwitterApi({
+  appKey: process.env.TWITTER_API_KEY as string,
+  appSecret: process.env.TWITTER_API_SECRET as string,
+  accessToken: process.env.TWITTER_ACCESS_TOKEN as string,
+  accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET as string,
+})
 
 const zeroHex = '0x0000000000000000000000000000000000000000'
 
 const redis = new Redis(process.env.REDIS_URL as string)
 
 const app = new Elysia()
-  .onError(({ server, error, path }) => {
-    console.log(path, error)
-    server?.stop()
-    process.exit(1)
-  })
+  //   .onError(({ server, error, path }) => {
+  //     console.log(path, error)
+  //     server?.stop()
+  //     process.exit(1)
+  //   })
   .use(cors().use(Logestic.preset('common')))
-  .get('/merkle-tree/:tokenAddress', ({ params }) => fetchTree(params.tokenAddress), {
-    params: t.Object({
-      tokenAddress: t.String(),
-    }),
-  })
+  //   .get('/twitter/auth-link', async () => {
+  //     const authLink = await twitterClient.generateAuthLink('http://localhost:3000')
+  //     console.log(authLink)
+  //     return {
+  //       authLink,
+  //     }
+  //   })
+  //   .get('/twitter/persist-tokens', async () => {
+  //     try {
+  //       const result = await twitterClient.login(
+  //         process.env.TWITTER_OAUTH_VERIFIER as string
+  //       )
+  //       console.log(result.accessToken, result.accessSecret, result)
+  //     } catch (e) {
+  //       console.error(e)
+  //     }
+  //   })
+  //   .get('/twitter/post', async () => {
+  //     const result = await twitterClient.v2.tweet('test')
+  //     console.log(result)
+  //   })
+  .get(
+    '/merkle-tree/:tokenAddress',
+    ({ params }) => fetchTree(params.tokenAddress, 'create'),
+    {
+      params: t.Object({
+        tokenAddress: t.String(),
+      }),
+    }
+  )
   .get(
     '/merkle-tree/:tokenAddress/delete',
-    ({ params }) => fetchTree(params.tokenAddress, true),
+    ({ params }) => fetchTree(params.tokenAddress, 'delete'),
+    {
+      params: t.Object({
+        tokenAddress: t.String(),
+      }),
+    }
+  )
+  .get(
+    '/merkle-tree/:tokenAddress/promote',
+    ({ params }) => fetchTree(params.tokenAddress, 'promote'),
     {
       params: t.Object({
         tokenAddress: t.String(),
@@ -82,20 +134,26 @@ const app = new Elysia()
       publicInputs: t.Array(t.Array(t.Number())),
     }),
   })
+  .post('/post/promote', ({ body }) => promotePost(body.proof, body.publicInputs), {
+    body: t.Object({
+      proof: t.Array(t.Number()),
+      publicInputs: t.Array(t.Array(t.Number())),
+    }),
+  })
 
 app.listen(3001)
 
 console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`)
 
-async function fetchTree(tokenAddress: string, isDelete?: boolean) {
-  const data = await redis.get(`anon:tree:${tokenAddress}${isDelete ? ':delete' : ''}`)
+async function fetchTree(tokenAddress: string, mode: 'create' | 'delete' | 'promote') {
+  const data = await redis.get(`anon:tree:${tokenAddress.toLowerCase()}:${mode}`)
   if (data) {
     return JSON.parse(data)
   }
 
-  const tree = await createTree({ tokenAddress, isDelete })
+  const tree = await createTree({ tokenAddress, mode })
   await redis.set(
-    `anon:tree:${tokenAddress}${isDelete ? ':delete' : ''}`,
+    `anon:tree:${tokenAddress.toLowerCase()}:${mode}`,
     JSON.stringify(tree),
     'EX',
     60 * 5
@@ -106,12 +164,12 @@ async function fetchTree(tokenAddress: string, isDelete?: boolean) {
 
 export async function createTree({
   tokenAddress,
-  isDelete,
-}: { tokenAddress: string; isDelete?: boolean }) {
+  mode,
+}: { tokenAddress: string; mode: 'create' | 'delete' | 'promote' }) {
   const mimc = await buildMimc()
   const merkleTree = new MerkleTreeMiMC(11, mimc)
 
-  const owners = await fetchOwners(tokenAddress, isDelete)
+  const owners = await fetchOwners(tokenAddress, mode)
   for (const owner of owners) {
     const commitment = MiMC7(
       mimc,
@@ -141,16 +199,16 @@ export async function createTree({
 
 async function fetchOwners(
   tokenAddress: string,
-  isDelete?: boolean
+  mode: 'create' | 'delete' | 'promote'
 ): Promise<Array<Owner>> {
-  const data = await redis.get(`anon:owners:${tokenAddress}${isDelete ? ':delete' : ''}`)
+  const data = await redis.get(`anon:owners:${tokenAddress.toLowerCase()}:${mode}`)
   if (data) {
     return JSON.parse(data)
   }
 
-  const owners = await fetchTopOwners(tokenAddress, isDelete)
+  const owners = await fetchTopOwners(tokenAddress, mode)
   await redis.set(
-    `anon:owners:${tokenAddress}${isDelete ? ':delete' : ''}`,
+    `anon:owners:${tokenAddress.toLowerCase()}:${mode}`,
     JSON.stringify(owners),
     'EX',
     60 * 5
@@ -225,6 +283,12 @@ async function submitPost(proof: number[], publicInputs: number[][]) {
       'X-API-KEY': process.env.NEYNAR_API_KEY as string,
     },
   })
+  if (!response.ok) {
+    console.error(response)
+    return {
+      success: false,
+    }
+  }
 
   const data: PostCastResponse = await response.json()
 
@@ -320,7 +384,35 @@ function extractDeleteData(data: number[][]): {
   }
 }
 
-async function getCast(identifier: string) {
+function extractPromoteData(data: number[][]): {
+  timestamp: number
+  root: string
+  hash: string
+  tokenAddress: string
+} {
+  const root = `0x${Buffer.from(data[0]).toString('hex')}`
+
+  const timestampBuffer = Buffer.from(data[1])
+  let timestamp = 0
+  for (let i = 0; i < timestampBuffer.length; i++) {
+    timestamp = timestamp * 256 + timestampBuffer[i]
+  }
+
+  const hashArray = data[2]
+  const hash = `0x${Buffer.from(hashArray).toString('hex').slice(-40)}`
+
+  const tokenAddressArray = data[3]
+  const tokenAddress = `0x${Buffer.from(tokenAddressArray).toString('hex').slice(-40)}`
+
+  return {
+    timestamp,
+    root: root as string,
+    hash,
+    tokenAddress: tokenAddress as string,
+  }
+}
+
+async function getCast(identifier: string): Promise<GetCastResponse> {
   const response = await fetch(
     `https://api.neynar.com/v2/farcaster/cast?type=${
       identifier.startsWith('0x') ? 'hash' : 'url'
@@ -422,5 +514,99 @@ async function deletePost(proof: number[], publicInputs: number[][]) {
     },
   })
 
-  await response.json()
+  const postMapping = await getPostMapping(params.hash)
+  if (postMapping) {
+    await twitterClient.v2.deleteTweet(postMapping.tweetId)
+  }
+
+  return await response.json()
+}
+
+async function promotePost(proof: number[], publicInputs: number[][]) {
+  let isValid = false
+  try {
+    isValid = await verifyProofForPromote(proof, publicInputs)
+  } catch (e) {
+    console.error(e)
+  }
+
+  if (!isValid) {
+    throw new Error('Invalid proof')
+  }
+
+  const params = extractPromoteData(publicInputs)
+
+  const cast = await getCast(params.hash)
+  if (!cast.cast) {
+    return {
+      success: false,
+    }
+  }
+
+  const image = cast.cast?.embeds?.find((e) =>
+    e.metadata?.content_type?.startsWith('image')
+  )?.url
+  const tweet = await postToTwitter(cast.cast.text, image)
+  if (!tweet) {
+    return {
+      success: false,
+    }
+  }
+
+  await createPostMapping(cast.cast.hash, tweet.id)
+
+  return {
+    success: true,
+    tweetId: tweet.id,
+  }
+}
+
+async function postToTwitter(text: string, image?: string) {
+  try {
+    let mediaId: string | undefined
+    if (image) {
+      const { data: binaryData, mimeType } = await new Promise<{
+        data: Buffer
+        mimeType: string
+      }>((resolve, reject) => {
+        https
+          .get(image, (res) => {
+            res.setEncoding('binary')
+            let data = Buffer.alloc(0)
+
+            res.on('data', (chunk) => {
+              data = Buffer.concat([data, Buffer.from(chunk, 'binary')])
+            })
+            res.on('end', () => {
+              const mimeType = res.headers['content-type'] || 'image/jpeg'
+              resolve({ data, mimeType })
+            })
+          })
+          .on('error', (e) => {
+            reject(e)
+          })
+      })
+      mediaId = await twitterClient.v1.uploadMedia(binaryData as unknown as Buffer, {
+        mimeType,
+      })
+    }
+    const result = await twitterClient.v2.tweet(
+      text,
+      mediaId
+        ? {
+            media: {
+              media_ids: [mediaId],
+            },
+          }
+        : {}
+    )
+
+    if (result?.data?.id) {
+      return {
+        id: result.data.id,
+      }
+    }
+  } catch (e) {
+    console.error(e)
+  }
 }

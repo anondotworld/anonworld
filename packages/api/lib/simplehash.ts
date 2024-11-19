@@ -11,15 +11,17 @@ export type Owner = {
 
 export async function fetchTopOwners(
   tokenAddress: string,
-  isDelete?: boolean
+  mode: 'create' | 'delete' | 'promote'
 ): Promise<Array<Owner>> {
   const owners: Array<Owner> = []
 
   let minAmount = '1000000000000000000000000000000000'
-  if (isDelete) {
+  if (mode === 'delete') {
     minAmount = TOKEN_CONFIG[tokenAddress].deleteAmount
+  } else if (mode === 'promote') {
+    minAmount = TOKEN_CONFIG[tokenAddress].promoteAmount
   } else {
-    minAmount = TOKEN_CONFIG[tokenAddress].minAmount
+    minAmount = TOKEN_CONFIG[tokenAddress].postAmount
   }
 
   let cursor = ''

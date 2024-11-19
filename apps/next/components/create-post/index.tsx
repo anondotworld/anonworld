@@ -43,8 +43,8 @@ export function CreatePost({
 
   if (data === undefined) return null
 
-  const minAmount = TOKEN_CONFIG[tokenAddress].minAmount
-  const difference = BigInt(minAmount) - data
+  const postAmount = TOKEN_CONFIG[tokenAddress].postAmount
+  const difference = BigInt(postAmount) - data
 
   if (difference > 0)
     return (

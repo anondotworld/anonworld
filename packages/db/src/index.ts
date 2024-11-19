@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { signersTable } from './db/schema'
+import { postMappingTable, signersTable } from './db/schema'
 import { eq } from 'drizzle-orm'
 
 const db = drizzle(process.env.DATABASE_URL as string)
@@ -21,4 +21,17 @@ export async function createSignerForAddress(address: string, signerUuid: string
     .onConflictDoUpdate({ target: signersTable.address, set: { signerUuid } })
     .returning()
   return user
+}
+
+export async function createPostMapping(castHash: string, tweetId: string) {
+  await db.insert(postMappingTable).values({ castHash, tweetId }).onConflictDoNothing()
+}
+
+export async function getPostMapping(castHash: string) {
+  const [row] = await db
+    .select()
+    .from(postMappingTable)
+    .where(eq(postMappingTable.castHash, castHash))
+    .limit(1)
+  return row
 }
