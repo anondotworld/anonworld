@@ -16,10 +16,10 @@ import {
   getPostMapping,
   getSignerForAddress,
 } from '@anon/db'
-import { GetCastResponse, PostCastResponse } from './types'
+import { GetCastResponse, GetCastsResponse, PostCastResponse } from './types'
 import crypto from 'crypto'
 import { TOKEN_CONFIG } from '../lib/config'
-import { TwitterApi } from 'twitter-api-v2'
+import { SendTweetV2Params, TwitterApi } from 'twitter-api-v2'
 import * as https from 'https'
 
 const twitterClient = new TwitterApi({
@@ -231,6 +231,12 @@ async function submitPost(proof: number[], publicInputs: number[][]) {
 
   const params = extractCreateData(publicInputs)
 
+  if (params.timestamp < Date.now() / 1000 - 600) {
+    return {
+      success: false,
+    }
+  }
+
   const signerUuid = await getSignerForAddress(params.tokenAddress)
 
   const embeds: Array<{
@@ -269,7 +275,9 @@ async function submitPost(proof: number[], publicInputs: number[][]) {
   const exists = await redis.get(`post:hash:${hash}`)
   if (exists) {
     console.log('Duplicate submission detected')
-    return
+    return {
+      success: false,
+    }
   }
 
   await redis.set(`post:hash:${hash}`, 'true', 'EX', 60 * 5)
@@ -498,6 +506,11 @@ async function deletePost(proof: number[], publicInputs: number[][]) {
   }
 
   const params = extractDeleteData(publicInputs)
+  if (params.timestamp < Date.now() / 1000 - 600) {
+    return {
+      success: false,
+    }
+  }
 
   const signerUuid = await getSignerForAddress(params.tokenAddress)
 
@@ -535,6 +548,18 @@ async function promotePost(proof: number[], publicInputs: number[][]) {
   }
 
   const params = extractPromoteData(publicInputs)
+  if (params.timestamp < Date.now() / 1000 - 600) {
+    return {
+      success: false,
+    }
+  }
+
+  const mapping = await getPostMapping(params.hash)
+  if (mapping?.tweetId) {
+    return {
+      success: true,
+    }
+  }
 
   const cast = await getCast(params.hash)
   if (!cast.cast) {
@@ -543,10 +568,51 @@ async function promotePost(proof: number[], publicInputs: number[][]) {
     }
   }
 
+  const twitterEmbed = cast.cast?.embeds?.find(
+    (e) => e.url?.includes('x.com') || e.url?.includes('twitter.com')
+  )
+
+  let quoteTweetId: string | undefined
+  if (twitterEmbed && twitterEmbed.url) {
+    const url = new URL(twitterEmbed.url)
+    const tweetId = url.pathname.split('/').pop()
+    if (tweetId) {
+      quoteTweetId = tweetId
+    }
+  }
+
+  const otherEmbeds = cast.cast?.embeds?.filter(
+    (e) =>
+      !e.url?.includes('x.com') &&
+      !e.url?.includes('twitter.com') &&
+      !e.metadata?.content_type?.startsWith('image')
+  )
+
+  const usedUrls = new Set<string>()
+
+  let text = cast.cast.text
+  for (const embed of otherEmbeds) {
+    if (embed.url) {
+      if (!usedUrls.has(embed.url)) {
+        text += `\n\n${embed.url}`
+        usedUrls.add(embed.url)
+      }
+    } else if (embed.cast) {
+      const url = `https://warpcast.com/${
+        embed.cast.author.username
+      }/${embed.cast.hash.slice(0, 10)}`
+      if (!usedUrls.has(url)) {
+        text += `\n\n${url}`
+        usedUrls.add(url)
+      }
+    }
+  }
+
   const image = cast.cast?.embeds?.find((e) =>
     e.metadata?.content_type?.startsWith('image')
   )?.url
-  const tweet = await postToTwitter(cast.cast.text, image)
+
+  const tweet = await postToTwitter(text, image, quoteTweetId)
   if (!tweet) {
     return {
       success: false,
@@ -561,7 +627,7 @@ async function promotePost(proof: number[], publicInputs: number[][]) {
   }
 }
 
-async function postToTwitter(text: string, image?: string) {
+async function postToTwitter(text: string, image?: string, quoteTweetId?: string) {
   try {
     let mediaId: string | undefined
     if (image) {
@@ -590,16 +656,19 @@ async function postToTwitter(text: string, image?: string) {
         mimeType,
       })
     }
-    const result = await twitterClient.v2.tweet(
-      text,
-      mediaId
-        ? {
-            media: {
-              media_ids: [mediaId],
-            },
-          }
-        : {}
-    )
+
+    const params: SendTweetV2Params = {}
+    if (mediaId) {
+      params.media = {
+        media_ids: [mediaId],
+      }
+    }
+
+    if (quoteTweetId) {
+      params.quote_tweet_id = quoteTweetId
+    }
+
+    const result = await twitterClient.v2.tweet(text, params)
 
     if (result?.data?.id) {
       return {

@@ -35,15 +35,27 @@ export default function Home() {
       </div>
       <Alert>
         <CircleHelp className="h-4 w-4" />
-        <AlertTitle className="font-bold">Post anonymously to Farcaster</AlertTitle>
+        <AlertTitle className="font-bold">
+          Post anonymously to Farcaster and X/Twitter
+        </AlertTitle>
         <AlertDescription>
-          Must have <b>30,000 $ANON</b> in your wallet to post. Posts are made anonymous
-          using zk proofs. Due to the complex calculations required, it could take up to a
-          few minutes to post. We&apos;ll work on speeding this up in the future.
+          Posts are made anonymous using zk proofs. Due to the complex calculations
+          required, it could take up to a few minutes to post and take other actions.
+          We&apos;ll work on speeding this up in the future.
           <br />
           <br />
-          Post wisely, anyone with <b>3,000,000 $ANON</b> is able to delete any posts that
-          abuse the account.
+          <b>Requirements:</b>
+          <ul>
+            <li>
+              - <b>30,000 ANON</b>: Post on Farcaster
+            </li>
+            <li>
+              - <b>1,000,000 ANON</b>: Promote posts to X/Twitter
+            </li>
+            <li>
+              - <b>3,000,000 ANON</b>: Delete posts
+            </li>
+          </ul>
         </AlertDescription>
       </Alert>
       {address && (

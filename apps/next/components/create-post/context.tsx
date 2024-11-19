@@ -29,7 +29,7 @@ interface CreatePostContextProps {
   setChannel: (channel: string | null) => void
   parent: GetCastResponse | null
   setParent: (parent: GetCastResponse | null) => void
-  createPost: () => Promise<void>
+  createPost: () => Promise<string | undefined>
   embedCount: number
   state: State
 }
@@ -152,9 +152,9 @@ export const CreatePostProvider = ({
       if (data?.success) {
         setState({ status: 'success', post: data })
         onSuccess?.()
-      } else {
-        setState({ status: 'error', error: 'Failed to post' })
+        return data.cast.hash
       }
+      setState({ status: 'error', error: 'Failed to post' })
     } catch (e) {
       setState({ status: 'error', error: 'Failed to post' })
       console.error(e)

@@ -1,4 +1,3 @@
-import { PostCastResponse } from '@/lib/types'
 import { generateProofForDelete, generateProofForPromote } from '@anon/api/lib/proof'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
@@ -31,7 +30,7 @@ type PromoteState =
 interface PostContextProps {
   deletePost: (hash: string) => Promise<void>
   deleteState: DeleteState
-  promotePost: (hash: string) => Promise<void>
+  promotePost: (hash: string) => Promise<string | undefined>
   promoteState: PromoteState
 }
 
@@ -230,9 +229,9 @@ export const PostProvider = ({
 
       if (data?.success) {
         setPromoteState({ status: 'success', tweetId: data.tweetId })
-      } else {
-        setPromoteState({ status: 'error', error: 'Failed to promote' })
+        return data.tweetId
       }
+      setPromoteState({ status: 'error', error: 'Failed to promote' })
     } catch (e) {
       setPromoteState({ status: 'error', error: 'Failed to promote' })
       console.error(e)

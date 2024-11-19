@@ -7,6 +7,7 @@ import { ReactNode, useRef, useState } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -18,6 +19,10 @@ import { GetCastResponse } from '@/lib/types'
 import { useBalance } from '@/hooks/use-balance'
 import { TOKEN_CONFIG } from '@anon/api/lib/config'
 import { formatUnits } from 'viem'
+import { useToast } from '@/hooks/use-toast'
+import { ToastAction } from '../ui/toast'
+
+const MAX_EMBEDS = 2
 
 export function CreatePost({
   tokenAddress,
@@ -76,12 +81,32 @@ export function CreatePost({
 
 function CreatePostForm() {
   const { text, setText, createPost, state } = useCreatePost()
+  const { toast } = useToast()
 
   const length = new Blob([text ?? '']).size
 
   const handleSetText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (new Blob([e.target.value]).size > 320) return
     setText(e.target.value)
+  }
+
+  const handleCreatePost = async () => {
+    const hash = await createPost()
+    if (hash) {
+      toast({
+        title: 'Post created',
+        action: (
+          <ToastAction
+            altText="View on Warpcast"
+            onClick={() => {
+              window.open(`https://warpcast.com/~/conversations/${hash}`, '_blank')
+            }}
+          >
+            View on Warpcast
+          </ToastAction>
+        ),
+      })
+    }
   }
 
   return (
@@ -106,7 +131,7 @@ function CreatePostForm() {
         <div className="flex flex-row items-center gap-2">
           <p>{`${length} / 320`}</p>
           <Button
-            onClick={createPost}
+            onClick={handleCreatePost}
             className="font-bold text-md rounded-xl hover:scale-105 transition-all duration-300"
             disabled={!['idle', 'success', 'error'].includes(state.status)}
           >
@@ -236,7 +261,7 @@ function UploadImage() {
     <TooltipButton
       tooltip="Upload image"
       onClick={() => fileInputRef.current?.click()}
-      disabled={loading || !!image || embedCount >= 2}
+      disabled={loading || !!image || embedCount >= MAX_EMBEDS}
     >
       <input
         ref={fileInputRef}
@@ -285,13 +310,17 @@ function EmbedLink() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <TooltipButton tooltip="Embed link" disabled={!!embed || embedCount >= 2}>
+        <TooltipButton
+          tooltip="Embed link"
+          disabled={!!embed || embedCount >= MAX_EMBEDS}
+        >
           <Link />
         </TooltipButton>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Embed link</DialogTitle>
+          <DialogDescription>You can embed any website.</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col  gap-4 py-4">
           <Input
@@ -382,20 +411,23 @@ function ParentCast() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <TooltipButton tooltip="Reply to cast" disabled={!!parent}>
+        <TooltipButton tooltip="Reply to post" disabled={!!parent}>
           <Reply />
         </TooltipButton>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Reply to cast</DialogTitle>
+          <DialogTitle>Reply to post</DialogTitle>
+          <DialogDescription>
+            You can only reply to posts from Warpcast.
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col  gap-4 py-4">
           <Input
             id="parent"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="https://example.com"
+            placeholder="https://warpcast.com/..."
           />
         </div>
         <DialogFooter>
@@ -455,7 +487,7 @@ function RemoveableParent() {
 }
 
 function QuoteCast() {
-  const { setQuote, embedCount, quote } = useCreatePost()
+  const { setQuote, embedCount, quote, setEmbed } = useCreatePost()
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState('')
   const [loading, setLoading] = useState(false)
@@ -463,11 +495,15 @@ function QuoteCast() {
   const handleSetQuote = async () => {
     setLoading(true)
     if (value) {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/get-cast?identifier=${value}`
-      )
-      const data: GetCastResponse = await response.json()
-      setQuote(data ?? null)
+      if (value.includes('x.com') || value.includes('twitter.com')) {
+        setEmbed(value)
+      } else {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/get-cast?identifier=${value}`
+        )
+        const data: GetCastResponse = await response.json()
+        setQuote(data ?? null)
+      }
     }
     setOpen(false)
     setLoading(false)
@@ -476,20 +512,26 @@ function QuoteCast() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <TooltipButton tooltip="Quote cast" disabled={!!quote || embedCount >= 2}>
+        <TooltipButton
+          tooltip="Quote post"
+          disabled={!!quote || embedCount >= MAX_EMBEDS}
+        >
           <Quote />
         </TooltipButton>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Quote cast</DialogTitle>
+          <DialogTitle>Quote post</DialogTitle>
+          <DialogDescription>
+            You can quote posts from Warpcast or X/Twitter.
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col  gap-4 py-4">
           <Input
             id="quote"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="https://example.com"
+            placeholder="https://warpcast.com/..., https://x.com/..."
           />
         </div>
         <DialogFooter>
