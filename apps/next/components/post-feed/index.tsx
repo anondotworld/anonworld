@@ -188,7 +188,10 @@ export function Post({
 
               if (embed.cast) {
                 return (
-                  <div className="flex flex-row gap-4 border p-4 rounded-xl">
+                  <div
+                    key={embed.cast.hash}
+                    className="flex flex-row gap-4 border p-4 rounded-xl"
+                  >
                     <img
                       src={embed.cast.author.pfp_url}
                       className="w-10 h-10 rounded-full"
