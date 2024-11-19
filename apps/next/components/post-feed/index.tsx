@@ -86,21 +86,28 @@ export function Post({ cast, canDelete }: { cast: Cast; canDelete: boolean }) {
           if (embed.metadata?.image) {
             return <img key={embed.url} src={embed.url} alt="embed" />
           }
-          return (
-            <div key={embed.url} className="w-full border rounded-xl overflow-hidden">
-              {embed.metadata?.html.ogImage && embed.metadata.html.ogImage.length > 0 && (
-                <img
-                  src={embed.metadata.html.ogImage[0].url}
-                  alt={embed.metadata.html.ogImage[0].alt}
-                  className="object-cover aspect-video"
-                />
-              )}
-              <div className="p-2">
-                <h3 className="text-lg font-bold">{embed.metadata?.html.ogTitle}</h3>
-                <p className="text-sm text-gray-600">
-                  {embed.metadata?.html.ogDescription}
-                </p>
+          if (embed.metadata?.html) {
+            return (
+              <div key={embed.url} className="w-full border rounded-xl overflow-hidden">
+                {embed.metadata?.html.ogImage && embed.metadata.html.ogImage.length > 0 && (
+                  <img
+                    src={embed.metadata.html.ogImage[0].url}
+                    alt={embed.metadata.html.ogImage[0].alt}
+                    className="object-cover aspect-video"
+                  />
+                )}
+                <div className="p-2">
+                  <h3 className="text-lg font-bold">{embed.metadata?.html.ogTitle}</h3>
+                  <p className="text-sm text-gray-600">
+                    {embed.metadata?.html.ogDescription}
+                  </p>
+                </div>
               </div>
+            )
+          }
+          return (
+            <div key={embed.url} className="w-full border rounded-xl overflow-hidden px-3 py-2">
+              <span className="text-sm text-gray-600">{embed.url}</span>
             </div>
           )
         })}
