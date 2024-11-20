@@ -2,7 +2,7 @@ import { ConnectButton as RainbowConnectButton } from '@rainbow-me/rainbowkit'
 import { Button } from './ui/button'
 import { useBalance } from '@/hooks/use-balance'
 import { formatEther } from 'viem'
-import { ANON_ADDRESS } from '@anon/api/lib/config'
+import { ANON_ADDRESS } from '@anon/utils/src/config'
 
 export const ConnectButton = () => {
   return (

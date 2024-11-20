@@ -1,11 +1,9 @@
-import { ANON_ADDRESS, TOKEN_CONFIG } from '@anon/api/lib/config'
-import { Cast, GetCastsResponse } from '@anon/api/src/types'
+import { ANON_ADDRESS, TOKEN_CONFIG } from '@anon/utils/src/config'
+import { Cast, GetCastsResponse } from '@anon/api/src/services/types'
 import {
   bytesToHexString,
-  CastId,
   createDefaultMetadataKeyInterceptor,
   getSSLHubRpcClient,
-  hexStringToBytes,
 } from '@farcaster/hub-nodejs'
 import Redis from 'ioredis'
 

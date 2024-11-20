@@ -2,20 +2,23 @@ use dep::std;
 use dep::ecrecover;
 
 fn main(
+    // Token Balance
     address: Field,
     balance: Field,
-    // Merkle membership proof
+    // Merkle Membership
     note_root: pub Field,
     index: Field,
     note_hash_path: [Field; 11],
-    // Cast Data
-    timestamp: pub u64,
-    hash: pub Field,
-    token_address: pub Field,
+    // Signature
     signature: [u8; 64],
     message_hash: [u8; 32],
     pub_key_x: [u8; 32],
     pub_key_y: [u8; 32],
+    // Token Data
+    token_address: pub Field,
+    timestamp: pub u64,
+    // Hash
+    hash: pub Field,
 ) -> pub (u64, Field, Field) {
     let recovered_address = ecrecover::ecrecover(pub_key_x, pub_key_y, signature, message_hash);
     assert(address == recovered_address);

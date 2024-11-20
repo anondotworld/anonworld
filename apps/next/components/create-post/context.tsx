@@ -1,5 +1,6 @@
-import { GetCastResponse, PostCastResponse } from '@/lib/types'
-import { generateProofForCreate } from '@anon/api/lib/proof'
+import { api } from '@/lib/api'
+import { Cast, GetCastResponse, PostCastResponse } from '@/lib/types'
+import { generateProof, ProofType } from '@anon/utils/src/proofs'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
 
@@ -23,12 +24,12 @@ interface CreatePostContextProps {
   setImage: (image: string | null) => void
   embed: string | null
   setEmbed: (embed: string | null) => void
-  quote: GetCastResponse | null
-  setQuote: (quote: GetCastResponse | null) => void
+  quote: Cast | null
+  setQuote: (quote: Cast | null) => void
   channel: string | null
   setChannel: (channel: string | null) => void
-  parent: GetCastResponse | null
-  setParent: (parent: GetCastResponse | null) => void
+  parent: Cast | null
+  setParent: (parent: Cast | null) => void
   createPost: () => Promise<string | undefined>
   embedCount: number
   state: State
@@ -61,9 +62,9 @@ export const CreatePostProvider = ({
   const [text, setText] = useState<string | null>(null)
   const [image, setImage] = useState<string | null>(null)
   const [embed, setEmbed] = useState<string | null>(null)
-  const [quote, setQuote] = useState<GetCastResponse | null>(null)
+  const [quote, setQuote] = useState<Cast | null>(null)
   const [channel, setChannel] = useState<string | null>(null)
-  const [parent, setParent] = useState<GetCastResponse | null>(null)
+  const [parent, setParent] = useState<Cast | null>(null)
   const [state, setState] = useState<State>({ status: 'idle' })
 
   const createPost = async () => {
@@ -84,17 +85,22 @@ export const CreatePostProvider = ({
 
       setState({ status: 'generating' })
 
-      const proof = await generateProofForCreate({
-        address: userAddress,
-        text,
-        embeds,
-        quote: quote?.cast?.hash ?? null,
-        channel,
-        parent: parent?.cast?.hash ?? null,
+      const proof = await generateProof({
         tokenAddress,
-        signature: signatureData.signature,
-        messageHash: hashMessage(signatureData.message),
-        timestamp,
+        userAddress,
+        proofType: ProofType.CREATE_POST,
+        signature: {
+          timestamp,
+          signature: signatureData.signature,
+          messageHash: hashMessage(signatureData.message),
+        },
+        input: {
+          text,
+          embeds,
+          quote: quote?.hash ?? null,
+          channel,
+          parent: parent?.hash ?? null,
+        },
       })
       if (!proof) {
         setState({ status: 'error', error: 'Not allowed to post' })
@@ -103,58 +109,27 @@ export const CreatePostProvider = ({
 
       setState({ status: 'posting' })
 
-      let response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post`, {
-        method: 'POST',
-        body: JSON.stringify({
-          proof: Array.from(proof.proof),
-          publicInputs: proof.publicInputs.map((i) => Array.from(i)),
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      let response = await api.createPost(
+        Array.from(proof.proof),
+        proof.publicInputs.map((i) => Array.from(i))
+      )
 
       // Try aggain
-      if (!response.ok) {
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post`, {
-          method: 'POST',
-          body: JSON.stringify({
-            proof: Array.from(proof.proof),
-            publicInputs: proof.publicInputs.map((i) => Array.from(i)),
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+      if (!response?.success) {
+        response = await api.createPost(
+          Array.from(proof.proof),
+          proof.publicInputs.map((i) => Array.from(i))
+        )
       }
 
-      if (!response.ok) {
+      if (!response?.success) {
         setState({ status: 'error', error: 'Failed to post' })
         return
       }
 
-      // Try again if it failed
-      let data: PostCastResponse | undefined = await response.json()
-      if (!data?.success) {
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post`, {
-          method: 'POST',
-          body: JSON.stringify({
-            proof: Array.from(proof.proof),
-            publicInputs: proof.publicInputs.map((i) => Array.from(i)),
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        data = await response.json()
-      }
-
-      if (data?.success) {
-        setState({ status: 'success', post: data })
-        onSuccess?.()
-        return data.cast.hash
-      }
-      setState({ status: 'error', error: 'Failed to post' })
+      setState({ status: 'success', post: response })
+      onSuccess?.()
+      return response.cast.hash
     } catch (e) {
       setState({ status: 'error', error: 'Failed to post' })
       console.error(e)

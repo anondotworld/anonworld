@@ -17,10 +17,11 @@ import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
 import { GetCastResponse } from '@/lib/types'
 import { useBalance } from '@/hooks/use-balance'
-import { TOKEN_CONFIG } from '@anon/api/lib/config'
+import { TOKEN_CONFIG } from '@anon/utils/src/config'
 import { formatUnits } from 'viem'
 import { useToast } from '@/hooks/use-toast'
 import { ToastAction } from '../ui/toast'
+import { api } from '@/lib/api'
 
 const MAX_EMBEDS = 2
 
@@ -398,10 +399,7 @@ function ParentCast() {
   const handleSetParent = async () => {
     setLoading(true)
     if (value) {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/get-cast?identifier=${value}`
-      )
-      const data: GetCastResponse = await response.json()
+      const data = await api.getCast(value)
       setParent(data ?? null)
     }
     setOpen(false)
@@ -450,31 +448,31 @@ function RemoveableParent() {
         className="w-full border rounded-xl p-2 overflow-hidden cursor-pointer flex flex-col gap-2"
         onClick={() =>
           window.open(
-            `https://warpcast.com/${parent.cast.author.username}/${parent.cast.hash}`,
+            `https://warpcast.com/${parent.author.username}/${parent.hash}`,
             '_blank'
           )
         }
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             window.open(
-              `https://warpcast.com/${parent.cast.author.username}/${parent.cast.hash}`,
+              `https://warpcast.com/${parent.author.username}/${parent.hash}`,
               '_blank'
             )
           }
         }}
       >
         <p className="text-sm text-gray-600">Replying to</p>
-        {parent.cast.author && (
+        {parent.author && (
           <div className="flex items-center gap-2">
             <img
-              src={parent.cast.author.pfp_url}
-              alt={parent.cast.author.username}
+              src={parent.author.pfp_url}
+              alt={parent.author.username}
               className="w-6 h-6 rounded-full"
             />
-            <p className="text-md font-bold">{parent.cast.author.username}</p>
+            <p className="text-md font-bold">{parent.author.username}</p>
           </div>
         )}
-        <p className="text-md line-clamp-2">{parent.cast.text}</p>
+        <p className="text-md line-clamp-2">{parent.text}</p>
       </div>
       <Button
         variant="outline"
@@ -500,10 +498,7 @@ function QuoteCast() {
       if (value.includes('x.com') || value.includes('twitter.com')) {
         setEmbed(value)
       } else {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/get-cast?identifier=${value}`
-        )
-        const data: GetCastResponse = await response.json()
+        const data = await api.getCast(value)
         setQuote(data ?? null)
       }
     }
@@ -556,14 +551,14 @@ function RemoveableQuote() {
         className="w-full border rounded-xl p-2 overflow-hidden cursor-pointer flex flex-col gap-2"
         onClick={() =>
           window.open(
-            `https://warpcast.com/${quote.cast.author.username}/${quote.cast.hash}`,
+            `https://warpcast.com/${quote.author.username}/${quote.hash}`,
             '_blank'
           )
         }
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             window.open(
-              `https://warpcast.com/${quote.cast.author.username}/${quote.cast.hash}`,
+              `https://warpcast.com/${quote.author.username}/${quote.hash}`,
               '_blank'
             )
           }
@@ -572,13 +567,13 @@ function RemoveableQuote() {
         <p className="text-sm text-gray-600">Quoting</p>
         <div className="flex items-center gap-2">
           <img
-            src={quote.cast.author.pfp_url}
-            alt={quote.cast.author.username}
+            src={quote.author.pfp_url}
+            alt={quote.author.username}
             className="w-6 h-6 rounded-full"
           />
-          <p className="text-md font-bold">{quote.cast.author.username}</p>
+          <p className="text-md font-bold">{quote.author.username}</p>
         </div>
-        <p className="text-md line-clamp-2">{quote.cast.text}</p>
+        <p className="text-md line-clamp-2">{quote.text}</p>
       </div>
       <Button
         variant="outline"

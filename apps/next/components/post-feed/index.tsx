@@ -1,4 +1,4 @@
-import { Cast, GetCastsResponse } from '@/lib/types'
+import { Cast } from '@/lib/types'
 import { useQuery } from '@tanstack/react-query'
 import {
   AlertDialog,
@@ -12,13 +12,14 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { useBalance } from '@/hooks/use-balance'
-import { TOKEN_CONFIG } from '@anon/api/lib/config'
+import { TOKEN_CONFIG } from '@anon/utils/src/config'
 import { PostProvider, usePost } from './context'
 import { useToast } from '@/hooks/use-toast'
 import { Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useSignMessage } from 'wagmi'
 import { ToastAction } from '../ui/toast'
+import { api } from '@/lib/api'
 
 export default function PostFeed({
   tokenAddress,
@@ -30,21 +31,17 @@ export default function PostFeed({
 
   const { data: trendingPosts } = useQuery({
     queryKey: ['trending', tokenAddress],
-    queryFn: async (): Promise<GetCastsResponse> => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/posts/${tokenAddress}/trending`
-      )
-      return await response.json()
+    queryFn: async (): Promise<Cast[]> => {
+      const response = await api.getTrendingPosts(tokenAddress)
+      return response?.casts || []
     },
   })
 
   const { data: newPosts } = useQuery({
     queryKey: ['posts', tokenAddress],
-    queryFn: async (): Promise<GetCastsResponse> => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/posts/${tokenAddress}`
-      )
-      return await response.json()
+    queryFn: async (): Promise<Cast[]> => {
+      const response = await api.getNewPosts(tokenAddress)
+      return response?.casts || []
     },
   })
 
@@ -113,9 +110,9 @@ export default function PostFeed({
           )}
         </div>
         {selected === 'new' ? (
-          <Posts canDelete={canDelete} canPromote={canPromote} data={newPosts} />
+          <Posts canDelete={canDelete} canPromote={canPromote} casts={newPosts} />
         ) : (
-          <Posts canDelete={canDelete} canPromote={canPromote} data={trendingPosts} />
+          <Posts canDelete={canDelete} canPromote={canPromote} casts={trendingPosts} />
         )}
       </div>
     </PostProvider>
@@ -123,13 +120,13 @@ export default function PostFeed({
 }
 
 function Posts({
-  data,
+  casts,
   canDelete,
   canPromote,
-}: { canDelete: boolean; canPromote: boolean; data: GetCastsResponse | undefined }) {
+}: { canDelete: boolean; canPromote: boolean; casts?: Cast[] }) {
   return (
     <div className="flex flex-col gap-4">
-      {data?.casts.map((cast) => (
+      {casts?.map((cast) => (
         <Post key={cast.hash} cast={cast} canDelete={canDelete} canPromote={canPromote} />
       ))}
     </div>

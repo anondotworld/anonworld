@@ -1,3 +1,21 @@
+export type CreatePostParams = {
+  timestamp: number
+  root: string
+  text: string
+  embeds: string[]
+  quote: string
+  channel: string
+  parent: string
+  tokenAddress: string
+}
+
+export type SubmitHashParams = {
+  timestamp: number
+  root: string
+  hash: string
+  tokenAddress: string
+}
+
 export interface PostCastResponse {
   success: boolean
   cast: {
@@ -15,6 +33,12 @@ export interface GetCastResponse {
 
 export type GetCastsResponse = {
   casts: Array<Cast>
+}
+
+export type GetBulkCastsResponse = {
+  result: {
+    casts: Array<Cast>
+  }
 }
 
 export type Cast = {

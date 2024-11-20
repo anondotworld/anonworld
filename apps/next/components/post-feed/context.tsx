@@ -1,4 +1,5 @@
-import { generateProofForDelete, generateProofForPromote } from '@anon/api/lib/proof'
+import { api } from '@/lib/api'
+import { generateProof, ProofType } from '@anon/utils/src/proofs'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
 
@@ -76,13 +77,18 @@ export const PostProvider = ({
 
       setDeleteState({ status: 'generating' })
 
-      const proof = await generateProofForDelete({
-        address: userAddress,
-        hash,
+      const proof = await generateProof({
         tokenAddress,
-        timestamp,
-        signature: signatureData.signature,
-        messageHash: hashMessage(signatureData.message),
+        userAddress,
+        proofType: ProofType.DELETE_POST,
+        signature: {
+          timestamp,
+          signature: signatureData.signature,
+          messageHash: hashMessage(signatureData.message),
+        },
+        input: {
+          hash,
+        },
       })
       if (!proof) {
         setDeleteState({ status: 'error', error: 'Not allowed to delete' })
@@ -91,57 +97,25 @@ export const PostProvider = ({
 
       setDeleteState({ status: 'deleting' })
 
-      let response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/delete`, {
-        method: 'POST',
-        body: JSON.stringify({
-          proof: Array.from(proof.proof),
-          publicInputs: proof.publicInputs.map((i) => Array.from(i)),
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      let response = await api.deletePost(
+        Array.from(proof.proof),
+        proof.publicInputs.map((i) => Array.from(i))
+      )
 
       // Try aggain
-      if (!response.ok) {
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/delete`, {
-          method: 'POST',
-          body: JSON.stringify({
-            proof: Array.from(proof.proof),
-            publicInputs: proof.publicInputs.map((i) => Array.from(i)),
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+      if (!response?.success) {
+        response = await api.deletePost(
+          Array.from(proof.proof),
+          proof.publicInputs.map((i) => Array.from(i))
+        )
       }
 
-      if (!response.ok) {
+      if (!response?.success) {
         setDeleteState({ status: 'error', error: 'Failed to delete' })
         return
       }
 
-      // Try again if it failed
-      let data: { success: boolean } | undefined = await response.json()
-      if (!data?.success) {
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/delete`, {
-          method: 'POST',
-          body: JSON.stringify({
-            proof: Array.from(proof.proof),
-            publicInputs: proof.publicInputs.map((i) => Array.from(i)),
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        data = await response.json()
-      }
-
-      if (data?.success) {
-        setDeleteState({ status: 'success' })
-      } else {
-        setDeleteState({ status: 'error', error: 'Failed to delete' })
-      }
+      setDeleteState({ status: 'success' })
     } catch (e) {
       setDeleteState({ status: 'error', error: 'Failed to delete' })
       console.error(e)
@@ -165,13 +139,18 @@ export const PostProvider = ({
 
       setPromoteState({ status: 'generating' })
 
-      const proof = await generateProofForPromote({
-        address: userAddress,
-        hash,
+      const proof = await generateProof({
         tokenAddress,
-        timestamp,
-        signature: signatureData.signature,
-        messageHash: hashMessage(signatureData.message),
+        userAddress,
+        proofType: ProofType.PROMOTE_POST,
+        signature: {
+          timestamp,
+          signature: signatureData.signature,
+          messageHash: hashMessage(signatureData.message),
+        },
+        input: {
+          hash,
+        },
       })
       if (!proof) {
         setPromoteState({ status: 'error', error: 'Not allowed to delete' })
@@ -180,58 +159,25 @@ export const PostProvider = ({
 
       setPromoteState({ status: 'promoting' })
 
-      let response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/promote`, {
-        method: 'POST',
-        body: JSON.stringify({
-          proof: Array.from(proof.proof),
-          publicInputs: proof.publicInputs.map((i) => Array.from(i)),
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      let response = await api.promotePost(
+        Array.from(proof.proof),
+        proof.publicInputs.map((i) => Array.from(i))
+      )
 
-      // Try aggain
-      if (!response.ok) {
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/promote`, {
-          method: 'POST',
-          body: JSON.stringify({
-            proof: Array.from(proof.proof),
-            publicInputs: proof.publicInputs.map((i) => Array.from(i)),
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+      if (!response?.success) {
+        response = await api.promotePost(
+          Array.from(proof.proof),
+          proof.publicInputs.map((i) => Array.from(i))
+        )
       }
 
-      if (!response.ok) {
+      if (!response?.success) {
         setPromoteState({ status: 'error', error: 'Failed to promote' })
         return
       }
 
-      // Try again if it failed
-      let data: { success: true; tweetId: string } | { success: false } | undefined =
-        await response.json()
-      if (!data?.success) {
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post/promote`, {
-          method: 'POST',
-          body: JSON.stringify({
-            proof: Array.from(proof.proof),
-            publicInputs: proof.publicInputs.map((i) => Array.from(i)),
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        data = await response.json()
-      }
-
-      if (data?.success) {
-        setPromoteState({ status: 'success', tweetId: data.tweetId })
-        return data.tweetId
-      }
-      setPromoteState({ status: 'error', error: 'Failed to promote' })
+      setPromoteState({ status: 'success', tweetId: response.tweetId })
+      return response.tweetId
     } catch (e) {
       setPromoteState({ status: 'error', error: 'Failed to promote' })
       console.error(e)

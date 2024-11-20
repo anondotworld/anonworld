@@ -4,7 +4,7 @@ import { ConnectButton } from '@/components/connect-button'
 import { CreatePost } from '@/components/create-post'
 import PostFeed from '@/components/post-feed'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { ANON_ADDRESS } from '@anon/api/lib/config'
+import { ANON_ADDRESS } from '@anon/utils/src/config'
 import { CircleHelp } from 'lucide-react'
 import { useAccount, useSignMessage } from 'wagmi'
 

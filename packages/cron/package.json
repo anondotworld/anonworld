@@ -6,10 +6,11 @@
   "main": "src/index.ts",
   "files": ["types", "dist"],
   "scripts": {
-    "update-trending": "bun run src/update-trending.ts"
+    "update-trending": "bun run src/update-trending.ts",
+    "update-merkle-tree": "bun run src/update-merkle-tree.ts"
   },
   "dependencies": {
-    "@anon/api": "*",
+    "@anon/utils": "*",
     "@farcaster/hub-nodejs": "^0.12.7",
     "ioredis": "^5.4.1"
   },

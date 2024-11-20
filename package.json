@@ -7,8 +7,8 @@
     "next:dev": "bun run --filter @anon/next dev",
     "api:dev": "bun run --filter @anon/api dev",
     "api:start": "bun run --filter @anon/api start",
-    "api:update-merkle-tree": "bun run --filter @anon/api update-merkle-tree",
     "db:push": "bun run --filter @anon/db push",
-    "cron:update-trending": "bun run --filter @anon/cron update-trending"
+    "cron:update-trending": "bun run --filter @anon/cron update-trending",
+    "cron:update-merkle-tree": "bun run --filter @anon/cron update-merkle-tree"
   }
 }

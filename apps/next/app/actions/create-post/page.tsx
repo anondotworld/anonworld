@@ -1,8 +1,8 @@
 'use client'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { ValidateFrameResponse } from '@/lib/types'
-import { ANON_ADDRESS } from '@anon/api/lib/config'
+import { api } from '@/lib/api'
+import { ANON_ADDRESS } from '@anon/utils/src/config'
 import { useQuery } from '@tanstack/react-query'
 import { CircleHelp, ExternalLink, Loader2 } from 'lucide-react'
 import React from 'react'
@@ -15,10 +15,8 @@ const client = createPublicClient({
 })
 
 async function getConnectedAddress(data: string) {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/validate-frame?data=${data}`
-  )
-  const frameData: ValidateFrameResponse = await response.json()
+  const frameData = await api.validateFrame(data)
+  if (!frameData) return null
 
   const balances = await Promise.all(
     frameData.action.interactor.verified_addresses.eth_addresses.map(async (address) => {
