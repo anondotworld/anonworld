@@ -98,6 +98,14 @@ export default function Home() {
           >
             Uniswap
           </a>
+          <a
+            href="https://github.com/Slokh/anoncast"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-gray-500 font-semibold"
+          >
+            GitHub
+          </a>
         </div>
       </Alert>
       {address && (

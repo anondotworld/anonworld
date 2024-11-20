@@ -9,6 +9,8 @@
     "api:start": "bun run --filter @anon/api start",
     "db:push": "bun run --filter @anon/db push",
     "cron:update-trending": "bun run --filter @anon/cron update-trending",
-    "cron:update-merkle-tree": "bun run --filter @anon/cron update-merkle-tree"
+    "cron:update-merkle-tree": "bun run --filter @anon/cron update-merkle-tree",
+    "cron:profile-proof-generation": "bun run --filter @anon/cron profile-proof-generation",
+    "circuits:compile": "bun run --filter @anon/circuits compile"
   }
 }

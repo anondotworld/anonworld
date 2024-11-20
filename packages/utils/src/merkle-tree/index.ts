@@ -1,29 +1,30 @@
 import { buildMimc7 as buildMimc } from 'circomlibjs'
 import { MerkleTreeMiMC, MiMC7 } from '../proofs/merkle-tree'
 
+export const MERKLE_TREE_LEVELS = 11
+
 interface BuildTreeArgs {
   tokenAddress: string
   minAmount: string
   maxAmount?: string
 }
 
-export async function buildHoldersTree(args: BuildTreeArgs) {
+export async function buildHoldersTree(holders: { address: string; balance: string }[]) {
   const mimc = await buildMimc()
-  const merkleTree = new MerkleTreeMiMC(11, mimc)
+  const merkleTree = new MerkleTreeMiMC(MERKLE_TREE_LEVELS, mimc)
 
-  const owners = await fetchHolders(args)
-  for (const owner of owners) {
+  for (const holder of holders) {
     const commitment = MiMC7(
       mimc,
-      owner.address.toLowerCase().replace('0x', ''),
-      BigInt(owner.balance).toString(16).replace('0x', '')
+      holder.address.toLowerCase().replace('0x', ''),
+      BigInt(holder.balance).toString(16).replace('0x', '')
     )
     merkleTree.insert(commitment)
   }
 
   const root = `0x${merkleTree.root()}`
 
-  const elements = owners.map((owner, index) => {
+  const elements = holders.map((owner, index) => {
     return {
       path: merkleTree.proof(index).pathElements.map((p) => `0x${p}` as string),
       address: owner.address,
@@ -39,7 +40,7 @@ export async function buildHoldersTree(args: BuildTreeArgs) {
   return tree
 }
 
-async function fetchHolders(args: BuildTreeArgs) {
+export async function fetchHolders(args: BuildTreeArgs) {
   const owners: Array<{ address: string; balance: string }> = []
 
   let cursor = ''

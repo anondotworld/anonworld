@@ -1,5 +1,10 @@
 {
-	"name": "@anon/circuits",
-	"version": "0.0.1",
-	"private": true
+  "name": "@anon/circuits",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "compile:create-post": "cd create-post && nargo compile && cd ..",
+    "compile:submit-hash": "cd submit-hash && nargo compile && cd ..",
+    "compile": "bun run compile:create-post && bun run compile:submit-hash"
+  }
 }

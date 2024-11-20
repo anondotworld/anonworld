@@ -1,4 +1,4 @@
-import { buildHoldersTree } from '@anon/utils/src/merkle-tree'
+import { buildHoldersTree, fetchHolders } from '@anon/utils/src/merkle-tree'
 import { TOKEN_CONFIG, ANON_ADDRESS } from '@anon/utils/src/config'
 import Redis from 'ioredis'
 import { ProofType } from '@anon/utils/src/proofs'
@@ -20,7 +20,8 @@ async function buildAndCacheTree(
   proofType: ProofType,
   minAmount: string
 ) {
-  const tree = await buildHoldersTree({ tokenAddress, minAmount })
+  const holders = await fetchHolders({ tokenAddress, minAmount })
+  const tree = await buildHoldersTree(holders)
   console.log(proofType, tree.root)
   await redis.set(
     `anon:tree:${tokenAddress}:${proofType}`,

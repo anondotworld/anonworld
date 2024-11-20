@@ -46,10 +46,10 @@ interface ProofArgs {
   input: CreatePostArgs | SubmitHashArgs
 }
 
-async function getTree(args: {
+async function getTrees(args: {
   tokenAddress: string
   proofType: ProofType
-}): Promise<Tree | null> {
+}): Promise<Tree[]> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/merkle-tree`, {
     method: 'POST',
     body: JSON.stringify(args),
@@ -58,16 +58,34 @@ async function getTree(args: {
     },
   })
   if (res.status !== 200) {
-    return null
+    return []
   }
-  return await res.json()
+  const data = await res.json()
+  return data.trees || []
 }
 
-export async function generateProof(args: ProofArgs): Promise<ProofData | null> {
-  const tree = await getTree({
+async function getTreeForUser(args: {
+  tokenAddress: string
+  userAddress: string
+  proofType: ProofType
+}): Promise<Tree | null> {
+  const trees = await getTrees({
     tokenAddress: args.tokenAddress,
     proofType: args.proofType,
   })
+  if (!trees || trees.length === 0) {
+    return null
+  }
+
+  return (
+    trees.find((t) =>
+      t.elements.find((e) => e.address === args.userAddress.toLowerCase())
+    ) || null
+  )
+}
+
+export async function generateProof(args: ProofArgs): Promise<ProofData | null> {
+  const tree = await getTreeForUser(args)
   if (!tree) {
     return null
   }

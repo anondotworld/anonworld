@@ -1,5 +1,6 @@
 import { SendTweetV2Params, TwitterApi } from 'twitter-api-v2'
 import { Cast } from './types'
+import https from 'https'
 
 export const twitterClient = new TwitterApi({
   appKey: process.env.TWITTER_API_KEY as string,

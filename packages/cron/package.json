@@ -7,7 +7,8 @@
   "files": ["types", "dist"],
   "scripts": {
     "update-trending": "bun run src/update-trending.ts",
-    "update-merkle-tree": "bun run src/update-merkle-tree.ts"
+    "update-merkle-tree": "bun run src/update-merkle-tree.ts",
+    "profile-proof-generation": "bun run src/profile-proof-generation.ts"
   },
   "dependencies": {
     "@anon/utils": "*",
