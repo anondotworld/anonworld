@@ -9,6 +9,7 @@
     "api:start": "bun run --filter @anon/api start",
     "db:push": "bun run --filter @anon/db push",
     "cron:update-trending": "bun run --filter @anon/cron update-trending",
-    "cron:update-merkle-tree": "bun run --filter @anon/cron update-merkle-tree"
+    "cron:update-merkle-tree": "bun run --filter @anon/cron update-merkle-tree",
+    "queue:start": "bun run --filter @anon/queue start"
   }
 }

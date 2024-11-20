@@ -268,7 +268,7 @@ function DeleteButton({ cast }: { cast: Cast }) {
   const handleDelete = async () => {
     await deletePost(cast.hash)
     toast({
-      title: 'Post deleted',
+      title: 'Post will be deleted in 1-2 minutes',
     })
     setOpen(false)
   }
@@ -294,12 +294,7 @@ function DeleteButton({ cast }: { cast: Cast }) {
             onClick={handleDelete}
             disabled={deleteState.status !== 'idle'}
           >
-            {deleteState.status === 'deleting' ? (
-              <div className="flex flex-row items-center gap-2">
-                <Loader2 className="animate-spin" />
-                <p>Deleting</p>
-              </div>
-            ) : deleteState.status === 'generating' ? (
+            {deleteState.status === 'generating' ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Generating proof</p>
@@ -325,22 +320,10 @@ function PromoteButton({ cast }: { cast: Cast }) {
   const [open, setOpen] = useState(false)
 
   const handlePromote = async () => {
-    const tweetId = await promotePost(cast.hash)
-    if (tweetId) {
-      toast({
-        title: 'Post promoted',
-        action: (
-          <ToastAction
-            altText="View on X"
-            onClick={() => {
-              window.open(`https://twitter.com/twitter/status/${tweetId}`, '_blank')
-            }}
-          >
-            View on X
-          </ToastAction>
-        ),
-      })
-    }
+    await promotePost(cast.hash)
+    toast({
+      title: 'Post will be promoted in 1-2 minutes',
+    })
     setOpen(false)
   }
 
@@ -361,12 +344,7 @@ function PromoteButton({ cast }: { cast: Cast }) {
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <Button onClick={handlePromote} disabled={promoteState.status !== 'idle'}>
-            {promoteState.status === 'promoting' ? (
-              <div className="flex flex-row items-center gap-2">
-                <Loader2 className="animate-spin" />
-                <p>Promoting</p>
-              </div>
-            ) : promoteState.status === 'generating' ? (
+            {promoteState.status === 'generating' ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Generating proof</p>

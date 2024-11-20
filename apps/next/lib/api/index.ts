@@ -24,6 +24,12 @@ export const api = {
     })
     return response.data
   },
+  submitAction: async (type: ProofType, proof: number[], publicInputs: number[][]) => {
+    await apiClient.request(`/posts/submit`, {
+      method: 'POST',
+      body: JSON.stringify({ type, proof, publicInputs }),
+    })
+  },
   createPost: async (proof: number[], publicInputs: number[][]) => {
     const response = await apiClient.request<PostCastResponse>(`/posts/create`, {
       method: 'POST',

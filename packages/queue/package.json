@@ -1,0 +1,16 @@
+{
+  "name": "@anon/queue",
+  "version": "0.0.1",
+  "private": true,
+  "types": "./src",
+  "main": "src/index.ts",
+  "files": ["types", "dist"],
+  "scripts": {
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "@anon/utils": "*",
+    "bullmq": "^5.28.1",
+    "ioredis": "^5.4.1"
+  }
+}

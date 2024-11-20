@@ -1,16 +1,12 @@
 import { api } from '@/lib/api'
-import { Cast, PostCastResponse } from '@/lib/types'
+import { Cast } from '@/lib/types'
 import { generateProof, ProofType } from '@anon/utils/src/proofs'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
 
 type State =
   | {
-      status: 'idle' | 'signature' | 'generating' | 'posting'
-    }
-  | {
-      status: 'success'
-      post: PostCastResponse
+      status: 'idle' | 'signature' | 'generating' | 'done'
     }
   | {
       status: 'error'
@@ -30,7 +26,7 @@ interface CreatePostContextProps {
   setChannel: (channel: string | null) => void
   parent: Cast | null
   setParent: (parent: Cast | null) => void
-  createPost: () => Promise<string | undefined>
+  createPost: () => Promise<void>
   embedCount: number
   state: State
 }
@@ -107,29 +103,15 @@ export const CreatePostProvider = ({
         return
       }
 
-      setState({ status: 'posting' })
-
-      let response = await api.createPost(
+      await api.submitAction(
+        ProofType.CREATE_POST,
         Array.from(proof.proof),
         proof.publicInputs.map((i) => Array.from(i))
       )
 
-      // Try aggain
-      if (!response?.success) {
-        response = await api.createPost(
-          Array.from(proof.proof),
-          proof.publicInputs.map((i) => Array.from(i))
-        )
-      }
+      setState({ status: 'done' })
 
-      if (!response?.success) {
-        setState({ status: 'error', error: 'Failed to post' })
-        return
-      }
-
-      setState({ status: 'success', post: response })
       onSuccess?.()
-      return response.cast.hash
     } catch (e) {
       setState({ status: 'error', error: 'Failed to post' })
       console.error(e)

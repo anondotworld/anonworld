@@ -6,8 +6,22 @@ import { CreatePostParams, SubmitHashParams } from '../services/types'
 import { neynar } from '../services/neynar'
 import { promoteToTwitter } from '../services/twitter'
 import { getPostMapping } from '@anon/db'
+import { getQueue, QueueName } from '@anon/queue/src/utils'
 
 export const postRoutes = createElysia({ prefix: '/posts' })
+  .post(
+    '/submit',
+    async ({ body }) => {
+      await getQueue(QueueName.Default).add(`${body.type}-${Date.now()}`, body)
+    },
+    {
+      body: t.Object({
+        type: t.Enum(ProofType),
+        proof: t.Array(t.Number()),
+        publicInputs: t.Array(t.Array(t.Number())),
+      }),
+    }
+  )
   .post(
     '/create',
     async ({ body }) => {

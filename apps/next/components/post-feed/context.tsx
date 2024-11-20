@@ -5,10 +5,7 @@ import { hashMessage } from 'viem'
 
 type DeleteState =
   | {
-      status: 'idle' | 'signature' | 'generating' | 'deleting'
-    }
-  | {
-      status: 'success'
+      status: 'idle' | 'signature' | 'generating' | 'done'
     }
   | {
       status: 'error'
@@ -17,11 +14,7 @@ type DeleteState =
 
 type PromoteState =
   | {
-      status: 'idle' | 'signature' | 'generating' | 'promoting'
-    }
-  | {
-      status: 'success'
-      tweetId: string
+      status: 'idle' | 'signature' | 'generating' | 'done'
     }
   | {
       status: 'error'
@@ -31,7 +24,7 @@ type PromoteState =
 interface PostContextProps {
   deletePost: (hash: string) => Promise<void>
   deleteState: DeleteState
-  promotePost: (hash: string) => Promise<string | undefined>
+  promotePost: (hash: string) => Promise<void>
   promoteState: PromoteState
 }
 
@@ -95,27 +88,13 @@ export const PostProvider = ({
         return
       }
 
-      setDeleteState({ status: 'deleting' })
-
-      let response = await api.deletePost(
+      await api.submitAction(
+        ProofType.DELETE_POST,
         Array.from(proof.proof),
         proof.publicInputs.map((i) => Array.from(i))
       )
 
-      // Try aggain
-      if (!response?.success) {
-        response = await api.deletePost(
-          Array.from(proof.proof),
-          proof.publicInputs.map((i) => Array.from(i))
-        )
-      }
-
-      if (!response?.success) {
-        setDeleteState({ status: 'error', error: 'Failed to delete' })
-        return
-      }
-
-      setDeleteState({ status: 'success' })
+      setDeleteState({ status: 'done' })
     } catch (e) {
       setDeleteState({ status: 'error', error: 'Failed to delete' })
       console.error(e)
@@ -157,27 +136,13 @@ export const PostProvider = ({
         return
       }
 
-      setPromoteState({ status: 'promoting' })
-
-      let response = await api.promotePost(
+      await api.submitAction(
+        ProofType.PROMOTE_POST,
         Array.from(proof.proof),
         proof.publicInputs.map((i) => Array.from(i))
       )
 
-      if (!response?.success) {
-        response = await api.promotePost(
-          Array.from(proof.proof),
-          proof.publicInputs.map((i) => Array.from(i))
-        )
-      }
-
-      if (!response?.success) {
-        setPromoteState({ status: 'error', error: 'Failed to promote' })
-        return
-      }
-
-      setPromoteState({ status: 'success', tweetId: response.tweetId })
-      return response.tweetId
+      setPromoteState({ status: 'done' })
     } catch (e) {
       setPromoteState({ status: 'error', error: 'Failed to promote' })
       console.error(e)
