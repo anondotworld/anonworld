@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-import { Cast, GetCastResponse, PostCastResponse } from '@/lib/types'
+import { Cast, PostCastResponse } from '@/lib/types'
 import { generateProof, ProofType } from '@anon/utils/src/proofs'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'

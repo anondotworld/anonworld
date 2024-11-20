@@ -15,7 +15,6 @@ import {
 } from '../ui/dialog'
 import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
-import { GetCastResponse } from '@/lib/types'
 import { useBalance } from '@/hooks/use-balance'
 import { TOKEN_CONFIG } from '@anon/utils/src/config'
 import { formatUnits } from 'viem'
