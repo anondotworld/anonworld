@@ -17,6 +17,7 @@
     "@anon/circuits": "*",
     "@anon/db": "*",
     "@anon/utils": "*",
+    "@anon/queue": "*",
     "@elysiajs/cors": "^1.1.1",
     "@noir-lang/backend_barretenberg": "^0.17.0",
     "@noir-lang/noir_js": "^0.17.0",
