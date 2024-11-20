@@ -18,7 +18,6 @@ import { useToast } from '@/hooks/use-toast'
 import { Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useSignMessage } from 'wagmi'
-import { ToastAction } from '../ui/toast'
 import { api } from '@/lib/api'
 
 export default function PostFeed({

@@ -1,7 +1,7 @@
 import { Button } from '../ui/button'
 import { Textarea } from '../ui/textarea'
 import { CreatePostProvider, useCreatePost } from './context'
-import { ExternalLink, Image, Link, Loader2, Quote, Reply, X } from 'lucide-react'
+import { Image, Link, Loader2, Quote, Reply, X } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { ReactNode, useRef, useState } from 'react'
 import {
@@ -19,7 +19,6 @@ import { useBalance } from '@/hooks/use-balance'
 import { TOKEN_CONFIG } from '@anon/utils/src/config'
 import { formatUnits } from 'viem'
 import { useToast } from '@/hooks/use-toast'
-import { ToastAction } from '../ui/toast'
 import { api } from '@/lib/api'
 
 const MAX_EMBEDS = 2
