@@ -4,7 +4,10 @@
   "private": true,
   "types": "./src",
   "main": "src/index.ts",
-  "files": ["types", "dist"],
+  "files": [
+    "types",
+    "dist"
+  ],
   "scripts": {
     "update-merkle-tree": "bun run src/update-merkle-tree.ts"
   },

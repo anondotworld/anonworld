@@ -6,11 +6,16 @@
   "main": "src/index.ts",
   "files": ["types", "dist"],
   "scripts": {
-    "start": "bun run src/index.ts"
+    "start": "bun run src/index.ts",
+    "ui": "bun run src/ui.ts"
   },
   "dependencies": {
     "@anon/utils": "*",
+    "@bull-board/api": "^6.5.3",
+    "@bull-board/fastify": "^6.5.3",
+    "@bull-board/ui": "^6.5.3",
     "bullmq": "^5.28.1",
+    "fastify": "^5.1.0",
     "ioredis": "^5.4.1"
   }
 }

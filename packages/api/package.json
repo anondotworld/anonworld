@@ -4,18 +4,19 @@
   "private": true,
   "types": "./src",
   "main": "src/index.ts",
-  "files": ["types", "dist"],
+  "files": [
+    "types",
+    "dist"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
-    "start": "bun run src/index.ts",
-    "update-merkle-tree": "bun run src/update-merkle-tree.ts"
+    "start": "bun run src/index.ts"
   },
   "dependencies": {
     "@anon/circuits": "*",
     "@anon/db": "*",
     "@anon/utils": "*",
-    "@anon/queue": "*",
     "@elysiajs/cors": "^1.1.1",
     "@noir-lang/backend_barretenberg": "^0.17.0",
     "@noir-lang/noir_js": "^0.17.0",
