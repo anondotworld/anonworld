@@ -133,7 +133,9 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
 
 export async function getProvingBackend(proofType: ProofType) {
   const circuit = getCircuit(proofType)
+  // @ts-ignore
   const backend = new BarretenbergBackend(circuit)
+  // @ts-ignore
   const noir = new Noir(circuit, backend)
 
   await backend.instantiate()
