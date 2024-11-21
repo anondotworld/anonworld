@@ -2,8 +2,7 @@ import { ProofType, Tree } from '@anon/utils/src/proofs'
 import { Cast, Channel, GetCastsResponse, PostCastResponse, ValidateFrameResponse } from '../types'
 import { ApiClient } from './client'
 
-console.log('publicurl', process.env.NEXT_PUBLIC_API_URL)
-const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
+const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || '')
 
 export const api = {
   getNewPosts: async (tokenAddress: string) => {
