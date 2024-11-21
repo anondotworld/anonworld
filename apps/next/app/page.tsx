@@ -1,47 +1,60 @@
-'use client'
+"use client";
 
-import { ConnectButton } from '@/components/connect-button'
-import { CreatePost } from '@/components/create-post'
-import PostFeed from '@/components/post-feed'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { ANON_ADDRESS } from '@anon/utils/src/config'
-import { CircleHelp } from 'lucide-react'
-import { useAccount, useSignMessage } from 'wagmi'
+import { ConnectButton } from "@/components/connect-button";
+import { CreatePost } from "@/components/create-post";
+import PostFeed from "@/components/post-feed";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ANON_ADDRESS } from "@anon/utils/src/config";
+import { CircleHelp } from "lucide-react";
+import { useAccount, useSignMessage } from "wagmi";
 
 export default function Home() {
-  const { address } = useAccount()
-  const { signMessageAsync } = useSignMessage()
+  const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
 
   const getSignature = async ({
     address,
     timestamp,
-  }: { address: string; timestamp: number }) => {
+  }: {
+    address: string;
+    timestamp: number;
+  }) => {
     try {
-      const message = `${address}:${timestamp}`
+      const message = `${address}:${timestamp}`;
       const signature = await signMessageAsync({
         message,
-      })
-      return { signature, message }
+      });
+      return { signature, message };
     } catch {
-      return
+      return;
     }
-  }
+  };
 
   return (
     <div className="flex h-screen flex-col p-4 max-w-screen-sm mx-auto gap-8">
-      <div className="flex items-center justify-between">
-        <div className="text-3xl font-bold">$ANON</div>
+      {/* Header */}
+      <div className="flex items-center justify-between xl:absolute xl:top-0 xl:left-0 xl:right-0 xl:p-8">
+        <div className="text-lg font-bold flex flex-row items-center font-geist">
+          <img
+            src="/anon.webp"
+            alt="ANON"
+            className="w-8 h-8 mr-3 rounded-full"
+          />
+          <span className="hidden sm:block">$ANON</span>
+        </div>
         <ConnectButton />
       </div>
+
+      {/* Info */}
       <Alert>
         <CircleHelp className="h-4 w-4" />
         <AlertTitle className="font-bold">
           Post anonymously to Farcaster and X/Twitter
         </AlertTitle>
         <AlertDescription>
-          Posts are made anonymous using zk proofs. Due to the complex calculations
-          required, it could take up to a few minutes to post and take other actions.
-          We&apos;ll work on speeding this up in the future.
+          Posts are made anonymous using zk proofs. Due to the complex
+          calculations required, it could take up to a few minutes to post and
+          take other actions. We&apos;ll work on speeding this up in the future.
           <br />
           <br />
           <b>Requirements:</b>
@@ -49,8 +62,8 @@ export default function Home() {
             <li>
               <p>
                 - <b className="line-through">30,000 ANON</b>
-                <b className="text-green-500 font-bold">{' 15,000 ANON'}</b>: Post on
-                Farcaster
+                <b className="text-green-500 font-bold">{" 15,000 ANON"}</b>:
+                Post on Farcaster
               </p>
             </li>
             <li>
@@ -113,5 +126,5 @@ export default function Home() {
       )}
       <PostFeed tokenAddress={ANON_ADDRESS} userAddress={address} />
     </div>
-  )
+  );
 }

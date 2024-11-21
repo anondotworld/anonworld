@@ -19,5 +19,8 @@
     "queue:ui": "bun run --filter @anon/queue ui",
     "queue:process-failed": "bun run --filter @anon/queue process-failed",
     "queue:process-failed:promote-post": "bun run --filter @anon/queue process-failed promote-post"
+  },
+  "dependencies": {
+    "geist": "^1.3.1"
   }
 }
