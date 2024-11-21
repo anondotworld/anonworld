@@ -11,7 +11,13 @@ export const feedRoutes = createElysia({ prefix: '/feed' })
   .get(
     '/:tokenAddress/new',
     async ({ params }) => {
+      const cached = await redis.get(`new:${params.tokenAddress}`)
+      if (cached) {
+        return JSON.parse(cached)
+      }
+
       const response = await neynar.getUserCasts(TOKEN_CONFIG[params.tokenAddress].fid)
+      await redis.set(`new:${params.tokenAddress}`, JSON.stringify(response), 'EX', 30)
       return response
     },
     {

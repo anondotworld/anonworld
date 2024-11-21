@@ -6,12 +6,14 @@ export enum QueueName {
   Default = 'default',
 }
 
+export type QueueArgs = {
+  type: ProofType
+  proof: number[]
+  publicInputs: number[][]
+}
+
 type QueueType = {
-  [QueueName.Default]: {
-    type: ProofType
-    proof: number[]
-    publicInputs: number[][]
-  }
+  [QueueName.Default]: QueueArgs
 }
 
 const connection = new Redis(process.env.REDIS_URL as string, {

@@ -1,39 +1,19 @@
 import { ProofType } from '@anon/utils/src/proofs'
-import { QueueName, getWorker } from './utils'
+import { QueueName, getWorker, QueueArgs, getQueue } from './utils'
 
 const run = async () => {
-  const worker = getWorker(QueueName.Default, async (job) => {
-    console.log(`[${job.id}] ${job.data.type}`)
-    switch (job.data.type) {
-      case ProofType.CREATE_POST:
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/create`, {
-          method: 'POST',
-          body: JSON.stringify(job.data),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        break
-      case ProofType.DELETE_POST:
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/delete`, {
-          method: 'POST',
-          body: JSON.stringify(job.data),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        break
-      case ProofType.PROMOTE_POST:
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/promote`, {
-          method: 'POST',
-          body: JSON.stringify(job.data),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        break
+  // Manual run
+  if (process.argv[2]) {
+    const queue = getQueue(QueueName.Default)
+    const job = await queue.getJob(process.argv[2])
+    if (job) {
+      await handle(job.data)
     }
-  })
+    return
+  }
+
+  // Start worker
+  const worker = getWorker(QueueName.Default, async (job) => await handle(job.data))
 
   worker.on('failed', (job, err) => {
     if (job) {
@@ -46,3 +26,45 @@ run().catch((e) => {
   console.error(e)
   process.exit(1)
 })
+
+async function handle(data: QueueArgs) {
+  console.log(`${data.type}`)
+  switch (data.type) {
+    case ProofType.CREATE_POST: {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/create`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((res) => res.json())
+
+      console.log(JSON.stringify(response, null, 2))
+      break
+    }
+    case ProofType.DELETE_POST: {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/delete`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((res) => res.json())
+
+      console.log(JSON.stringify(response, null, 2))
+      break
+    }
+    case ProofType.PROMOTE_POST: {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/promote`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((res) => res.json())
+
+      console.log(JSON.stringify(response, null, 2))
+      break
+    }
+  }
+}
