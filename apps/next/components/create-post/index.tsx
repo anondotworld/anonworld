@@ -1,9 +1,14 @@
-import { Button } from '../ui/button'
-import { Textarea } from '../ui/textarea'
-import { CreatePostProvider, useCreatePost } from './context'
-import { Image, Link, Loader2, Quote, Reply, X, Slash } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
-import { ReactNode, useRef, useState } from 'react'
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
+import { CreatePostProvider, useCreatePost } from "./context";
+import { Image, Link, Loader2, Quote, Reply, X, Slash } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { ReactNode, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,18 +17,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../ui/dialog'
+} from "../ui/dialog";
 
-import { Input } from '../ui/input'
-import { useQuery } from '@tanstack/react-query'
-import { useBalance } from '@/hooks/use-balance'
-import { TOKEN_CONFIG } from '@anon/utils/src/config'
-import { formatUnits } from 'viem'
-import { useToast } from '@/hooks/use-toast'
-import { api } from '@/lib/api'
-import Confetti from 'confetti-react'
+import { Input } from "../ui/input";
+import { useQuery } from "@tanstack/react-query";
+import { useBalance } from "@/hooks/use-balance";
+import { TOKEN_CONFIG } from "@anon/utils/src/config";
+import { formatUnits } from "viem";
+import { useToast } from "@/hooks/use-toast";
+import { api } from "@/lib/api";
+import Confetti from "confetti-react";
 
-const MAX_EMBEDS = 2
+const MAX_EMBEDS = 2;
 
 export function CreatePost({
   tokenAddress,
@@ -31,26 +36,29 @@ export function CreatePost({
   onSuccess,
   getSignature,
 }: {
-  tokenAddress: string
-  userAddress: string
-  onSuccess?: () => void
+  tokenAddress: string;
+  userAddress: string;
+  onSuccess?: () => void;
   getSignature: ({
     address,
     timestamp,
-  }: { address: string; timestamp: number }) => Promise<
+  }: {
+    address: string;
+    timestamp: number;
+  }) => Promise<
     | {
-        signature: string
-        message: string
+        signature: string;
+        message: string;
       }
     | undefined
-  >
+  >;
 }) {
-  const { data } = useBalance(tokenAddress, userAddress)
+  const { data } = useBalance(tokenAddress, userAddress);
 
-  if (data === undefined) return null
+  if (data === undefined) return null;
 
-  const postAmount = TOKEN_CONFIG[tokenAddress].postAmount
-  const difference = BigInt(postAmount) - data
+  const postAmount = TOKEN_CONFIG[tokenAddress].postAmount;
+  const difference = BigInt(postAmount) - data;
 
   if (difference > 0)
     return (
@@ -66,7 +74,7 @@ export function CreatePost({
           )} more.`}</p>
         </div>
       </a>
-    )
+    );
 
   return (
     <CreatePostProvider
@@ -77,36 +85,36 @@ export function CreatePost({
     >
       <CreatePostForm />
     </CreatePostProvider>
-  )
+  );
 }
 
 function CreatePostForm() {
-  const { text, setText, createPost, state } = useCreatePost()
-  const { toast } = useToast()
-  const [confetti, setConfetti] = useState(false)
+  const { text, setText, createPost, state } = useCreatePost();
+  const { toast } = useToast();
+  const [confetti, setConfetti] = useState(false);
 
-  const length = new Blob([text ?? '']).size
+  const length = new Blob([text ?? ""]).size;
 
   const handleSetText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (new Blob([e.target.value]).size > 320) return
-    setText(e.target.value)
-  }
+    if (new Blob([e.target.value]).size > 320) return;
+    setText(e.target.value);
+  };
 
   const handleCreatePost = async () => {
-    await createPost()
+    await createPost();
     toast({
-      title: 'Post will be created in 1-2 minutes',
-    })
-    setConfetti(true)
-  }
+      title: "Post will be created in 1-2 minutes",
+    });
+    setConfetti(true);
+  };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 bg-[#0D0D0D]">
       <RemoveableParent />
       <Textarea
-        value={text ?? ''}
+        value={text ?? ""}
         onChange={handleSetText}
-        className="h-32 resize-none"
+        className="h-32 resize-none font-medium text-white placeholder:font-normal"
         placeholder="What's happening?"
       />
       <RemoveableImage />
@@ -124,21 +132,21 @@ function CreatePostForm() {
           <p>{`${length} / 320`}</p>
           <Button
             onClick={handleCreatePost}
-            className="font-bold text-md rounded-xl hover:scale-105 transition-all duration-300"
-            disabled={!['idle', 'success', 'error'].includes(state.status)}
+            className="font-bold text-md rounded-md hover:scale-105 transition-all duration-300"
+            disabled={!["idle", "success", "error"].includes(state.status)}
           >
-            {state.status === 'generating' ? (
+            {state.status === "generating" ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Generating proof</p>
               </div>
-            ) : state.status === 'signature' ? (
+            ) : state.status === "signature" ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Awaiting signature</p>
               </div>
             ) : (
-              'Post'
+              "Post anonymously"
             )}
           </Button>
         </div>
@@ -148,29 +156,29 @@ function CreatePostForm() {
           width={window.innerWidth}
           height={window.innerHeight}
           colors={[
-            '#808080', // Mid gray
-            '#999999',
-            '#b3b3b3',
-            '#cccccc',
-            '#e6e6e6',
-            '#ffffff', // Pure white
+            "#808080", // Mid gray
+            "#999999",
+            "#b3b3b3",
+            "#cccccc",
+            "#e6e6e6",
+            "#ffffff", // Pure white
           ]}
           drawShape={(ctx) => {
-            ctx.beginPath()
-            ctx.lineWidth = 3
+            ctx.beginPath();
+            ctx.lineWidth = 3;
 
             // Draw the main curve of the question mark
-            ctx.moveTo(0, -8)
-            ctx.quadraticCurveTo(8, -8, 8, -16)
-            ctx.quadraticCurveTo(8, -30, 0, -30)
-            ctx.quadraticCurveTo(-8, -30, -8, -20)
+            ctx.moveTo(0, -8);
+            ctx.quadraticCurveTo(8, -8, 8, -16);
+            ctx.quadraticCurveTo(8, -30, 0, -30);
+            ctx.quadraticCurveTo(-8, -30, -8, -20);
 
             // Draw the dot of the question mark
-            ctx.moveTo(2, 0)
-            ctx.arc(0, 0, 2, 0, Math.PI * 2, true)
+            ctx.moveTo(2, 0);
+            ctx.arc(0, 0, 2, 0, Math.PI * 2, true);
 
-            ctx.stroke()
-            ctx.closePath()
+            ctx.stroke();
+            ctx.closePath();
           }}
           gravity={0.25}
           recycle={false}
@@ -178,7 +186,7 @@ function CreatePostForm() {
         />
       )}
     </div>
-  )
+  );
 }
 
 function TooltipButton({
@@ -187,16 +195,21 @@ function TooltipButton({
   onClick,
   disabled,
 }: {
-  children: ReactNode
-  tooltip: string
-  onClick?: () => void
-  disabled?: boolean
+  children: ReactNode;
+  tooltip: string;
+  onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <TooltipProvider>
       <Tooltip delayDuration={100}>
         <TooltipTrigger asChild>
-          <Button variant="outline" size="icon" onClick={onClick} disabled={disabled}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onClick}
+            disabled={disabled}
+          >
             {children}
           </Button>
         </TooltipTrigger>
@@ -205,63 +218,65 @@ function TooltipButton({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
+  );
 }
 
 function UploadImage() {
-  const { setImage, embedCount, image } = useCreatePost()
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [loading, setLoading] = useState(false)
+  const { setImage, embedCount, image } = useCreatePost();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files || files.length === 0) return
+  const handleImageSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-    setLoading(true)
-    const newFiles: { file: string; type: string }[] = []
+    setLoading(true);
+    const newFiles: { file: string; type: string }[] = [];
     const fileReadPromises = Array.from(files).map((file) => {
       return new Promise<void>((resolve) => {
-        const reader = new FileReader()
+        const reader = new FileReader();
         reader.onload = (e) => {
           if (e.target?.result) {
             newFiles.push({
-              file: (e.target.result as string).split(',')[1],
+              file: (e.target.result as string).split(",")[1],
               type: file.type,
-            })
+            });
           }
-          resolve()
-        }
-        reader.readAsDataURL(file)
-      })
-    })
+          resolve();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
 
-    await Promise.all(fileReadPromises)
+    await Promise.all(fileReadPromises);
 
     if (newFiles.length === 0) {
-      setLoading(false)
-      return
+      setLoading(false);
+      return;
     }
 
-    const response = await fetch('https://imgur-apiv3.p.rapidapi.com/3/image', {
-      method: 'POST',
+    const response = await fetch("https://imgur-apiv3.p.rapidapi.com/3/image", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Client-ID c2593243d3ea679',
-        'X-RapidApi-Key': 'H6XlGK0RRnmshCkkElumAWvWjiBLp1ItTOBjsncst1BaYKMS8H',
+        "Content-Type": "application/json",
+        Authorization: "Client-ID c2593243d3ea679",
+        "X-RapidApi-Key": "H6XlGK0RRnmshCkkElumAWvWjiBLp1ItTOBjsncst1BaYKMS8H",
       },
       body: JSON.stringify({ image: newFiles[0].file }),
-    })
+    });
 
-    const data: { data: { link: string } } = await response.json()
+    const data: { data: { link: string } } = await response.json();
 
     if (!data.data.link) {
-      setLoading(false)
-      return
+      setLoading(false);
+      return;
     }
 
-    setImage(data.data.link)
-    setLoading(false)
-  }
+    setImage(data.data.link);
+    setLoading(false);
+  };
 
   return (
     <TooltipButton
@@ -274,18 +289,18 @@ function UploadImage() {
         type="file"
         multiple={false}
         accept="image/*"
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
         onChange={handleImageSelect}
       />
       {loading && <Loader2 className="animate-spin" />}
       {!loading && <Image />}
     </TooltipButton>
-  )
+  );
 }
 
 function RemoveableImage() {
-  const { image, setImage } = useCreatePost()
-  if (!image) return null
+  const { image, setImage } = useCreatePost();
+  if (!image) return null;
   return (
     <div className="relative">
       <img src={image} alt="Uploaded" />
@@ -298,20 +313,20 @@ function RemoveableImage() {
         <X />
       </Button>
     </div>
-  )
+  );
 }
 
 function EmbedLink() {
-  const { setEmbed, embedCount, embed } = useCreatePost()
-  const [value, setValue] = useState('')
-  const [open, setOpen] = useState(false)
+  const { setEmbed, embedCount, embed } = useCreatePost();
+  const [value, setValue] = useState("");
+  const [open, setOpen] = useState(false);
 
   const handleEmbed = () => {
     if (value) {
-      setEmbed(value)
+      setEmbed(value);
     }
-    setOpen(false)
-  }
+    setOpen(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -341,32 +356,35 @@ function EmbedLink() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function RemoveableEmbed() {
-  const { embed, setEmbed } = useCreatePost()
+  const { embed, setEmbed } = useCreatePost();
   const { data: opengraph } = useQuery({
-    queryKey: ['opengraph', embed],
+    queryKey: ["opengraph", embed],
     queryFn: embed
       ? async () => {
-          const response = await fetch(`/api/opengraph?url=${embed}`)
-          const data = await response.json()
-          return data
+          const response = await fetch(`/api/opengraph?url=${embed}`);
+          const data = await response.json();
+          return data;
         }
       : undefined,
     enabled: !!embed,
-  })
+  });
 
-  if (!embed || !opengraph) return null
+  if (!embed || !opengraph) return null;
 
   const image =
-    opengraph?.ogImage?.[0]?.url ?? opengraph.twitterImage?.[0]?.url ?? opengraph.favicon
-  const title = opengraph.ogTitle ?? opengraph.twitterTitle ?? opengraph.dcTitle
+    opengraph?.ogImage?.[0]?.url ??
+    opengraph.twitterImage?.[0]?.url ??
+    opengraph.favicon;
+  const title =
+    opengraph.ogTitle ?? opengraph.twitterTitle ?? opengraph.dcTitle;
   const description =
     opengraph.ogDescription ??
     opengraph.twitterDescription?.[0] ??
-    opengraph.dcDescription
+    opengraph.dcDescription;
 
   return (
     <div className="relative">
@@ -392,24 +410,24 @@ function RemoveableEmbed() {
         <X />
       </Button>
     </div>
-  )
+  );
 }
 
 function ParentCast() {
-  const { setParent, parent } = useCreatePost()
-  const [open, setOpen] = useState(false)
-  const [value, setValue] = useState('')
-  const [loading, setLoading] = useState(false)
+  const { setParent, parent } = useCreatePost();
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSetParent = async () => {
-    setLoading(true)
+    setLoading(true);
     if (value) {
-      const data = await api.getCast(value)
-      setParent(data ?? null)
+      const data = await api.getCast(value);
+      setParent(data ?? null);
     }
-    setOpen(false)
-    setLoading(false)
-  }
+    setOpen(false);
+    setLoading(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -435,17 +453,17 @@ function ParentCast() {
         </div>
         <DialogFooter>
           <Button onClick={handleSetParent} disabled={loading}>
-            {loading ? <Loader2 className="animate-spin" /> : 'Save'}
+            {loading ? <Loader2 className="animate-spin" /> : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function RemoveableParent() {
-  const { parent, setParent } = useCreatePost()
-  if (!parent) return null
+  const { parent, setParent } = useCreatePost();
+  if (!parent) return null;
 
   return (
     <div className="relative">
@@ -454,15 +472,15 @@ function RemoveableParent() {
         onClick={() =>
           window.open(
             `https://warpcast.com/${parent.author.username}/${parent.hash}`,
-            '_blank'
+            "_blank"
           )
         }
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             window.open(
               `https://warpcast.com/${parent.author.username}/${parent.hash}`,
-              '_blank'
-            )
+              "_blank"
+            );
           }
         }}
       >
@@ -488,48 +506,52 @@ function RemoveableParent() {
         <X />
       </Button>
     </div>
-  )
+  );
 }
 
 function Channel() {
-  const { setChannel, channel } = useCreatePost()
-  const [open, setOpen] = useState(false)
-  const [value, setValue] = useState(channel?.id ?? '')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { setChannel, channel } = useCreatePost();
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(channel?.id ?? "");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSetChannel = async () => {
     if (!value) {
       // clearing the channel
-      setChannel(null)
-      setOpen(false)
-      return
+      setChannel(null);
+      setOpen(false);
+      return;
     }
 
-    setLoading(true)
-    setError(null) // Clear any previous error
+    setLoading(true);
+    setError(null); // Clear any previous error
     try {
-    const data = await api.getChannel(value.replace('/', ''))
-    if (!data) {
-      setError('Couldn\'t find that channel.')
-    } else {
-      setChannel(data)
-      setOpen(false)
+      const data = await api.getChannel(value.replace("/", ""));
+      if (!data) {
+        setError("Couldn't find that channel.");
+      } else {
+        setChannel(data);
+        setOpen(false);
       }
     } catch (e) {
-      console.error(e)
-      setError(`Something went wrong.`)
+      console.error(e);
+      setError(`Something went wrong.`);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <TooltipButton tooltip="Channel">
           {channel ? (
-            <img src={channel.image_url} alt={channel.name} className='rounded-sm' />
+            <img
+              src={channel.image_url}
+              alt={channel.name}
+              className="rounded-sm"
+            />
           ) : (
             <Slash />
           )}
@@ -553,33 +575,33 @@ function Channel() {
         </div>
         <DialogFooter>
           <Button onClick={handleSetChannel} disabled={loading}>
-            {loading ? <Loader2 className="animate-spin" /> : 'Save'}
+            {loading ? <Loader2 className="animate-spin" /> : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function QuoteCast() {
-  const { setQuote, embedCount, quote, setEmbed } = useCreatePost()
-  const [open, setOpen] = useState(false)
-  const [value, setValue] = useState('')
-  const [loading, setLoading] = useState(false)
+  const { setQuote, embedCount, quote, setEmbed } = useCreatePost();
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSetQuote = async () => {
-    setLoading(true)
+    setLoading(true);
     if (value) {
-      if (value.includes('x.com') || value.includes('twitter.com')) {
-        setEmbed(value)
+      if (value.includes("x.com") || value.includes("twitter.com")) {
+        setEmbed(value);
       } else {
-        const data = await api.getCast(value)
-        setQuote(data ?? null)
+        const data = await api.getCast(value);
+        setQuote(data ?? null);
       }
     }
-    setOpen(false)
-    setLoading(false)
-  }
+    setOpen(false);
+    setLoading(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -608,17 +630,17 @@ function QuoteCast() {
         </div>
         <DialogFooter>
           <Button onClick={handleSetQuote} disabled={loading}>
-            {loading ? <Loader2 className="animate-spin" /> : 'Save'}
+            {loading ? <Loader2 className="animate-spin" /> : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function RemoveableQuote() {
-  const { quote, setQuote } = useCreatePost()
-  if (!quote) return null
+  const { quote, setQuote } = useCreatePost();
+  if (!quote) return null;
 
   return (
     <div className="relative">
@@ -627,15 +649,15 @@ function RemoveableQuote() {
         onClick={() =>
           window.open(
             `https://warpcast.com/${quote.author.username}/${quote.hash}`,
-            '_blank'
+            "_blank"
           )
         }
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             window.open(
               `https://warpcast.com/${quote.author.username}/${quote.hash}`,
-              '_blank'
-            )
+              "_blank"
+            );
           }
         }}
       >
@@ -659,5 +681,5 @@ function RemoveableQuote() {
         <X />
       </Button>
     </div>
-  )
+  );
 }
