@@ -7,145 +7,137 @@ import { neynar } from '../services/neynar'
 import { promoteToTwitter } from '../services/twitter'
 import { createPostMapping, getPostMapping } from '@anon/db'
 import { getQueue, QueueName } from '@anon/queue/src/utils'
+import { Noir } from '@noir-lang/noir_js'
 
-export const postRoutes = createElysia({ prefix: '/posts' })
-  .post(
-    '/submit',
-    async ({ body }) => {
-      if (body.type === ProofType.PROMOTE_POST) {
-        await getQueue(QueueName.PromotePost).add(`${body.type}-${Date.now()}`, body)
-      } else {
-        await getQueue(QueueName.Default).add(`${body.type}-${Date.now()}`, body)
-      }
-    },
-    {
-      body: t.Object({
-        type: t.Enum(ProofType),
-        proof: t.Array(t.Number()),
-        publicInputs: t.Array(t.Array(t.Number())),
-        args: t.Object({
-          asReply: t.Optional(t.Boolean()),
+export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) {
+  return createElysia({ prefix: '/posts' })
+    .decorate('createPostBackend', createPostBackend)
+    .decorate('submitHashBackend', submitHashBackend)
+    .post(
+      '/submit',
+      async ({ body }) => {
+        if (body.type === ProofType.PROMOTE_POST) {
+          await getQueue(QueueName.PromotePost).add(`${body.type}-${Date.now()}`, body)
+        } else {
+          await getQueue(QueueName.Default).add(`${body.type}-${Date.now()}`, body)
+        }
+      },
+      {
+        body: t.Object({
+          type: t.Enum(ProofType),
+          proof: t.Array(t.Number()),
+          publicInputs: t.Array(t.Array(t.Number())),
         }),
-      }),
-    }
-  )
-  .post(
-    '/create',
-    async ({ body }) => {
-      const isValid = await validateProof(
-        ProofType.CREATE_POST,
-        body.proof,
-        body.publicInputs
-      )
-      if (!isValid) {
-        throw new Error('Invalid proof')
       }
+    )
+    .post(
+      '/create',
+      async ({ body, createPostBackend }) => {
+        const isValid = await createPostBackend.verifyFinalProof({
+          proof: new Uint8Array(body.proof),
+          publicInputs: body.publicInputs.map((i) => new Uint8Array(i)),
+        })
+        if (!isValid) {
+          throw new Error('Invalid proof')
+        }
 
-      const params = extractCreatePostData(body.publicInputs)
+        const params = extractCreatePostData(body.publicInputs)
+        if (params.timestamp < Date.now() / 1000 - 600) {
+          return {
+            success: false,
+          }
+        }
 
-      return await neynar.post(params)
-    },
-    {
-      body: t.Object({
-        proof: t.Array(t.Number()),
-        publicInputs: t.Array(t.Array(t.Number())),
-      }),
-    }
-  )
-  .post(
-    '/delete',
-    async ({ body }) => {
-      const isValid = await validateProof(
-        ProofType.DELETE_POST,
-        body.proof,
-        body.publicInputs
-      )
-      if (!isValid) {
-        throw new Error('Invalid proof')
+        return await neynar.post(params)
+      },
+      {
+        body: t.Object({
+          proof: t.Array(t.Number()),
+          publicInputs: t.Array(t.Array(t.Number())),
+        }),
       }
+    )
+    .post(
+      '/delete',
+      async ({ body, submitHashBackend }) => {
+        const isValid = await submitHashBackend.verifyFinalProof({
+          proof: new Uint8Array(body.proof),
+          publicInputs: body.publicInputs.map((i) => new Uint8Array(i)),
+        })
+        if (!isValid) {
+          throw new Error('Invalid proof')
+        }
 
-      const params = extractSubmitHashData(body.publicInputs)
+        const params = extractSubmitHashData(body.publicInputs)
+        if (params.timestamp < Date.now() / 1000 - 600) {
+          return {
+            success: false,
+          }
+        }
 
-      return await neynar.delete(params)
-    },
-    {
-      body: t.Object({
-        proof: t.Array(t.Number()),
-        publicInputs: t.Array(t.Array(t.Number())),
-      }),
-    }
-  )
-  .post(
-    '/promote',
-    async ({ body }) => {
-      const isValid = await validateProof(
-        ProofType.PROMOTE_POST,
-        body.proof,
-        body.publicInputs
-      )
-      if (!isValid) {
-        throw new Error('Invalid proof')
+        return await neynar.delete(params)
+      },
+      {
+        body: t.Object({
+          proof: t.Array(t.Number()),
+          publicInputs: t.Array(t.Array(t.Number())),
+        }),
       }
+    )
+    .post(
+      '/promote',
+      async ({ body, submitHashBackend }) => {
+        const isValid = await submitHashBackend.verifyFinalProof({
+          proof: new Uint8Array(body.proof),
+          publicInputs: body.publicInputs.map((i) => new Uint8Array(i)),
+        })
+        if (!isValid) {
+          throw new Error('Invalid proof')
+        }
 
-      const params = extractSubmitHashData(body.publicInputs)
+        const params = extractSubmitHashData(body.publicInputs)
+        if (params.timestamp < Date.now() / 1000 - 600) {
+          return {
+            success: false,
+          }
+        }
 
-      const mapping = await getPostMapping(params.hash)
-      if (mapping?.tweetId) {
+        const mapping = await getPostMapping(params.hash)
+        if (mapping?.tweetId) {
+          return {
+            success: true,
+          }
+        }
+
+        const cast = await neynar.getCast(params.hash)
+        if (!cast.cast) {
+          return {
+            success: false,
+          }
+        }
+
+        const tweetId = await promoteToTwitter(cast.cast)
+
+        if (!tweetId) {
+          return {
+            success: false,
+          }
+        }
+
+        await createPostMapping(params.hash, tweetId)
+
         return {
           success: true,
+          tweetId,
         }
+      },
+      {
+        body: t.Object({
+          proof: t.Array(t.Number()),
+          publicInputs: t.Array(t.Array(t.Number())),
+        }),
       }
-
-      const cast = await neynar.getCast(params.hash)
-      if (!cast.cast) {
-        return {
-          success: false,
-        }
-      }
-
-      const tweetId = await promoteToTwitter(cast.cast, body.args?.asReply)
-
-      if (!tweetId) {
-        return {
-          success: false,
-        }
-      }
-
-      await createPostMapping(params.hash, tweetId)
-
-      return {
-        success: true,
-        tweetId,
-      }
-    },
-    {
-      body: t.Object({
-        proof: t.Array(t.Number()),
-        publicInputs: t.Array(t.Array(t.Number())),
-        args: t.Optional(
-          t.Object({
-            asReply: t.Boolean(),
-          })
-        ),
-      }),
-    }
-  )
-
-async function validateProof(
-  proofType: ProofType,
-  proof: number[],
-  publicInputs: number[][]
-) {
-  let isValid = false
-  try {
-    isValid = await verifyProof(proofType, {
-      proof: new Uint8Array(proof),
-      publicInputs: publicInputs.map((i) => new Uint8Array(i)),
-    })
-  } catch (e) {
-    console.error(e)
-  }
-  return isValid
+    )
 }
 
 function extractCreatePostData(data: number[][]): CreatePostParams {
