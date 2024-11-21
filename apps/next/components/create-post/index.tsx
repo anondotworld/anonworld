@@ -1,7 +1,7 @@
 import { Button } from '../ui/button'
 import { Textarea } from '../ui/textarea'
 import { CreatePostProvider, useCreatePost } from './context'
-import { Image, Link, Loader2, Quote, Reply, X } from 'lucide-react'
+import { Image, Link, Loader2, Quote, Reply, X, Home } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { ReactNode, useRef, useState } from 'react'
 import {
@@ -37,9 +37,9 @@ export function CreatePost({
     timestamp,
   }: { address: string; timestamp: number }) => Promise<
     | {
-        signature: string
-        message: string
-      }
+      signature: string
+      message: string
+    }
     | undefined
   >
 }) {
@@ -114,6 +114,7 @@ function CreatePostForm() {
           <EmbedLink />
           <ParentCast />
           <QuoteCast />
+          <SelectChannel />
         </div>
         <div className="flex flex-row items-center gap-2">
           <p>{`${length} / 320`}</p>
@@ -147,17 +148,24 @@ function TooltipButton({
   tooltip,
   onClick,
   disabled,
+  filled = false,
 }: {
   children: ReactNode
   tooltip: string
   onClick?: () => void
   disabled?: boolean
+  filled?: boolean
 }) {
   return (
     <TooltipProvider>
       <Tooltip delayDuration={100}>
         <TooltipTrigger asChild>
-          <Button variant="outline" size="icon" onClick={onClick} disabled={disabled}>
+          <Button
+            variant={filled ? "default" : "outline"}
+            size="icon"
+            onClick={onClick}
+            disabled={disabled}
+          >
             {children}
           </Button>
         </TooltipTrigger>
@@ -311,10 +319,10 @@ function RemoveableEmbed() {
     queryKey: ['opengraph', embed],
     queryFn: embed
       ? async () => {
-          const response = await fetch(`/api/opengraph?url=${embed}`)
-          const data = await response.json()
-          return data
-        }
+        const response = await fetch(`/api/opengraph?url=${embed}`)
+        const data = await response.json()
+        return data
+      }
       : undefined,
     enabled: !!embed,
   })
@@ -505,6 +513,96 @@ function QuoteCast() {
       </DialogContent>
     </Dialog>
   )
+}
+
+function SelectChannel() {
+  const { channel, setChannel } = useCreatePost();
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // TODO: Get channels from API
+  const channels = [
+    { name: 'books', displayName: '/books', members: '71K' },
+    { name: 'basecolors', displayName: '/basecolors', members: '2.6K' },
+    { name: 'fitness', displayName: '/fitness', members: '125K' },
+    { name: 'aesthetic', displayName: '/aesthetic', members: '1.3K' },
+    { name: 'founders', displayName: '/founders', members: '199K' },
+    { name: 'farcaster', displayName: '/farcaster', members: '342K' },
+    { name: 'memes', displayName: '/memes', members: '372K' },
+  ];
+
+  // const { } = useCreatePost()
+
+  const filteredChannels = channels.filter(channel =>
+    channel.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleSetChannel = async () => {
+    setLoading(true)
+    const data = await api.getCast(value)
+    setOpen(false)
+    setLoading(false)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <TooltipButton tooltip={channel ? `${channel}` : "Select channel"} filled={!!channel}>
+          <Home />
+        </TooltipButton>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Select a Channel</DialogTitle>
+          <DialogDescription>
+            Choose a Farcaster channel to post in.
+          </DialogDescription>
+        </DialogHeader>
+        <Input
+          placeholder="Search channels..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {channel &&
+          <>
+            <p>Selected channel:</p>
+            <div className="p-2 border rounded-lg flex justify-between items-center">
+              {channel && (
+                <>
+                  <p className="font-semibold">{channel}</p>
+                  <button
+                    onClick={() => setChannel(null)}
+                    className="ml-2 text-gray-500 hover:text-gray-800"
+                    aria-label="Clear channel"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+            </div>
+          </>
+        }
+        <div className="flex flex-col gap-2 py-4">
+          {filteredChannels
+            .filter((c) => c.name !== channel) // Hide the currently selected channel
+            .map((channel, index) => (
+              <Button
+                key={index}
+                onClick={() => {
+                  setChannel(channel.name);
+                  setOpen(false);
+                }}
+                className="flex justify-between"
+              >
+                <span>{channel.name}</span>
+                <span>{channel.members} members</span>
+              </Button>
+            ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 function RemoveableQuote() {
