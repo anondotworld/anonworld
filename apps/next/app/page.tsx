@@ -29,7 +29,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen flex-col p-4 max-w-screen-sm mx-auto gap-8">
+    <div className="flex h-screen flex-col p-4 xl:p-8 max-w-screen-sm mx-auto gap-8">
       {/* Header */}
       <div className="flex items-center justify-between xl:absolute xl:top-0 xl:left-0 xl:right-0 xl:p-8">
         <div className="text-lg font-bold flex flex-row items-center font-geist">
