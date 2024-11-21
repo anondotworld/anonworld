@@ -519,7 +519,6 @@ function SelectChannel() {
   const { channel, setChannel } = useCreatePost();
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false);
 
   // TODO: Get channels from API
   const channels = [
@@ -532,18 +531,9 @@ function SelectChannel() {
     { name: 'memes', displayName: '/memes', members: '372K' },
   ];
 
-  // const { } = useCreatePost()
-
   const filteredChannels = channels.filter(channel =>
     channel.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleSetChannel = async () => {
-    setLoading(true)
-    const data = await api.getCast(value)
-    setOpen(false)
-    setLoading(false)
-  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
