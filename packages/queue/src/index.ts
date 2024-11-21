@@ -23,11 +23,6 @@ const run = async () => {
   })
 }
 
-run().catch((e) => {
-  console.error(e)
-  process.exit(1)
-})
-
 async function handle(data: QueueArgs) {
   console.log(`${data.type}`)
   switch (data.type) {
@@ -87,3 +82,11 @@ async function handle(data: QueueArgs) {
     }
   }
 }
+
+run()
+  .catch((e) => {
+    console.error(e)
+  })
+  .finally(() => {
+    process.exit(0)
+  })
