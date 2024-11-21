@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-import { Cast } from '@/lib/types'
+import { Cast, Channel } from '@/lib/types'
 import { generateProof, ProofType } from '@anon/utils/src/proofs'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
@@ -22,8 +22,8 @@ interface CreatePostContextProps {
   setEmbed: (embed: string | null) => void
   quote: Cast | null
   setQuote: (quote: Cast | null) => void
-  channel: string | null
-  setChannel: (channel: string | null) => void
+  channel: Channel | null
+  setChannel: (channel: Channel | null) => void
   parent: Cast | null
   setParent: (parent: Cast | null) => void
   createPost: () => Promise<void>
@@ -59,7 +59,7 @@ export const CreatePostProvider = ({
   const [image, setImage] = useState<string | null>(null)
   const [embed, setEmbed] = useState<string | null>(null)
   const [quote, setQuote] = useState<Cast | null>(null)
-  const [channel, setChannel] = useState<string | null>(null)
+  const [channel, setChannel] = useState<Channel | null>(null)
   const [parent, setParent] = useState<Cast | null>(null)
   const [state, setState] = useState<State>({ status: 'idle' })
 
@@ -104,7 +104,7 @@ export const CreatePostProvider = ({
           text,
           embeds,
           quote: quote?.hash ?? null,
-          channel,
+          channel: channel?.id ?? null,
           parent: parent?.hash ?? null,
         },
       })

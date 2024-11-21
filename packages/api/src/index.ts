@@ -22,6 +22,18 @@ const app = createElysia()
     }
   )
   .get(
+    '/get-channel',
+    async ({ query }) => {
+      const response = await neynar.getChannel(query.identifier)
+      return response.channel
+    },
+    {
+      query: t.Object({
+        identifier: t.String(),
+      }),
+    }
+  )
+  .get(
     '/validate-frame',
     async ({ query }) => {
       return await neynar.validateFrame(query.data)

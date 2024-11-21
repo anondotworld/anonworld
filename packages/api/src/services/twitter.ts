@@ -1,6 +1,7 @@
 import { SendTweetV2Params, TwitterApi } from 'twitter-api-v2'
 import { Cast } from './types'
 import https from 'https'
+
 export const twitterClient = new TwitterApi({
   appKey: process.env.TWITTER_API_KEY as string,
   appSecret: process.env.TWITTER_API_SECRET as string,
@@ -39,9 +40,8 @@ export async function promoteToTwitter(cast: Cast) {
         usedUrls.add(embed.url)
       }
     } else if (embed.cast) {
-      const url = `https://warpcast.com/${
-        embed.cast.author.username
-      }/${embed.cast.hash.slice(0, 10)}`
+      const url = `https://warpcast.com/${embed.cast.author.username
+        }/${embed.cast.hash.slice(0, 10)}`
       if (!usedUrls.has(url)) {
         text += `\n\n${url}`
         usedUrls.add(url)

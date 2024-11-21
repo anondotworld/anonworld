@@ -416,79 +416,85 @@ export type Cast = {
       blocked_by: boolean
     }
   }>
-  channel: {
-    id: string
-    url: string
-    name: string
-    description: string
-    object: string
-    created_at: number
-    follower_count: number
-    external_link: {
-      title: string
-      url: string
-    }
-    image_url: string
-    parent_url: string
-    lead: {
-      object: string
-      fid: number
-      username: string
-      display_name: string
-      custody_address: string
-      pfp_url: string
-      profile: {
-        bio: {
-          text: string
-          mentioned_profiles: Array<string>
-        }
-        location: {
-          latitude: number
-          longitude: number
-          address: {
-            city: string
-            state: string
-            state_code: string
-            country: string
-            country_code: string
-          }
-        }
-      }
-      follower_count: number
-      following_count: number
-      verifications: Array<string>
-      verified_addresses: {
-        eth_addresses: Array<string>
-        sol_addresses: Array<string>
-      }
-      verified_accounts: Array<{
-        platform: string
-        username: string
-      }>
-      power_badge: boolean
-      experimental: {
-        neynar_user_score: number
-      }
-      viewer_context: {
-        following: boolean
-        followed_by: boolean
-        blocking: boolean
-        blocked_by: boolean
-      }
-    }
-    moderator_fids: Array<number>
-    member_count: number
-    pinned_cast_hash: string
-    viewer_context: {
-      following: boolean
-      role: string
-    }
-  }
+  channel: Channel
   viewer_context: {
     liked: boolean
     recasted: boolean
   }
   author_channel_context: {
+    following: boolean
+    role: string
+  }
+}
+
+export type GetChannelResponse = {
+  channel: Channel;
+}
+
+export type Channel = {
+  id: string
+  url: string
+  name: string
+  description: string
+  object: string
+  created_at: number
+  follower_count: number
+  external_link: {
+    title: string
+    url: string
+  }
+  image_url: string
+  parent_url: string
+  lead: {
+    object: string
+    fid: number
+    username: string
+    display_name: string
+    custody_address: string
+    pfp_url: string
+    profile: {
+      bio: {
+        text: string
+        mentioned_profiles: Array<string>
+      }
+      location: {
+        latitude: number
+        longitude: number
+        address: {
+          city: string
+          state: string
+          state_code: string
+          country: string
+          country_code: string
+        }
+      }
+    }
+    follower_count: number
+    following_count: number
+    verifications: Array<string>
+    verified_addresses: {
+      eth_addresses: Array<string>
+      sol_addresses: Array<string>
+    }
+    verified_accounts: Array<{
+      platform: string
+      username: string
+    }>
+    power_badge: boolean
+    experimental: {
+      neynar_user_score: number
+    }
+    viewer_context: {
+      following: boolean
+      followed_by: boolean
+      blocking: boolean
+      blocked_by: boolean
+    }
+  }
+  moderator_fids: Array<number>
+  member_count: number
+  pinned_cast_hash: string
+  viewer_context: {
     following: boolean
     role: string
   }

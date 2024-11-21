@@ -5,6 +5,7 @@ import {
   GetBulkCastsResponse,
   GetCastResponse,
   GetCastsResponse,
+  GetChannelResponse,
   PostCastResponse,
   SubmitHashParams,
 } from './types'
@@ -84,6 +85,12 @@ class NeynarService {
   async getCast(hash: string) {
     return this.makeRequest<GetCastResponse>(
       `/farcaster/cast?type=${hash.startsWith('0x') ? 'hash' : 'url'}&identifier=${hash}`
+    )
+  }
+
+  async getChannel(identifier: string) {
+    return this.makeRequest<GetChannelResponse>(
+      `/farcaster/channel?id=${identifier}&type=id`
     )
   }
 

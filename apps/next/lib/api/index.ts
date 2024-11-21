@@ -1,8 +1,9 @@
 import { ProofType, Tree } from '@anon/utils/src/proofs'
-import { Cast, GetCastsResponse, PostCastResponse, ValidateFrameResponse } from '../types'
+import { Cast, Channel, GetCastsResponse, PostCastResponse, ValidateFrameResponse } from '../types'
 import { ApiClient } from './client'
 
-const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || '')
+console.log('publicurl', process.env.NEXT_PUBLIC_API_URL)
+const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
 
 export const api = {
   getNewPosts: async (tokenAddress: string) => {
@@ -55,6 +56,10 @@ export const api = {
   },
   getCast: async (identifier: string) => {
     const response = await apiClient.request<Cast>(`/get-cast?identifier=${identifier}`)
+    return response.data
+  },
+  getChannel: async (identifier: string) => {
+    const response = await apiClient.request<Channel>(`/get-channel?identifier=${identifier}`)
     return response.data
   },
   validateFrame: async (data: string) => {

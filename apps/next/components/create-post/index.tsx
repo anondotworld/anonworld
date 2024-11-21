@@ -1,7 +1,7 @@
 import { Button } from '../ui/button'
 import { Textarea } from '../ui/textarea'
 import { CreatePostProvider, useCreatePost } from './context'
-import { Image, Link, Loader2, Quote, Reply, X } from 'lucide-react'
+import { Image, Link, Loader2, Quote, Reply, X, Slash } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { ReactNode, useRef, useState } from 'react'
 import {
@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog'
+
 import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
 import { useBalance } from '@/hooks/use-balance'
@@ -117,6 +118,7 @@ function CreatePostForm() {
           <EmbedLink />
           <ParentCast />
           <QuoteCast />
+          <Channel />
         </div>
         <div className="flex flex-row items-center gap-2">
           <p>{`${length} / 320`}</p>
@@ -486,6 +488,76 @@ function RemoveableParent() {
         <X />
       </Button>
     </div>
+  )
+}
+
+function Channel() {
+  const { setChannel, channel } = useCreatePost()
+  const [open, setOpen] = useState(false)
+  const [value, setValue] = useState(channel?.id ?? '')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSetChannel = async () => {
+    if (!value) {
+      // clearing the channel
+      setChannel(null)
+      setOpen(false)
+      return
+    }
+
+    setLoading(true)
+    setError(null) // Clear any previous error
+    try {
+    const data = await api.getChannel(value.replace('/', ''))
+    if (!data) {
+      setError('Couldn\'t find that channel.')
+    } else {
+      setChannel(data)
+      setOpen(false)
+      }
+    } catch (e) {
+      console.error(e)
+      setError(`Something went wrong.`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <TooltipButton tooltip="Channel">
+          {channel ? (
+            <img src={channel.image_url} alt={channel.name} className='rounded-sm' />
+          ) : (
+            <Slash />
+          )}
+        </TooltipButton>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Channel</DialogTitle>
+          <DialogDescription>
+            You can set a channel for your post.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 py-4">
+          <Input
+            id="channel"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="memes"
+          />
+          {error && <p className="text-red-500">{error}</p>}
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSetChannel} disabled={loading}>
+            {loading ? <Loader2 className="animate-spin" /> : 'Save'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
