@@ -1,7 +1,8 @@
+/* eslint-disable jsx-a11y/alt-text */
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { CreatePostProvider, useCreatePost } from "./context";
-import { Image, Link, Loader2, Quote, Reply, X, Slash } from "lucide-react";
+import { Image, Link, Loader2, Quote, Reply, X } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -114,22 +115,22 @@ function CreatePostForm() {
       <Textarea
         value={text ?? ""}
         onChange={handleSetText}
-        className="h-32 resize-none font-medium text-white placeholder:font-normal"
+        className="h-32 p-3 resize-none font-medium text-gray-300 text-base placeholder:text-gray-400"
         placeholder="What's happening?"
       />
       <RemoveableImage />
       <RemoveableEmbed />
       <RemoveableQuote />
-      <div className="flex justify-between">
+      <div className="flex flex-col sm:flex-row justify-between gap-4 xs:gap-0">
         <div className="flex gap-4">
           <UploadImage />
           <EmbedLink />
           <ParentCast />
           <QuoteCast />
-          <Channel />
+          {/* <Channel /> */}
         </div>
-        <div className="flex flex-row items-center gap-2">
-          <p>{`${length} / 320`}</p>
+        <div className="flex flex-row items-center gap-4 sm: justify-between">
+          <p className="font-medium text-gray-400">{`${length} / 320`}</p>
           <Button
             onClick={handleCreatePost}
             className="font-bold text-md rounded-md hover:scale-105 transition-all duration-300"
@@ -194,11 +195,13 @@ function TooltipButton({
   tooltip,
   onClick,
   disabled,
+  className,
 }: {
   children: ReactNode;
   tooltip: string;
   onClick?: () => void;
   disabled?: boolean;
+  className?: string;
 }) {
   return (
     <TooltipProvider>
@@ -209,6 +212,7 @@ function TooltipButton({
             size="icon"
             onClick={onClick}
             disabled={disabled}
+            className={className}
           >
             {children}
           </Button>
@@ -283,6 +287,7 @@ function UploadImage() {
       tooltip="Upload image"
       onClick={() => fileInputRef.current?.click()}
       disabled={loading || !!image || embedCount >= MAX_EMBEDS}
+      className="w-full sm:w-auto min-w-10"
     >
       <input
         ref={fileInputRef}
@@ -334,6 +339,7 @@ function EmbedLink() {
         <TooltipButton
           tooltip="Embed link"
           disabled={!!embed || embedCount >= MAX_EMBEDS}
+          className="w-full sm:w-auto min-w-10"
         >
           <Link />
         </TooltipButton>
@@ -343,7 +349,7 @@ function EmbedLink() {
           <DialogTitle>Embed link</DialogTitle>
           <DialogDescription>You can embed any website.</DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col  gap-4 py-4">
+        <div className="flex flex-col  gap-4 py-4 ">
           <Input
             id="link"
             value={value}
@@ -432,7 +438,11 @@ function ParentCast() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <TooltipButton tooltip="Reply to post" disabled={!!parent}>
+        <TooltipButton
+          tooltip="Reply to post"
+          disabled={!!parent}
+          className="w-full sm:w-auto min-w-10"
+        >
           <Reply />
         </TooltipButton>
       </DialogTrigger>
@@ -509,79 +519,79 @@ function RemoveableParent() {
   );
 }
 
-function Channel() {
-  const { setChannel, channel } = useCreatePost();
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(channel?.id ?? "");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+// function Channel() {
+//   const { setChannel, channel } = useCreatePost();
+//   const [open, setOpen] = useState(false);
+//   const [value, setValue] = useState(channel?.id ?? "");
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState<string | null>(null);
 
-  const handleSetChannel = async () => {
-    if (!value) {
-      // clearing the channel
-      setChannel(null);
-      setOpen(false);
-      return;
-    }
+//   const handleSetChannel = async () => {
+//     if (!value) {
+//       // clearing the channel
+//       setChannel(null);
+//       setOpen(false);
+//       return;
+//     }
 
-    setLoading(true);
-    setError(null); // Clear any previous error
-    try {
-      const data = await api.getChannel(value.replace("/", ""));
-      if (!data) {
-        setError("Couldn't find that channel.");
-      } else {
-        setChannel(data);
-        setOpen(false);
-      }
-    } catch (e) {
-      console.error(e);
-      setError(`Something went wrong.`);
-    } finally {
-      setLoading(false);
-    }
-  };
+//     setLoading(true);
+//     setError(null); // Clear any previous error
+//     try {
+//       const data = await api.getChannel(value.replace("/", ""));
+//       if (!data) {
+//         setError("Couldn't find that channel.");
+//       } else {
+//         setChannel(data);
+//         setOpen(false);
+//       }
+//     } catch (e) {
+//       console.error(e);
+//       setError(`Something went wrong.`);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <TooltipButton tooltip="Channel">
-          {channel ? (
-            <img
-              src={channel.image_url}
-              alt={channel.name}
-              className="rounded-sm"
-            />
-          ) : (
-            <Slash />
-          )}
-        </TooltipButton>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Channel</DialogTitle>
-          <DialogDescription>
-            You can set a channel for your post.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-4 py-4">
-          <Input
-            id="channel"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="memes"
-          />
-          {error && <p className="text-red-500">{error}</p>}
-        </div>
-        <DialogFooter>
-          <Button onClick={handleSetChannel} disabled={loading}>
-            {loading ? <Loader2 className="animate-spin" /> : "Save"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
+//   return (
+//     <Dialog open={open} onOpenChange={setOpen}>
+//       <DialogTrigger asChild>
+//         <TooltipButton tooltip="Channel">
+//           {channel ? (
+//             <img
+//               src={channel.image_url}
+//               alt={channel.name}
+//               className="rounded-sm"
+//             />
+//           ) : (
+//             <Slash />
+//           )}
+//         </TooltipButton>
+//       </DialogTrigger>
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogTitle>Channel</DialogTitle>
+//           <DialogDescription>
+//             You can set a channel for your post.
+//           </DialogDescription>
+//         </DialogHeader>
+//         <div className="flex flex-col gap-4 py-4">
+//           <Input
+//             id="channel"
+//             value={value}
+//             onChange={(e) => setValue(e.target.value)}
+//             placeholder="memes"
+//           />
+//           {error && <p className="text-red-500">{error}</p>}
+//         </div>
+//         <DialogFooter>
+//           <Button onClick={handleSetChannel} disabled={loading}>
+//             {loading ? <Loader2 className="animate-spin" /> : "Save"}
+//           </Button>
+//         </DialogFooter>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
 
 function QuoteCast() {
   const { setQuote, embedCount, quote, setEmbed } = useCreatePost();
@@ -609,6 +619,7 @@ function QuoteCast() {
         <TooltipButton
           tooltip="Quote post"
           disabled={!!quote || embedCount >= MAX_EMBEDS}
+          className="w-full sm:w-auto min-w-10"
         >
           <Quote />
         </TooltipButton>
