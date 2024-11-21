@@ -1,10 +1,7 @@
 {
   "name": "anon",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
+  "workspaces": ["packages/*", "apps/*"],
   "scripts": {
     "build": "bun run --filter '**' build",
     "next:dev": "bun run --filter @anon/next dev",
@@ -13,6 +10,7 @@
     "db:push": "bun run --filter @anon/db push",
     "cron:update-trending": "bun run --filter @anon/cron update-trending",
     "cron:update-merkle-tree": "bun run --filter @anon/cron update-merkle-tree",
+    "circuits:compile": "bun run --filter @anon/circuits compile",
     "queue:start": "bun run --filter @anon/queue start",
     "queue:ui": "bun run --filter @anon/queue ui"
   }

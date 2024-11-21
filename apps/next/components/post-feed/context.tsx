@@ -94,7 +94,7 @@ export const PostProvider = ({
         proof.publicInputs.map((i) => Array.from(i))
       )
 
-      setDeleteState({ status: 'done' })
+      setDeleteState({ status: 'idle' })
     } catch (e) {
       setDeleteState({ status: 'error', error: 'Failed to delete' })
       console.error(e)
@@ -142,7 +142,7 @@ export const PostProvider = ({
         proof.publicInputs.map((i) => Array.from(i))
       )
 
-      setPromoteState({ status: 'done' })
+      setPromoteState({ status: 'idle' })
     } catch (e) {
       setPromoteState({ status: 'error', error: 'Failed to promote' })
       console.error(e)

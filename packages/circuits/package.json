@@ -1,5 +1,8 @@
 {
-	"name": "@anon/circuits",
-	"version": "0.0.1",
-	"private": true
+  "name": "@anon/circuits",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "compile": "cd create-post && nargo compile && cd .. && cd submit-hash && nargo compile && cd .."
+  }
 }

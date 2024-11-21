@@ -7,7 +7,8 @@ const run = async () => {
     const queue = getQueue(QueueName.Default)
     const job = await queue.getJob(process.argv[2])
     if (job) {
-      await handle(job.data)
+      const result = await handle(job.data)
+      console.log(JSON.stringify(result, null, 2))
     }
     return
   }
@@ -37,10 +38,16 @@ async function handle(data: QueueArgs) {
         headers: {
           'Content-Type': 'application/json',
         },
-      }).then((res) => res.json())
+      })
+      if (!response.ok) {
+        throw new Error(`Failed to create post: ${response.statusText}`)
+      }
 
-      console.log(JSON.stringify(response, null, 2))
-      break
+      const result = await response.json()
+      if (!result?.success) {
+        throw new Error('Failed to create post')
+      }
+      return result
     }
     case ProofType.DELETE_POST: {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/delete`, {
@@ -49,10 +56,16 @@ async function handle(data: QueueArgs) {
         headers: {
           'Content-Type': 'application/json',
         },
-      }).then((res) => res.json())
+      })
+      if (!response.ok) {
+        throw new Error(`Failed to delete post: ${response.statusText}`)
+      }
 
-      console.log(JSON.stringify(response, null, 2))
-      break
+      const result = await response.json()
+      if (!result?.success) {
+        throw new Error('Failed to delete post')
+      }
+      return result
     }
     case ProofType.PROMOTE_POST: {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts/promote`, {
@@ -61,10 +74,16 @@ async function handle(data: QueueArgs) {
         headers: {
           'Content-Type': 'application/json',
         },
-      }).then((res) => res.json())
+      })
+      if (!response.ok) {
+        throw new Error(`Failed to promote post: ${response.statusText}`)
+      }
 
-      console.log(JSON.stringify(response, null, 2))
-      break
+      const result = await response.json()
+      if (!result?.success) {
+        throw new Error('Failed to promote post')
+      }
+      return result
     }
   }
 }
