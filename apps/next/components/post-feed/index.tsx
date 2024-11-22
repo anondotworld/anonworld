@@ -15,20 +15,13 @@ import { useBalance } from '@/hooks/use-balance'
 import { TOKEN_CONFIG } from '@anon/utils/src/config'
 import { PostProvider, usePost } from './context'
 import { useToast } from '@/hooks/use-toast'
-import { ArrowUpDown, Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
+import { Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useSignMessage } from 'wagmi'
 import { api } from '@/lib/api'
 import { Checkbox } from '../ui/checkbox'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select'
-import { Skeleton } from '../ui/skeleton'
 import AnimatedTabs from './animated-tabs'
+import { Skeleton } from '../ui/skeleton'
 
 export default function PostFeed({
   tokenAddress,
@@ -191,13 +184,13 @@ export function Post({
   const sanitizedText = cleanText(cast.text)
 
   return (
-    <div className="relative [overflow-wrap:anywhere] bg-[#111111] rounded-xl overflow-hidden">
+    <div className="relative [overflow-wrap:anywhere] bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden">
       <a
         href={`https://warpcast.com/${cast.author.username}/${cast.hash.slice(0, 10)}`}
         target="_blank"
         rel="noreferrer"
       >
-        <div className="flex flex-row gap-4 border p-4 sm:p-6 rounded-xl">
+        <div className="flex flex-row gap-4  p-4 sm:p-6  ">
           <div className="flex flex-col gap-2 w-full">
             <div className=" font-medium whitespace-pre-wrap">{sanitizedText}</div>
             {cast.embeds.map((embed) => {
@@ -229,7 +222,7 @@ export function Post({
                       <h3 className="text-lg font-bold">
                         {embed.metadata?.html?.ogTitle}
                       </h3>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-zinc-400">
                         {embed.metadata?.html?.ogDescription}
                       </p>
                     </div>
@@ -241,7 +234,7 @@ export function Post({
                 return (
                   <div
                     key={embed.cast.hash}
-                    className="flex flex-row gap-4 border p-4 rounded-xl"
+                    className="flex flex-row gap-4 border border-zinc-700 p-4 rounded-xl"
                   >
                     <img
                       src={embed.cast.author?.pfp_url}
@@ -267,21 +260,21 @@ export function Post({
             })}
             <div className="flex flex-col gap-4 sm:flex-row justify-between">
               <div className="flex flex-row items-center gap-2 mt-2">
-                <div className="text-sm font-medium text-gray-400">
+                <div className="text-sm font-medium text-zinc-400">
                   {timeAgo(cast.timestamp)}
                 </div>
-                <div className="w-1 h-1 bg-gray-400" />
+                <div className="w-1 h-1 bg-zinc-400" />
 
-                <div className="flex flex-row items-center gap-1 ">
-                  <MessageSquare size={16} className="text-gray-400" />
+                <div className="flex flex-row items-center gap-1.5 ">
+                  <MessageSquare size={16} className="text-zinc-400" />
                   <p className="text-sm font-medium">{cast.replies.count}</p>
                 </div>
-                <div className="flex flex-row items-center gap-1 ">
-                  <RefreshCcw size={16} className="text-gray-400" />
+                <div className="flex flex-row items-center gap-1.5 ">
+                  <RefreshCcw size={16} className="text-zinc-400" />
                   <p className="text-sm font-medium ">{cast.reactions.recasts_count}</p>
                 </div>
-                <div className="flex flex-row items-center gap-1 w-16">
-                  <Heart size={16} className="text-gray-400" />
+                <div className="flex flex-row items-center gap-1.5 w-16">
+                  <Heart size={16} className="text-zinc-400" />
                   <p className="text-sm font-medium">{cast.reactions.likes_count}</p>
                 </div>
               </div>

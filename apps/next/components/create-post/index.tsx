@@ -148,12 +148,12 @@ function CreatePostForm() {
   }
 
   return (
-    <div className="flex flex-col gap-4 bg-[#0D0D0D]">
+    <div className="flex flex-col gap-4">
       <RemoveableParent />
       <Textarea
         value={text ?? ''}
         onChange={handleSetText}
-        className="h-32 p-3 resize-none font-medium !text-base placeholder:text-gray-400"
+        className="h-32 p-3 resize-none font-medium !text-base placeholder:text-zinc-400 bg-zinc-950 border border-zinc-700"
         placeholder="What's happening, anon?"
       />
       <RemoveableImage />
@@ -168,7 +168,7 @@ function CreatePostForm() {
           <Channel />
         </div>
         <div className="flex flex-row items-center gap-4 sm: justify-between">
-          <p className="font-medium text-gray-400">{`${length} / 320`}</p>
+          <p className="font-medium text-zinc-400">{`${length} / 320`}</p>
           <Button
             onClick={handleCreatePost}
             className="font-bold text-md rounded-md hover:scale-105 transition-all duration-300"
@@ -323,7 +323,7 @@ function UploadImage() {
       tooltip="Upload image"
       onClick={() => fileInputRef.current?.click()}
       disabled={loading || !!image || embedCount >= MAX_EMBEDS}
-      className="w-full sm:w-auto min-w-10"
+      className="w-full sm:w-auto min-w-10 bg-zinc-950 border border-zinc-700"
     >
       <input
         ref={fileInputRef}
@@ -375,7 +375,7 @@ function EmbedLink() {
         <TooltipButton
           tooltip="Embed link"
           disabled={!!embed || embedCount >= MAX_EMBEDS}
-          className="w-full sm:w-auto min-w-10"
+          className="w-full sm:w-auto min-w-10 bg-zinc-950 border border-zinc-700"
         >
           <Link />
         </TooltipButton>
@@ -445,7 +445,7 @@ function RemoveableEmbed() {
         )}
         <div className="p-2">
           <h3 className="text-lg font-bold">{title}</h3>
-          <p className="text-sm text-gray-400">{description}</p>
+          <p className="text-sm text-zinc-400">{description}</p>
         </div>
       </div>
       <Button
@@ -482,7 +482,7 @@ function ParentCast() {
         <TooltipButton
           tooltip="Reply to post"
           disabled={!!parent}
-          className="w-full sm:w-auto min-w-10"
+          className="w-full sm:w-auto min-w-10 bg-zinc-950 border border-zinc-700"
         >
           <Reply />
         </TooltipButton>
@@ -535,7 +535,7 @@ function RemoveableParent() {
           }
         }}
       >
-        <p className="text-sm text-gray-600">Replying to</p>
+        <p className="text-sm text-zinc-400">Replying to</p>
         {parent.author && (
           <div className="flex items-center gap-2">
             <img
@@ -596,7 +596,10 @@ function Channel() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <TooltipButton tooltip="Channel" className="w-full sm:w-auto min-w-10">
+        <TooltipButton
+          tooltip="Channel"
+          className="w-full sm:w-auto min-w-10 bg-zinc-950 border border-zinc-700"
+        >
           {channel ? (
             <img src={channel.image_url} alt={channel.name} className="rounded-sm" />
           ) : (
@@ -654,7 +657,7 @@ function QuoteCast() {
         <TooltipButton
           tooltip="Quote post"
           disabled={!!quote || embedCount >= MAX_EMBEDS}
-          className="w-full sm:w-auto min-w-10"
+          className="w-full sm:w-auto min-w-10 bg-zinc-950 border border-zinc-700"
         >
           <Quote />
         </TooltipButton>
@@ -707,7 +710,7 @@ function RemoveableQuote() {
           }
         }}
       >
-        <p className="text-sm text-gray-600">Quoting</p>
+        <p className="text-sm text-zinc-400">Quoting</p>
         <div className="flex items-center gap-2">
           <img
             src={quote.author.pfp_url}

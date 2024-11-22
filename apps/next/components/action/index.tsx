@@ -35,18 +35,18 @@ export default function ActionComponent({
   const DELETE_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].deleteAmount) / BigInt(10 ** 18)
 
   return (
-    <Alert className="flex flex-col gap-4 bg-[#111111]">
+    <Alert className="flex flex-col gap-4 bg-zinc-900 border border-zinc-700">
       <AlertTitle className="font-semibold text-xl">
         Post anonymously to Farcaster and X/Twitter
       </AlertTitle>
       <AlertDescription>
-        <p className="text-gray-400">
+        <p className="text-zinc-400">
           Posts are made anonymous using zk proofs. Due to the complex calculations
           required, it could take up to a few minutes to post and take other actions.
           We&apos;ll work on speeding this up in the future.
         </p>
         <br />
-        <p className="text-gray-400 ">Holder requirements:</p>
+        <p className="text-zinc-400 ">Holder requirements:</p>
         <ul className="flex flex-col gap-1 mt-3">
           <TokenRequirement
             tokenAmount={data}

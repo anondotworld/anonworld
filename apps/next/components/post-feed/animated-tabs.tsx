@@ -20,13 +20,13 @@ export default function AnimatedTabs({
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
   return (
-    <div className="flex gap-2 bg-zinc-950 border border-zinc-900 rounded-lg p-2">
+    <div className="flex gap-2 bg-zinc-900 border border-zinc-700 rounded-lg p-1">
       {tabs.map((tab) => (
         <motion.ul
           layout
           className={clsx(
-            "relative cursor-pointer px-2 py-1 font-open-runde outline-none transition-colors",
-            activeTab === tab ? "text-zinc-950" : "text-zinc-400"
+            "relative cursor-pointer px-2 py-1 font-semibold outline-none transition-colors",
+            activeTab === tab ? "text-zinc-900" : "text-zinc-400"
           )}
           tabIndex={0}
           key={tab}
@@ -37,7 +37,7 @@ export default function AnimatedTabs({
           {activeTab === tab ? (
             <motion.div
               layoutId="tab-indicator"
-              className="absolute inset-0 rounded-lg bg-zinc-100"
+              className="absolute inset-0 rounded-lg bg-white"
             />
           ) : null}
           <span className="relative text-inherit">
