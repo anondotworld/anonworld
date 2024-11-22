@@ -15,11 +15,24 @@ import { useBalance } from "@/hooks/use-balance";
 import { TOKEN_CONFIG } from "@anon/utils/src/config";
 import { PostProvider, usePost } from "./context";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Loader2, MessageSquare, RefreshCcw } from "lucide-react";
+import {
+  ArrowUpDown,
+  Heart,
+  Loader2,
+  MessageSquare,
+  RefreshCcw,
+} from "lucide-react";
 import { useState } from "react";
 import { useSignMessage } from "wagmi";
 import { api } from "@/lib/api";
 import { Checkbox } from "../ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 export default function PostFeed({
   tokenAddress,
@@ -83,37 +96,27 @@ export default function PostFeed({
       getSignature={getSignature}
     >
       <div className="flex flex-col gap-4 ">
-        <div className="flex flex-row gap-4">
-          {trendingPosts && (
-            <div
-              className={`text-xl font-bold cursor-pointer ${
-                selected !== "trending" ? "text-gray-500" : ""
-              }`}
-              onClick={() => setSelected("trending")}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  setSelected("trending");
-                }
-              }}
+        <div className="flex flex-row justify-between">
+          <div className="flex flex-row items-center gap-2">
+            <img src="/incognitoIcon.png" alt="ANON" className="w-4 h-4" />
+            <p className="font-medium text-gray-400">Anons posting</p>
+          </div>
+
+          <Select
+            value={selected}
+            onValueChange={(value) => setSelected(value as "new" | "trending")}
+          >
+            <SelectTrigger
+              icon={<ArrowUpDown className="w-4 h-4 text-gray-400" />}
+              className="w-fit justify-end gap-1 items-center border-0 font-medium"
             >
-              Trending
-            </div>
-          )}
-          {newPosts && (
-            <div
-              className={`text-xl font-bold cursor-pointer ${
-                selected !== "new" ? "text-gray-500" : ""
-              }`}
-              onClick={() => setSelected("new")}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  setSelected("new");
-                }
-              }}
-            >
-              New
-            </div>
-          )}
+              <SelectValue placeholder="Select view" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="trending">Trending</SelectItem>
+              <SelectItem value="new">New</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         {selected === "new" ? (
           <Posts

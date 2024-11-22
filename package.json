@@ -21,6 +21,7 @@
     "queue:process-failed:promote-post": "bun run --filter @anon/queue process-failed promote-post"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.1.2",
     "geist": "^1.3.1"
   }
 }
