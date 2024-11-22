@@ -20,10 +20,13 @@ export default function AnimatedTabs({
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
   return (
-    <div className="flex gap-2 bg-zinc-900 border border-zinc-700 rounded-lg p-1">
+    <motion.div
+      className="flex gap-2 bg-zinc-900 border border-zinc-700 rounded-lg p-1"
+      layout
+      transition={{ duration: 0.0 }}
+    >
       {tabs.map((tab) => (
-        <motion.ul
-          layout
+        <ul
           className={clsx(
             "relative cursor-pointer px-2 py-1 font-semibold outline-none transition-colors",
             activeTab === tab ? "text-zinc-900" : "text-zinc-400"
@@ -43,8 +46,8 @@ export default function AnimatedTabs({
           <span className="relative text-inherit">
             {firstLetterUpperCase(tab)}
           </span>
-        </motion.ul>
+        </ul>
       ))}
-    </div>
+    </motion.div>
   );
 }
