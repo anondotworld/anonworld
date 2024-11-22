@@ -4,12 +4,7 @@ import { CircleCheckIcon } from "lucide-react";
 import { CircleXIcon } from "lucide-react";
 import { CircleMinusIcon } from "lucide-react";
 import { CreatePost } from "../create-post";
-
-export enum PostAmounts {
-  FARCASTER_POST = 30_000,
-  TWITTER_PROMOTE = 1_000_000,
-  DELETE_POST = 3_000_000,
-}
+import { ANON_ADDRESS, TOKEN_CONFIG } from "@anon/utils/src/config";
 
 export default function ActionComponent({
   tokenAddress,
@@ -34,6 +29,10 @@ export default function ActionComponent({
 }) {
   const { data } = useBalance(tokenAddress, userAddress);
 
+  const FARCASTER_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].postAmount) / BigInt(10 ** 18);
+  const TWITTER_PROMOTE = BigInt(TOKEN_CONFIG[ANON_ADDRESS].promoteAmount) / BigInt(10 ** 18);
+  const DELETE_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].deleteAmount) / BigInt(10 ** 18);
+
   return (
     <Alert className="flex flex-col gap-4 bg-[#111111]">
       <AlertTitle className="font-semibold text-xl">
@@ -50,19 +49,19 @@ export default function ActionComponent({
         <ul className="flex flex-col gap-1 mt-3">
           <TokenRequirement
             tokenAmount={data}
-            tokenNeeded={PostAmounts.FARCASTER_POST}
+            tokenNeeded={FARCASTER_POST}
             string="Hold 30,000 $ANON: Post on Farcaster"
             isConnected={!!userAddress}
           />
           <TokenRequirement
             tokenAmount={data}
-            tokenNeeded={PostAmounts.TWITTER_PROMOTE}
+            tokenNeeded={TWITTER_PROMOTE}
             string="Hold 1,000,000 $ANON: Promote posts to X/Twitter"
             isConnected={!!userAddress}
           />
           <TokenRequirement
             tokenAmount={data}
-            tokenNeeded={PostAmounts.DELETE_POST}
+            tokenNeeded={DELETE_POST}
             string="Hold 3,000,000 $ANON: Delete posts"
             isConnected={!!userAddress}
           />
@@ -144,11 +143,10 @@ function TokenRequirement({
   isConnected,
 }: {
   tokenAmount: bigint | undefined;
-  tokenNeeded: PostAmounts;
+  tokenNeeded: bigint;
   string: string;
   isConnected: boolean;
 }) {
-  const tokenNeededBigInt = BigInt(tokenNeeded);
   const tokenAmountInTokens = tokenAmount
     ? tokenAmount / BigInt(10 ** 18)
     : BigInt(0);
@@ -156,7 +154,7 @@ function TokenRequirement({
   return (
     <li className="flex flex-row items-center gap-2 font-medium">
       {isConnected ? (
-        tokenAmountInTokens >= tokenNeededBigInt ? (
+        tokenAmountInTokens >= tokenNeeded ? (
           <CircleCheckIcon className="text-green-500 w-4 h-4" />
         ) : (
           <CircleXIcon className="text-red-500 w-4 h-4" />

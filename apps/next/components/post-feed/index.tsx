@@ -105,7 +105,7 @@ export default function PostFeed({
           <Select
             value={selected}
             onValueChange={(value) => setSelected(value as "new" | "trending")}
-          >
+        >
             <SelectTrigger
               icon={<ArrowUpDown className="w-4 h-4 text-gray-400" />}
               className="w-fit justify-end gap-1 items-center border-0 font-medium"
