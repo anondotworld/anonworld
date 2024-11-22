@@ -1,40 +1,38 @@
-import { useBalance } from "@/hooks/use-balance";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { CircleCheckIcon } from "lucide-react";
-import { CircleXIcon } from "lucide-react";
-import { CircleMinusIcon } from "lucide-react";
-import { CreatePost } from "../create-post";
-import { ANON_ADDRESS, TOKEN_CONFIG } from "@anon/utils/src/config";
+import { useBalance } from '@/hooks/use-balance'
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
+import { CircleCheckIcon } from 'lucide-react'
+import { CircleXIcon } from 'lucide-react'
+import { CircleMinusIcon } from 'lucide-react'
+import { CreatePost } from '../create-post'
+import { ANON_ADDRESS, TOKEN_CONFIG } from '@anon/utils/src/config'
 
 export default function ActionComponent({
   tokenAddress,
   userAddress,
   getSignature,
 }: {
-  tokenAddress: string;
-  userAddress: `0x${string}` | undefined;
+  tokenAddress: string
+  userAddress: `0x${string}` | undefined
   getSignature: ({
     address,
     timestamp,
   }: {
-    address: string;
-    timestamp: number;
+    address: string
+    timestamp: number
   }) => Promise<
     | {
-        signature: string;
-        message: string;
+        signature: string
+        message: string
       }
     | undefined
-  >;
+  >
 }) {
-  const { data } = useBalance(tokenAddress, userAddress);
+  const { data } = useBalance(tokenAddress, userAddress)
 
-  const FARCASTER_POST =
-    BigInt(TOKEN_CONFIG[ANON_ADDRESS].postAmount) / BigInt(10 ** 18);
+  const FARCASTER_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].postAmount) / BigInt(10 ** 18)
   const TWITTER_PROMOTE =
-    BigInt(TOKEN_CONFIG[ANON_ADDRESS].promoteAmount) / BigInt(10 ** 18);
-  const DELETE_POST =
-    BigInt(TOKEN_CONFIG[ANON_ADDRESS].deleteAmount) / BigInt(10 ** 18);
+    BigInt(TOKEN_CONFIG[ANON_ADDRESS].promoteAmount) / BigInt(10 ** 18)
+  const DELETE_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].deleteAmount) / BigInt(10 ** 18)
 
   return (
     <Alert className="flex flex-col gap-4 bg-[#111111]">
@@ -43,9 +41,9 @@ export default function ActionComponent({
       </AlertTitle>
       <AlertDescription>
         <p className="text-gray-400">
-          Posts are made anonymous using zk proofs. Due to the complex
-          calculations required, it could take up to a few minutes to post and
-          take other actions. We&apos;ll work on speeding this up in the future.
+          Posts are made anonymous using zk proofs. Due to the complex calculations
+          required, it could take up to a few minutes to post and take other actions.
+          We&apos;ll work on speeding this up in the future.
         </p>
         <br />
         <p className="text-gray-400 ">Requirements:</p>
@@ -53,7 +51,7 @@ export default function ActionComponent({
           <TokenRequirement
             tokenAmount={data}
             tokenNeeded={FARCASTER_POST}
-            string="Hold 30,000 $ANON: Post on Farcaster"
+            string="Hold 15,000 $ANON: Post on Farcaster"
             isConnected={!!userAddress}
           />
           <TokenRequirement
@@ -65,7 +63,7 @@ export default function ActionComponent({
           <TokenRequirement
             tokenAmount={data}
             tokenNeeded={DELETE_POST}
-            string="Hold 3,000,000 $ANON: Delete posts"
+            string="Hold 1,000,000 $ANON: Delete posts"
             isConnected={!!userAddress}
           />
         </ul>
@@ -79,11 +77,7 @@ export default function ActionComponent({
             className="text-sm decoration-dotted underline font-medium"
           >
             <span className="hidden sm:inline">X/Twitter</span>
-            <img
-              src="/xLogo.png"
-              alt="X/Twitter"
-              className="w-4 h-4 sm:hidden"
-            />
+            <img src="/xLogo.png" alt="X/Twitter" className="w-4 h-4 sm:hidden" />
           </a>
 
           <a
@@ -93,22 +87,18 @@ export default function ActionComponent({
             className="text-sm decoration-dotted underline font-medium"
           >
             <span className="hidden sm:inline">Farcaster</span>
-            <img
-              src="/warpcastLogo.png"
-              alt="Farcaster"
-              className="w-4 h-4 sm:hidden"
-            />
+            <img src="/warpcastLogo.png" alt="Farcaster" className="w-4 h-4 sm:hidden" />
           </a>
         </div>
 
         <div className="flex flex-row gap-4 justify-end">
           <a
-            href="https://basescan.org/token/0x0db510e79909666d6dec7f5e49370838c16d950f"
+            href="https://dexscreener.com/base/0xc4ecaf115cbce3985748c58dccfc4722fef8247c"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm decoration-dotted underline font-medium"
           >
-            Basescan
+            DEX Screener
           </a>
           <a
             href="https://app.uniswap.org/swap?outputCurrency=0x0Db510e79909666d6dEc7f5e49370838c16D950f&chain=base"
@@ -136,7 +126,7 @@ export default function ActionComponent({
         />
       )}
     </Alert>
-  );
+  )
 }
 
 function TokenRequirement({
@@ -145,14 +135,12 @@ function TokenRequirement({
   string,
   isConnected,
 }: {
-  tokenAmount: bigint | undefined;
-  tokenNeeded: bigint;
-  string: string;
-  isConnected: boolean;
+  tokenAmount: bigint | undefined
+  tokenNeeded: bigint
+  string: string
+  isConnected: boolean
 }) {
-  const tokenAmountInTokens = tokenAmount
-    ? tokenAmount / BigInt(10 ** 18)
-    : BigInt(0);
+  const tokenAmountInTokens = tokenAmount ? tokenAmount / BigInt(10 ** 18) : BigInt(0)
 
   return (
     <li className="flex flex-row items-center gap-2 font-medium">
@@ -167,5 +155,5 @@ function TokenRequirement({
       )}
       <b>{string}</b>
     </li>
-  );
+  )
 }
