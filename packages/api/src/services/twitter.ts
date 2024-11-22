@@ -1,12 +1,13 @@
+import https from 'https'
+import { Redis } from 'ioredis'
 import {
   ApiResponseError,
   SendTweetV2Params,
   TwitterApi,
   TwitterApiV2Settings,
 } from 'twitter-api-v2'
+import { neynar } from './neynar'
 import { Cast } from './types'
-import https from 'https'
-import { Redis } from 'ioredis'
 
 TwitterApiV2Settings.debug = true
 
@@ -119,6 +120,30 @@ async function formatAndSubmitToTwitter(
   if (replyToTweetId) {
     params.reply = {
       in_reply_to_tweet_id: replyToTweetId,
+    }
+  }
+
+  const mentions = text.match(/@[\w-]+(?:\.eth)?/g)
+
+  if (mentions) {
+    for (const mention of mentions) {
+      try {
+        const farcasterUser = await neynar.getUserByUsername(mention.slice(1))
+    
+        if (!farcasterUser.user) {
+          continue
+        }
+    
+        const connectedTwitter = farcasterUser.user.verified_accounts?.find(
+          (va) => va.platform === 'x'
+        )
+    
+        if (connectedTwitter) {
+          text = text.replace(mention, `@${connectedTwitter.username}`)
+        }
+      } catch {
+        continue
+      }
     }
   }
 

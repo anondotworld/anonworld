@@ -1,16 +1,17 @@
-import crypto from 'crypto'
 import { getPostMapping, getSignerForAddress } from '@anon/db'
+import crypto from 'crypto'
+import { Redis } from 'ioredis'
+import { twitterClient } from './twitter'
 import {
   CreatePostParams,
   GetBulkCastsResponse,
   GetCastResponse,
   GetCastsResponse,
   GetChannelResponse,
+  GetUserResponse,
   PostCastResponse,
   SubmitHashParams,
 } from './types'
-import Redis from 'ioredis'
-import { twitterClient } from './twitter'
 
 const redis = new Redis(process.env.REDIS_URL as string)
 
@@ -91,6 +92,12 @@ class NeynarService {
   async getChannel(identifier: string) {
     return this.makeRequest<GetChannelResponse>(
       `/farcaster/channel?id=${identifier}&type=id`
+    )
+  }
+
+  async getUserByUsername(username: string) {
+    return this.makeRequest<GetUserResponse>(
+      `/farcaster/user/by_username?username=${username}`
     )
   }
 

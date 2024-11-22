@@ -499,3 +499,56 @@ export type Channel = {
     role: string
   }
 }
+
+export type GetUserResponse = {
+  user: User
+}
+
+export type User = {
+  object: "user"
+  fid: number
+  username: string
+  display_name: string
+  custody_address: string
+  pfp_url: string
+  profile: {
+    bio: {
+      text: string
+      mentioned_profiles: string[]
+    }
+    location: {
+      latitude: number
+      longitude: number
+      address: {
+        city: string
+        state: string
+        state_code: string
+        country: string
+        country_code: string
+      }
+    }
+  }
+  follower_count: number
+  following_count: number
+  verifications: string[]
+  verified_addresses: {
+    eth_addresses: string[]
+    sol_addresses: string[]
+  }
+  verified_accounts?: [
+    {
+      platform: "x"
+      username: string
+    }
+  ]
+  power_badge: boolean
+  experimental: {
+    neynar_user_score: number
+  }
+  viewer_context: {
+    following: boolean
+    followed_by: boolean
+    blocking: boolean
+    blocked_by: boolean
+  }
+}
