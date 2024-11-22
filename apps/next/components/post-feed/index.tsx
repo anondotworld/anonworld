@@ -105,7 +105,7 @@ export default function PostFeed({
           <Select
             value={selected}
             onValueChange={(value) => setSelected(value as "new" | "trending")}
-        >
+          >
             <SelectTrigger
               icon={<ArrowUpDown className="w-4 h-4 text-gray-400" />}
               className="w-fit justify-end gap-1 items-center border-0 font-medium"
@@ -119,17 +119,23 @@ export default function PostFeed({
           </Select>
         </div>
         {selected === "new" ? (
-          <Posts
-            canDelete={canDelete}
-            canPromote={canPromote}
-            casts={newPosts}
-          />
-        ) : (
+          newPosts?.length && newPosts?.length > 0 ? (
+            <Posts
+              canDelete={canDelete}
+              canPromote={canPromote}
+              casts={newPosts}
+            />
+          ) : (
+            <h1>Something went wrong. Please refresh the page.</h1>
+          )
+        ) : trendingPosts?.length && trendingPosts?.length > 0 ? (
           <Posts
             canDelete={canDelete}
             canPromote={canPromote}
             casts={trendingPosts}
           />
+        ) : (
+          <h1>Something went wrong. Please refresh the page.</h1>
         )}
       </div>
     </PostProvider>

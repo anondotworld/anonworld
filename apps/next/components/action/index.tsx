@@ -29,9 +29,12 @@ export default function ActionComponent({
 }) {
   const { data } = useBalance(tokenAddress, userAddress);
 
-  const FARCASTER_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].postAmount) / BigInt(10 ** 18);
-  const TWITTER_PROMOTE = BigInt(TOKEN_CONFIG[ANON_ADDRESS].promoteAmount) / BigInt(10 ** 18);
-  const DELETE_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].deleteAmount) / BigInt(10 ** 18);
+  const FARCASTER_POST =
+    BigInt(TOKEN_CONFIG[ANON_ADDRESS].postAmount) / BigInt(10 ** 18);
+  const TWITTER_PROMOTE =
+    BigInt(TOKEN_CONFIG[ANON_ADDRESS].promoteAmount) / BigInt(10 ** 18);
+  const DELETE_POST =
+    BigInt(TOKEN_CONFIG[ANON_ADDRESS].deleteAmount) / BigInt(10 ** 18);
 
   return (
     <Alert className="flex flex-col gap-4 bg-[#111111]">
