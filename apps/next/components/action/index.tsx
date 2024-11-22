@@ -35,7 +35,7 @@ export default function ActionComponent({
   const { data } = useBalance(tokenAddress, userAddress);
 
   return (
-    <Alert className="flex flex-col gap-6 bg-[#111111]">
+    <Alert className="flex flex-col gap-4 bg-[#111111]">
       <AlertTitle className="font-semibold text-xl">
         Post anonymously to Farcaster and X/Twitter
       </AlertTitle>
@@ -46,7 +46,7 @@ export default function ActionComponent({
           take other actions. We&apos;ll work on speeding this up in the future.
         </p>
         <br />
-        <b className="text-gray-400 ">Requirements:</b>
+        <p className="text-gray-400 ">Requirements:</p>
         <ul className="flex flex-col gap-1 mt-3">
           <TokenRequirement
             tokenAmount={data}
@@ -162,7 +162,7 @@ function TokenRequirement({
           <CircleXIcon className="text-red-500 w-4 h-4" />
         )
       ) : (
-        <CircleMinusIcon className="text-gray-300 w-4 h-4" />
+        <CircleMinusIcon className="text-gray-400 w-4 h-4" />
       )}
       <b>{string}</b>
     </li>

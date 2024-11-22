@@ -210,7 +210,7 @@ export function Post({
                       <h3 className="text-lg font-bold">
                         {embed.metadata?.html?.ogTitle}
                       </h3>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-400">
                         {embed.metadata?.html?.ogDescription}
                       </p>
                     </div>

@@ -115,7 +115,7 @@ function CreatePostForm() {
       <Textarea
         value={text ?? ""}
         onChange={handleSetText}
-        className="h-32 p-3 resize-none font-medium text-gray-300 !text-base placeholder:text-gray-400"
+        className="h-32 p-3 resize-none font-medium text-gray-400 !text-base placeholder:text-gray-400"
         placeholder="What's happening?"
       />
       <RemoveableImage />
@@ -404,7 +404,7 @@ function RemoveableEmbed() {
         )}
         <div className="p-2">
           <h3 className="text-lg font-bold">{title}</h3>
-          <p className="text-sm text-gray-600">{description}</p>
+          <p className="text-sm text-gray-400">{description}</p>
         </div>
       </div>
       <Button
