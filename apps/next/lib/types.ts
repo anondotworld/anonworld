@@ -405,6 +405,20 @@ export type Cast = {
     following: boolean
     role: string
   }
+  reveal?: {
+    revealHash: string
+    revealPhrase: string
+    signature: string
+    address: string
+    revealedAt: string
+    input: {
+      text: string
+      embeds: Array<string>
+      quote: string | null
+      channel: string | null
+      parent: string | null
+    }
+  }
 }
 
 export interface Channel {
@@ -555,4 +569,3 @@ export type ValidateFrameResponse = {
     signer: string
   }
 }
-

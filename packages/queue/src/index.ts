@@ -10,14 +10,14 @@ const run = async () => {
   const queueName = usePromotePost ? QueueName.PromotePost : QueueName.Default
   console.log(`Starting worker for ${queueName}`)
   const worker = getWorker(queueName, async (job) => {
-    if (job.data.type === ProofType.PROMOTE_POST) {
-      const rateLimit = await redis.get('twitter:rate-limit')
-      if (rateLimit) {
-        job.moveToDelayed(parseInt(rateLimit) * 1000)
-        console.log(`[${job.id}] rate limit hit, delaying ${job.data.type}`)
-        return
-      }
-    }
+    // if (job.data.type === ProofType.PROMOTE_POST) {
+    //   const rateLimit = await redis.get('twitter:rate-limit')
+    //   if (rateLimit) {
+    //     job.moveToDelayed(parseInt(rateLimit) * 1000)
+    //     console.log(`[${job.id}] rate limit hit, delaying ${job.data.type}`)
+    //     return
+    //   }
+    // }
 
     console.log(`[${job.id}] started ${job.data.type}`)
     await handler(job.data)

@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { postMappingTable, signersTable } from './db/schema'
-import { eq } from 'drizzle-orm'
+import { postMappingTable, postRevealTable, signersTable } from './db/schema'
+import { eq, inArray } from 'drizzle-orm'
 
 const db = drizzle(process.env.DATABASE_URL as string)
 
@@ -34,4 +34,37 @@ export async function getPostMapping(castHash: string) {
     .where(eq(postMappingTable.castHash, castHash))
     .limit(1)
   return row
+}
+
+export async function createPostReveal(castHash: string, revealHash: string) {
+  await db.insert(postRevealTable).values({ castHash, revealHash })
+}
+
+export async function getPostReveal(castHash: string) {
+  const [row] = await db
+    .select()
+    .from(postRevealTable)
+    .where(eq(postRevealTable.castHash, castHash))
+    .limit(1)
+  return row
+}
+
+export async function markPostReveal(
+  castHash: string,
+  revealPhrase: string,
+  signature: string,
+  address: string
+) {
+  await db
+    .update(postRevealTable)
+    .set({ revealPhrase, signature, address, revealedAt: new Date() })
+    .where(eq(postRevealTable.castHash, castHash))
+}
+
+export async function getPostReveals(castHashes: string[]) {
+  const rows = await db
+    .select()
+    .from(postRevealTable)
+    .where(inArray(postRevealTable.castHash, castHashes))
+  return rows
 }

@@ -29,25 +29,9 @@ const MAX_EMBEDS = 2
 export function CreatePost({
   tokenAddress,
   userAddress,
-  onSuccess,
-  getSignature,
 }: {
   tokenAddress: string
   userAddress: string
-  onSuccess?: () => void
-  getSignature: ({
-    address,
-    timestamp,
-  }: {
-    address: string
-    timestamp: number
-  }) => Promise<
-    | {
-        signature: string
-        message: string
-      }
-    | undefined
-  >
 }) {
   const { data } = useBalance(tokenAddress, userAddress)
 
@@ -73,19 +57,15 @@ export function CreatePost({
     )
 
   return (
-    <CreatePostProvider
-      tokenAddress={tokenAddress}
-      userAddress={userAddress}
-      onSuccess={onSuccess}
-      getSignature={getSignature}
-    >
+    <CreatePostProvider tokenAddress={tokenAddress} userAddress={userAddress}>
       <CreatePostForm />
     </CreatePostProvider>
   )
 }
 
 function CreatePostForm() {
-  const { text, setText, createPost, state } = useCreatePost()
+  const { text, setText, createPost, state, revealPhrase, setRevealPhrase } =
+    useCreatePost()
   const { toast } = useToast()
   const [confetti, setConfetti] = useState(false)
 
@@ -112,6 +92,11 @@ function CreatePostForm() {
         onChange={handleSetText}
         className="h-32 p-3 resize-none font-medium text-gray-400 !text-base placeholder:text-gray-400"
         placeholder="What's happening, anon?"
+      />
+      <Input
+        value={revealPhrase ?? ''}
+        onChange={(e) => setRevealPhrase(e.target.value)}
+        placeholder="(optional) Enter phrase to reveal yourself as the author later"
       />
       <RemoveableImage />
       <RemoveableEmbed />

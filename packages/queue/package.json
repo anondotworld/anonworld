@@ -10,8 +10,8 @@
     "start:promote-post": "bun run src/index.ts promote-post",
     "start:manual": "bun run src/manual.ts",
     "ui": "bun run src/ui.ts",
-    "process-failed": "bun run src/process-failed.ts",
-    "process-failed:promote-post": "bun run src/process-failed.ts promote-post"
+    "process-failed": "while true; do bun run src/process-failed.ts; sleep 60; done",
+    "process-failed:promote-post": "while true; do bun run src/process-failed.ts promote-post; sleep 60; done"
   },
   "dependencies": {
     "@anon/api": "*",

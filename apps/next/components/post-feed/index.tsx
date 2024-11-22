@@ -17,7 +17,7 @@ import { PostProvider, usePost } from './context'
 import { useToast } from '@/hooks/use-toast'
 import { ArrowUpDown, Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
-import { useSignMessage } from 'wagmi'
+import { useAccount, useSignMessage } from 'wagmi'
 import { api } from '@/lib/api'
 import { Checkbox } from '../ui/checkbox'
 import {
@@ -27,6 +27,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select'
+import { Input } from '../ui/input'
+import { useRouter } from 'next/navigation'
+import { hashMessage } from 'viem'
 
 export default function PostFeed({
   tokenAddress,
@@ -150,11 +153,13 @@ export function Post({
   cast,
   canDelete,
   canPromote,
-}: {
-  cast: Cast
-  canDelete: boolean
-  canPromote: boolean
-}) {
+}: { cast: Cast; canDelete: boolean; canPromote: boolean }) {
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [promoteOpen, setPromoteOpen] = useState(false)
+  const [revealOpen, setRevealOpen] = useState(false)
+  const canReveal = !!cast.reveal && !cast.reveal.revealedAt
+  const canDoAnything = canReveal || canDelete || canPromote
+
   return (
     <div className="relative [overflow-wrap:anywhere] bg-[#111111] rounded-xl overflow-hidden">
       <a
@@ -258,6 +263,7 @@ export function Post({
               >
                 {canDelete && <DeleteButton cast={cast} />}
                 {canPromote && <PromoteButton cast={cast} />}
+                {canReveal && <RevealButton cast={cast} />}
               </div>
             </div>
           </div>
@@ -292,9 +298,9 @@ function timeAgo(timestamp: string): string {
 }
 
 function DeleteButton({ cast }: { cast: Cast }) {
+  const [open, setOpen] = useState(false)
   const { toast } = useToast()
   const { deletePost, deleteState } = usePost()
-  const [open, setOpen] = useState(false)
 
   const handleDelete = async () => {
     await deletePost(cast.hash)
@@ -346,9 +352,9 @@ function DeleteButton({ cast }: { cast: Cast }) {
 }
 
 function PromoteButton({ cast }: { cast: Cast }) {
+  const [open, setOpen] = useState(false)
   const { toast } = useToast()
   const { promotePost, promoteState } = usePost()
-  const [open, setOpen] = useState(false)
   const [asReply, setAsReply] = useState(false)
 
   const handlePromote = async () => {
@@ -407,6 +413,81 @@ function PromoteButton({ cast }: { cast: Cast }) {
               </div>
             ) : (
               'Promote'
+            )}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
+function RevealButton({ cast }: { cast: Cast }) {
+  const [open, setOpen] = useState(false)
+  const { toast } = useToast()
+  const [value, setValue] = useState('')
+  const [isRevealing, setIsRevealing] = useState(false)
+  const { signMessageAsync } = useSignMessage()
+  const { address } = useAccount()
+  const router = useRouter()
+
+  const handleReveal = async () => {
+    if (!cast.reveal || !address) return
+    setIsRevealing(true)
+    try {
+      const inputHash = hashMessage(JSON.stringify(cast.reveal.input) + value)
+      if (inputHash !== cast.reveal.revealHash) {
+        toast({
+          title: 'Incorrect phrase',
+        })
+      } else {
+        const message = JSON.stringify({
+          revealHash: cast.reveal.revealHash,
+          revealPhrase: value,
+        })
+        const signature = await signMessageAsync({
+          message,
+        })
+        await api.revealPost(cast.hash, message, value, signature, address)
+        router.push(`/posts/${cast.hash}`)
+      }
+    } catch (e) {
+      setIsRevealing(false)
+      return
+    }
+    setIsRevealing(false)
+    setOpen(false)
+  }
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <p className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-red-400">
+          Reveal
+        </p>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Reveal your post</AlertDialogTitle>
+          <AlertDialogDescription>
+            Claim this post by revealing the phrase you chose when you created it.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <Input
+          id="parent"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="Enter phrase"
+        />
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <Button onClick={handleReveal} disabled={isRevealing}>
+            {isRevealing ? (
+              <div className="flex flex-row items-center gap-2">
+                <Loader2 className="animate-spin" />
+                <p>Generating proof</p>
+              </div>
+            ) : (
+              <p>Reveal</p>
             )}
           </Button>
         </AlertDialogFooter>

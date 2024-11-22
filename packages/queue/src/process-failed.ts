@@ -5,17 +5,17 @@ async function main() {
   const usePromotePost = !!process.argv[2]
   const queueName = usePromotePost ? QueueName.PromotePost : QueueName.Default
   const queue = getQueue(queueName)
-  const failed = await queue.getFailed()
-  console.log(new Date().toISOString(), 'found', failed.length, 'failed actions')
-  for (const job of failed) {
+  const jobs = (await Promise.all([queue.getDelayed(), queue.getFailed()])).flat()
+  console.log(new Date().toISOString(), 'found', jobs.length, 'actions')
+  for (const job of jobs) {
     try {
       console.log(`[${job.id}] processing ${job.data.type}`)
       await handler(job.data)
       console.log(`[${job.id}] completed ${job.data.type}`)
-      await job.remove()
     } catch (e) {
       console.error(`[${job.id}] failed with ${e}`)
     }
+    await job.remove()
   }
 }
 

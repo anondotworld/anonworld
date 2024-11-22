@@ -6,6 +6,7 @@ export type CreatePostParams = {
   quote: string
   channel: string
   parent: string
+  revealHash: string
   tokenAddress: string
 }
 
@@ -425,10 +426,17 @@ export type Cast = {
     following: boolean
     role: string
   }
+  reveal?: {
+    revealHash: string
+    revealPhrase: string
+    signature: string
+    address: string
+    revealedAt: string
+  }
 }
 
 export type GetChannelResponse = {
-  channel: Channel;
+  channel: Channel
 }
 
 export type Channel = {

@@ -4,29 +4,11 @@ import ActionComponent from '@/components/action'
 import { ConnectButton } from '@/components/connect-button'
 import PostFeed from '@/components/post-feed'
 import { ANON_ADDRESS } from '@anon/utils/src/config'
-import { useAccount, useSignMessage } from 'wagmi'
+import { CircleHelp } from 'lucide-react'
+import { useAccount } from 'wagmi'
 
 export default function Home() {
   const { address } = useAccount()
-  const { signMessageAsync } = useSignMessage()
-
-  const getSignature = async ({
-    address,
-    timestamp,
-  }: {
-    address: string
-    timestamp: number
-  }) => {
-    try {
-      const message = `${address}:${timestamp}`
-      const signature = await signMessageAsync({
-        message,
-      })
-      return { signature, message }
-    } catch {
-      return
-    }
-  }
 
   return (
     <div className="flex h-screen flex-col p-4 xl:p-8 max-w-screen-sm mx-auto gap-8">
@@ -40,11 +22,7 @@ export default function Home() {
       </div>
 
       {/* Info */}
-      <ActionComponent
-        tokenAddress={ANON_ADDRESS}
-        userAddress={address}
-        getSignature={getSignature}
-      />
+      <ActionComponent tokenAddress={ANON_ADDRESS} userAddress={address} />
       <PostFeed tokenAddress={ANON_ADDRESS} userAddress={address} />
     </div>
   )

@@ -3,6 +3,7 @@ import { Cast, Channel } from '@/lib/types'
 import { generateProof, ProofType } from '@anon/utils/src/proofs'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
+import { useSignMessage } from 'wagmi'
 
 type State =
   | {
@@ -26,6 +27,8 @@ interface CreatePostContextProps {
   setChannel: (channel: Channel | null) => void
   parent: Cast | null
   setParent: (parent: Cast | null) => void
+  revealPhrase: string | null
+  setRevealPhrase: (revealPhrase: string | null) => void
   createPost: () => Promise<void>
   embedCount: number
   state: State
@@ -36,23 +39,10 @@ const CreatePostContext = createContext<CreatePostContextProps | undefined>(unde
 export const CreatePostProvider = ({
   tokenAddress,
   userAddress,
-  onSuccess,
-  getSignature,
   children,
 }: {
   tokenAddress: string
   userAddress: string
-  onSuccess?: () => void
-  getSignature: ({
-    address,
-    timestamp,
-  }: { address: string; timestamp: number }) => Promise<
-    | {
-        signature: string
-        message: string
-      }
-    | undefined
-  >
   children: ReactNode
 }) => {
   const [text, setText] = useState<string | null>(null)
@@ -61,7 +51,9 @@ export const CreatePostProvider = ({
   const [quote, setQuote] = useState<Cast | null>(null)
   const [channel, setChannel] = useState<Channel | null>(null)
   const [parent, setParent] = useState<Cast | null>(null)
+  const [revealPhrase, setRevealPhrase] = useState<string | null>(null)
   const [state, setState] = useState<State>({ status: 'idle' })
+  const { signMessageAsync } = useSignMessage()
 
   const resetState = () => {
     setState({ status: 'idle' })
@@ -71,6 +63,7 @@ export const CreatePostProvider = ({
     setQuote(null)
     setChannel(null)
     setParent(null)
+    setRevealPhrase(null)
   }
 
   const createPost = async () => {
@@ -79,33 +72,37 @@ export const CreatePostProvider = ({
     setState({ status: 'signature' })
     try {
       const embeds = [image, embed].filter((e) => e !== null) as string[]
-      const timestamp = Math.floor(Date.now() / 1000)
-      const signatureData = await getSignature({
-        address: userAddress,
-        timestamp,
-      })
-      if (!signatureData) {
-        setState({ status: 'error', error: 'Failed to get signature' })
-        return
+      const input = {
+        text,
+        embeds,
+        quote: quote?.hash ?? null,
+        channel: channel?.id ?? null,
+        parent: parent?.hash ?? null,
       }
+
+      const message = JSON.stringify(input)
+      const signature = await signMessageAsync({
+        message,
+      })
+
+      const messageHash = hashMessage(message)
+      const revealHash = revealPhrase ? hashMessage(message + revealPhrase) : null
 
       setState({ status: 'generating' })
 
+      const timestamp = Math.floor(Date.now() / 1000)
       const proof = await generateProof({
         tokenAddress,
         userAddress,
         proofType: ProofType.CREATE_POST,
         signature: {
           timestamp,
-          signature: signatureData.signature,
-          messageHash: hashMessage(signatureData.message),
+          signature,
+          messageHash,
         },
         input: {
-          text,
-          embeds,
-          quote: quote?.hash ?? null,
-          channel: channel?.id ?? null,
-          parent: parent?.hash ?? null,
+          ...input,
+          revealHash,
         },
       })
       if (!proof) {
@@ -113,7 +110,7 @@ export const CreatePostProvider = ({
         return
       }
 
-      if (process.env.DISABLE_QUEUE) {
+      if (process.env.NEXT_PUBLIC_DISABLE_QUEUE) {
         await api.createPost(
           Array.from(proof.proof),
           proof.publicInputs.map((i) => Array.from(i))
@@ -128,8 +125,6 @@ export const CreatePostProvider = ({
       }
 
       resetState()
-
-      onSuccess?.()
     } catch (e) {
       setState({ status: 'error', error: 'Failed to post' })
       console.error(e)
@@ -155,6 +150,8 @@ export const CreatePostProvider = ({
         setParent,
         embedCount,
         createPost,
+        revealPhrase,
+        setRevealPhrase,
         state,
       }}
     >

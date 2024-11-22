@@ -88,7 +88,7 @@ export const PostProvider = ({
         return
       }
 
-      if (process.env.DISABLE_QUEUE) {
+      if (process.env.NEXT_PUBLIC_DISABLE_QUEUE) {
         await api.deletePost(
           Array.from(proof.proof),
           proof.publicInputs.map((i) => Array.from(i))
@@ -144,7 +144,7 @@ export const PostProvider = ({
         return
       }
 
-      if (process.env.DISABLE_QUEUE) {
+      if (process.env.NEXT_PUBLIC_DISABLE_QUEUE) {
         await api.promotePost(
           Array.from(proof.proof),
           proof.publicInputs.map((i) => Array.from(i)),

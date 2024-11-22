@@ -9,23 +9,9 @@ import { ANON_ADDRESS, TOKEN_CONFIG } from '@anon/utils/src/config'
 export default function ActionComponent({
   tokenAddress,
   userAddress,
-  getSignature,
 }: {
   tokenAddress: string
   userAddress: `0x${string}` | undefined
-  getSignature: ({
-    address,
-    timestamp,
-  }: {
-    address: string
-    timestamp: number
-  }) => Promise<
-    | {
-        signature: string
-        message: string
-      }
-    | undefined
-  >
 }) {
   const { data } = useBalance(tokenAddress, userAddress)
 
@@ -119,11 +105,7 @@ export default function ActionComponent({
         </div>
       </div>
       {userAddress && (
-        <CreatePost
-          tokenAddress={tokenAddress}
-          userAddress={userAddress}
-          getSignature={getSignature}
-        />
+        <CreatePost tokenAddress={tokenAddress} userAddress={userAddress} />
       )}
     </Alert>
   )
