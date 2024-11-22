@@ -8,7 +8,7 @@ import {
 } from '../types'
 import { ApiClient } from './client'
 
-const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
+const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || '')
 
 export const api = {
   getNewPosts: async (tokenAddress: string) => {
