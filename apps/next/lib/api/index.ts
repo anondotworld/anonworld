@@ -1,34 +1,36 @@
-import { ProofType, Tree } from '@anon/utils/src/proofs'
+import { ProofType, Tree } from "@anon/utils/src/proofs";
 import {
   Cast,
   Channel,
   GetCastsResponse,
   PostCastResponse,
   ValidateFrameResponse,
-} from '../types'
-import { ApiClient } from './client'
+} from "../types";
+import { ApiClient } from "./client";
 
-const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || '')
+const apiClient = new ApiClient(
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+);
 
 export const api = {
   getNewPosts: async (tokenAddress: string) => {
     const response = await apiClient.request<GetCastsResponse>(
       `/feed/${tokenAddress}/new`
-    )
-    return response.data
+    );
+    return response.data;
   },
   getTrendingPosts: async (tokenAddress: string) => {
     const response = await apiClient.request<GetCastsResponse>(
       `/feed/${tokenAddress}/trending`
-    )
-    return response.data
+    );
+    return response.data;
   },
   getMerkleTree: async (tokenAddress: string, proofType: ProofType) => {
     const response = await apiClient.request<Tree>(`/merkle-tree`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ tokenAddress, proofType }),
-    })
-    return response.data
+    });
+    return response.data;
   },
   submitAction: async (
     type: ProofType,
@@ -37,23 +39,29 @@ export const api = {
     args: { asReply?: boolean }
   ) => {
     await apiClient.request(`/posts/submit`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ type, proof, publicInputs, args }),
-    })
+    });
   },
   createPost: async (proof: number[], publicInputs: number[][]) => {
-    const response = await apiClient.request<PostCastResponse>(`/posts/create`, {
-      method: 'POST',
-      body: JSON.stringify({ proof, publicInputs }),
-    })
-    return response.data
+    const response = await apiClient.request<PostCastResponse>(
+      `/posts/create`,
+      {
+        method: "POST",
+        body: JSON.stringify({ proof, publicInputs }),
+      }
+    );
+    return response.data;
   },
   deletePost: async (proof: number[], publicInputs: number[][]) => {
-    const response = await apiClient.request<{ success: boolean }>(`/posts/delete`, {
-      method: 'POST',
-      body: JSON.stringify({ proof, publicInputs }),
-    })
-    return response.data
+    const response = await apiClient.request<{ success: boolean }>(
+      `/posts/delete`,
+      {
+        method: "POST",
+        body: JSON.stringify({ proof, publicInputs }),
+      }
+    );
+    return response.data;
   },
   promotePost: async (
     proof: number[],
@@ -63,25 +71,27 @@ export const api = {
     const response = await apiClient.request<
       { success: false } | { success: true; tweetId: string }
     >(`/posts/promote`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ proof, publicInputs, args }),
-    })
-    return response.data
+    });
+    return response.data;
   },
   getCast: async (identifier: string) => {
-    const response = await apiClient.request<Cast>(`/get-cast?identifier=${identifier}`)
-    return response.data
+    const response = await apiClient.request<Cast>(
+      `/get-cast?identifier=${identifier}`
+    );
+    return response.data;
   },
   getChannel: async (identifier: string) => {
     const response = await apiClient.request<Channel>(
       `/get-channel?identifier=${identifier}`
-    )
-    return response.data
+    );
+    return response.data;
   },
   validateFrame: async (data: string) => {
     const response = await apiClient.request<ValidateFrameResponse>(
       `/validate-frame?data=${data}`
-    )
-    return response.data
+    );
+    return response.data;
   },
-}
+};

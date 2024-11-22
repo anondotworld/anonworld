@@ -2,7 +2,7 @@
 import { Button } from '../ui/button'
 import { Textarea } from '../ui/textarea'
 import { CreatePostProvider, useCreatePost } from './context'
-import { Image, Link, Loader2, Quote, Reply, Slash, X } from 'lucide-react'
+import { Image, Link, Loader2, Quote, Reply, SquareSlash, X } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { ReactNode, useRef, useState } from 'react'
 import {
@@ -600,7 +600,7 @@ function Channel() {
           {channel ? (
             <img src={channel.image_url} alt={channel.name} className="rounded-sm" />
           ) : (
-            <Slash />
+            <SquareSlash />
           )}
         </TooltipButton>
       </DialogTrigger>
