@@ -1,8 +1,10 @@
-import { ConnectButton as RainbowConnectButton } from "@rainbow-me/rainbowkit";
-import { Button } from "./ui/button";
-import { useBalance } from "@/hooks/use-balance";
-import { formatEther } from "viem";
-import { ANON_ADDRESS } from "@anon/utils/src/config";
+'use client'
+
+import { ConnectButton as RainbowConnectButton } from '@rainbow-me/rainbowkit'
+import { Button } from './ui/button'
+import { useBalance } from '@/hooks/use-balance'
+import { formatEther } from 'viem'
+import { ANON_ADDRESS } from '@anon/utils/src/config'
 
 export const ConnectButton = () => {
   return (
@@ -16,20 +18,20 @@ export const ConnectButton = () => {
         authenticationStatus,
         mounted,
       }) => {
-        const ready = mounted && authenticationStatus !== "loading";
+        const ready = mounted && authenticationStatus !== 'loading'
         const connected =
           ready &&
           account &&
           chain &&
-          (!authenticationStatus || authenticationStatus === "authenticated");
+          (!authenticationStatus || authenticationStatus === 'authenticated')
         return (
           <div
             {...(!ready && {
-              "aria-hidden": true,
+              'aria-hidden': true,
               style: {
                 opacity: 0,
-                pointerEvents: "none",
-                userSelect: "none",
+                pointerEvents: 'none',
+                userSelect: 'none',
               },
             })}
           >
@@ -42,7 +44,7 @@ export const ConnectButton = () => {
                   >
                     Connect
                   </Button>
-                );
+                )
               }
               if (chain.unsupported) {
                 return (
@@ -52,7 +54,7 @@ export const ConnectButton = () => {
                   >
                     Switch Network
                   </Button>
-                );
+                )
               }
               return (
                 <button
@@ -65,36 +67,36 @@ export const ConnectButton = () => {
                     {account.displayName}
                   </div>
                 </button>
-              );
+              )
             })()}
           </div>
-        );
+        )
       }}
     </RainbowConnectButton.Custom>
-  );
-};
+  )
+}
 
 function Balance({ address }: { address: string }) {
-  const { data } = useBalance(ANON_ADDRESS, address);
+  const { data } = useBalance(ANON_ADDRESS, address)
 
-  const amount = parseFloat(formatEther(data ?? BigInt(0)));
+  const amount = parseFloat(formatEther(data ?? BigInt(0)))
 
   return (
     <div className="text-md font-bold bg-white text-black pl-3 pr-2">
       {`${formatNumber(amount)} ANON`}
     </div>
-  );
+  )
 }
 
 function formatNumber(num: number) {
   if (num >= 1e9) {
-    return `${(num / 1e9).toFixed(2)}B`;
+    return `${(num / 1e9).toFixed(2)}B`
   }
   if (num >= 1e6) {
-    return `${(num / 1e6).toFixed(2)}M`;
+    return `${(num / 1e6).toFixed(2)}M`
   }
   if (num >= 1e3) {
-    return `${(num / 1e3).toFixed(2)}K`;
+    return `${(num / 1e3).toFixed(2)}K`
   }
-  return num.toFixed(2);
+  return num.toFixed(2)
 }

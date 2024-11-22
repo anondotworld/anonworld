@@ -7,6 +7,7 @@ import {
   ValidateFrameResponse,
 } from '../types'
 import { ApiClient } from './client'
+import { Identity } from '@anon/api/src/services/types'
 
 const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || '')
 
@@ -99,6 +100,10 @@ export const api = {
   },
   getPost: async (hash: string) => {
     const response = await apiClient.request<Cast>(`/posts/${hash}`)
+    return response.data
+  },
+  getIdentity: async (address: string) => {
+    const response = await apiClient.request<Identity>(`/identity?address=${address}`)
     return response.data
   },
 }

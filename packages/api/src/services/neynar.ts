@@ -3,6 +3,7 @@ import { getPostMapping, getSignerForAddress } from '@anon/db'
 import {
   CreatePostParams,
   GetBulkCastsResponse,
+  GetBulkUsersResponse,
   GetCastResponse,
   GetCastsResponse,
   GetChannelResponse,
@@ -103,6 +104,12 @@ class NeynarService {
   async getBulkCasts(hashes: string[]) {
     return this.makeRequest<GetBulkCastsResponse>(
       `/farcaster/casts?casts=${hashes.join(',')}`
+    )
+  }
+
+  async getBulkUsers(addresses: string[]) {
+    return this.makeRequest<GetBulkUsersResponse>(
+      `/farcaster/user/bulk-by-address?addresses=${addresses.join(',')}`
     )
   }
 

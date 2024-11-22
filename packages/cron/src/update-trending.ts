@@ -62,6 +62,10 @@ async function main() {
 
   const castScores: Record<string, number> = {}
   for (const cast of casts) {
+    if (cast.hash === '0x905a65be3dba390d80e347532c1fef2ee03c2af5') {
+      continue
+    }
+
     const ageInHours = (now - new Date(cast.timestamp).getTime()) / 3600000
     const score = (cast.reactions.likes_count || 0) / (ageInHours + 2) ** 1.5
     castScores[cast.hash] = score

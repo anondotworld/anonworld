@@ -4,38 +4,50 @@ import { t } from 'elysia'
 import { neynar } from '../services/neynar'
 import { TOKEN_CONFIG } from '@anon/utils/src/config'
 import { Cast, GetCastsResponse } from '../services/types'
-import { getPostReveals } from '@anon/db'
+import { getPostMappings, getPostReveals } from '@anon/db'
 
 const redis = new Redis(process.env.REDIS_URL as string)
 
-export async function addRevealToCasts(casts: Cast[]) {
+export async function augmentCasts(casts: Cast[]) {
   const hashes = casts.map((cast) => cast.hash)
-  const reveals = await getPostReveals(hashes)
-  return casts.map((cast) => {
-    const reveal = reveals.find(
-      (reveal) =>
-        reveal.revealHash &&
-        reveal.castHash === cast.hash &&
-        BigInt(reveal.revealHash) != BigInt(0)
-    )
-    if (!reveal) {
-      return cast
-    }
+  const [reveals, mappings] = await Promise.all([
+    getPostReveals(hashes),
+    getPostMappings(hashes),
+  ])
 
-    return {
-      ...cast,
-      reveal: {
-        ...reveal,
-        input: {
-          text: cast.text,
-          embeds: cast.embeds.filter((embed) => embed.url).map((embed) => embed.url),
-          quote: cast.embeds.find((e) => e.cast)?.cast?.hash ?? null,
-          channel: cast.channel?.id ?? null,
-          parent: cast.parent_hash ?? null,
+  return casts
+    .map((cast) => {
+      const reveal = reveals.find(
+        (reveal) =>
+          reveal.revealHash &&
+          reveal.castHash === cast.hash &&
+          BigInt(reveal.revealHash) != BigInt(0)
+      )
+      if (!reveal) {
+        return cast
+      }
+
+      return {
+        ...cast,
+        reveal: {
+          ...reveal,
+          input: {
+            text: cast.text,
+            embeds: cast.embeds.filter((embed) => embed.url).map((embed) => embed.url),
+            quote: cast.embeds.find((e) => e.cast)?.cast?.hash ?? null,
+            channel: cast.channel?.id ?? null,
+            parent: cast.parent_hash ?? null,
+          },
         },
-      },
-    }
-  })
+      }
+    })
+    .map((cast) => {
+      const mapping = mappings.find((m) => m.castHash === cast.hash)
+      if (mapping) {
+        return { ...cast, tweetId: mapping.tweetId }
+      }
+      return cast
+    })
 }
 
 export const feedRoutes = createElysia({ prefix: '/feed' })
@@ -52,7 +64,7 @@ export const feedRoutes = createElysia({ prefix: '/feed' })
       }
 
       return {
-        casts: await addRevealToCasts(response.casts),
+        casts: await augmentCasts(response.casts),
       }
     },
     {
@@ -76,7 +88,7 @@ export const feedRoutes = createElysia({ prefix: '/feed' })
       const response = await neynar.getBulkCasts(hashes)
 
       return {
-        casts: await addRevealToCasts(response.result.casts),
+        casts: await augmentCasts(response.result.casts),
       }
     },
     {

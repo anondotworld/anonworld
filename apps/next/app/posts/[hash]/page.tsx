@@ -1,16 +1,17 @@
-'use client'
-
+import { Header } from '@/components/header'
+import SinglePost from '@/components/post'
 import { api } from '@/lib/api'
-import { useQuery } from '@tanstack/react-query'
+import { ANON_ADDRESS } from '@anon/utils/src/config'
 
-export default function Page({ params }: { params: { hash: string } }) {
-  const { data, isLoading } = useQuery({
-    queryKey: ['post', params.hash],
-    queryFn: () => api.getPost(params.hash),
-  })
+export default async function Page({ params }: { params: { hash: string } }) {
+  const data = await api.getPost(params.hash)
 
-  if (isLoading) return <div>Loading...</div>
   if (!data) return <div>Cast not found</div>
 
-  return <div>{`Created by ${data.reveal?.address || 'anoncast'}`}</div>
+  return (
+    <div className="flex flex-col gap-4">
+      <Header title="Post" backEnabled />
+      <SinglePost cast={data} tokenAddress={ANON_ADDRESS} />
+    </div>
+  )
 }

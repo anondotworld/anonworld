@@ -36,6 +36,14 @@ export async function getPostMapping(castHash: string) {
   return row
 }
 
+export async function getPostMappings(castHashes: string[]) {
+  const rows = await db
+    .select()
+    .from(postMappingTable)
+    .where(inArray(postMappingTable.castHash, castHashes))
+  return rows
+}
+
 export async function createPostReveal(castHash: string, revealHash: string) {
   await db.insert(postRevealTable).values({ castHash, revealHash })
 }

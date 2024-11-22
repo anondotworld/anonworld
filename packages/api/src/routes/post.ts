@@ -13,7 +13,7 @@ import {
 } from '@anon/db'
 import { getQueue, QueueName } from '@anon/queue/src/utils'
 import { Noir } from '@noir-lang/noir_js'
-import { addRevealToCasts } from './feed'
+import { augmentCasts } from './feed'
 
 export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) {
   return createElysia({ prefix: '/posts' })
@@ -193,7 +193,7 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
           return error(404, 'Cast not found')
         }
 
-        const revealedCast = await addRevealToCasts([cast.cast])
+        const revealedCast = await augmentCasts([cast.cast])
         return revealedCast[0]
       },
       {

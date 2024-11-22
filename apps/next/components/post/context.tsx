@@ -2,6 +2,7 @@ import { api } from '@/lib/api'
 import { generateProof, ProofType } from '@anon/utils/src/proofs'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
+import { useSignMessage } from 'wagmi'
 
 type DeleteState =
   | {
@@ -34,24 +35,32 @@ export const PostProvider = ({
   tokenAddress,
   userAddress,
   children,
-  getSignature,
 }: {
   tokenAddress: string
   userAddress?: string
   children: ReactNode
-  getSignature: ({
+}) => {
+  const [promoteState, setPromoteState] = useState<PromoteState>({ status: 'idle' })
+  const [deleteState, setDeleteState] = useState<DeleteState>({ status: 'idle' })
+  const { signMessageAsync } = useSignMessage()
+
+  const getSignature = async ({
     address,
     timestamp,
-  }: { address: string; timestamp: number }) => Promise<
-    | {
-        signature: string
-        message: string
-      }
-    | undefined
-  >
-}) => {
-  const [deleteState, setDeleteState] = useState<DeleteState>({ status: 'idle' })
-  const [promoteState, setPromoteState] = useState<PromoteState>({ status: 'idle' })
+  }: {
+    address: string
+    timestamp: number
+  }) => {
+    try {
+      const message = `${address}:${timestamp}`
+      const signature = await signMessageAsync({
+        message,
+      })
+      return { signature, message }
+    } catch {
+      return
+    }
+  }
 
   const deletePost = async (hash: string) => {
     if (!userAddress) return
