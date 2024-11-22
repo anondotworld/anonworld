@@ -115,7 +115,7 @@ function CreatePostForm() {
       <Textarea
         value={text ?? ""}
         onChange={handleSetText}
-        className="h-32 p-3 resize-none font-medium text-gray-300 text-base placeholder:text-gray-400"
+        className="h-32 p-3 resize-none font-medium text-gray-300 !text-base placeholder:text-gray-400"
         placeholder="What's happening?"
       />
       <RemoveableImage />
