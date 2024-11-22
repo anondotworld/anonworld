@@ -601,7 +601,11 @@ function Channel() {
           className="w-full sm:w-auto min-w-10 bg-zinc-950 border border-zinc-700"
         >
           {channel ? (
-            <img src={channel.image_url} alt={channel.name} className="rounded-sm" />
+            <img
+              src={channel.image_url}
+              alt={channel.name}
+              className="rounded-sm w-full h-full object-cover"
+            />
           ) : (
             <SquareSlash />
           )}
