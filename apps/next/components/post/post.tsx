@@ -21,21 +21,22 @@ import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { usePost } from './context'
 import { useQuery } from '@tanstack/react-query'
+import Link from 'next/link'
 
 export function Post({
   cast,
   canDelete,
   canPromote,
 }: { cast: Cast; canDelete: boolean; canPromote: boolean }) {
-  const canReveal = !!cast.reveal && !cast.reveal.revealedAt
+  const promotable = canPromote && !cast.tweetId
+  const deletable =
+    canDelete && Date.now() - new Date(cast.timestamp).getTime() <= 3 * 60 * 60 * 1000
+  const revealable = !!cast.reveal && !cast.reveal.revealedAt
+  const actionable = revealable || promotable || deletable
 
   return (
     <div className="relative [overflow-wrap:anywhere] bg-[#111111] rounded-xl overflow-hidden">
-      <a
-        href={`https://warpcast.com/${cast.author.username}/${cast.hash.slice(0, 10)}`}
-        target="_blank"
-        rel="noreferrer"
-      >
+      <Link href={`/posts/${cast.hash}`}>
         <div className="flex flex-row gap-4 border p-4 sm:p-6 rounded-xl">
           <div className="flex flex-col gap-2 w-full">
             {cast.reveal && <RevealBadge reveal={cast.reveal} />}
@@ -131,10 +132,31 @@ export function Post({
                 onClick={(e) => e.preventDefault()}
                 onKeyDown={(e) => e.preventDefault()}
               >
-                {canDelete &&
-                  Date.now() - new Date(cast.timestamp).getTime() <=
-                    3 * 60 * 60 * 1000 && <DeleteButton cast={cast} />}
-                {canPromote && !cast.tweetId && <PromoteButton cast={cast} />}
+                {cast.hash && (
+                  <p
+                    className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-red-400"
+                    onClick={() =>
+                      window.open(
+                        `https://warpcast.com/${cast.author.username}/${cast.hash.slice(
+                          0,
+                          10
+                        )}`,
+                        '_blank'
+                      )
+                    }
+                    onKeyDown={(e) =>
+                      window.open(
+                        `https://warpcast.com/${cast.author.username}/${cast.hash.slice(
+                          0,
+                          10
+                        )}`,
+                        '_blank'
+                      )
+                    }
+                  >
+                    Warpcast
+                  </p>
+                )}
                 {cast.tweetId && (
                   <p
                     className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-red-400"
@@ -145,15 +167,18 @@ export function Post({
                       window.open(`https://x.com/i/status/${cast.tweetId}`, '_blank')
                     }
                   >
-                    View on X
+                    Twitter
                   </p>
                 )}
-                {canReveal && <RevealButton cast={cast} />}
+                {actionable && <ul>&#8226;</ul>}
+                {revealable && <RevealButton cast={cast} />}
+                {promotable && <PromoteButton cast={cast} />}
+                {deletable && <DeleteButton cast={cast} />}
               </div>
             </div>
           </div>
         </div>
-      </a>
+      </Link>
     </div>
   )
 }

@@ -12,10 +12,10 @@ async function main() {
       console.log(`[${job.id}] processing ${job.data.type}`)
       await handler(job.data)
       console.log(`[${job.id}] completed ${job.data.type}`)
+      await job.remove()
     } catch (e) {
       console.error(`[${job.id}] failed with ${e}`)
     }
-    await job.remove()
   }
 }
 

@@ -10,7 +10,6 @@ export default async function Page({ params }: { params: { hash: string } }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Header title="Post" backEnabled />
       <SinglePost cast={data} tokenAddress={ANON_ADDRESS} />
     </div>
   )

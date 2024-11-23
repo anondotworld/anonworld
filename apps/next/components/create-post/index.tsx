@@ -4,7 +4,7 @@ import { Textarea } from '../ui/textarea'
 import { CreatePostProvider, useCreatePost } from './context'
 import { Image, Link, Loader2, Quote, Reply, Slash, X } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
-import { ReactNode, useRef, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ import { formatUnits } from 'viem'
 import { useToast } from '@/hooks/use-toast'
 import { api } from '@/lib/api'
 import Confetti from 'confetti-react'
+import { Checkbox } from '../ui/checkbox'
 
 const MAX_EMBEDS = 2
 
@@ -64,8 +65,7 @@ export function CreatePost({
 }
 
 function CreatePostForm() {
-  const { text, setText, createPost, state, revealPhrase, setRevealPhrase } =
-    useCreatePost()
+  const { text, setText, createPost, state } = useCreatePost()
   const { toast } = useToast()
   const [confetti, setConfetti] = useState(false)
 
@@ -85,19 +85,15 @@ function CreatePostForm() {
   }
 
   return (
-    <div className="flex flex-col gap-4 bg-[#0D0D0D]">
+    <div className="flex flex-col gap-4">
       <RemoveableParent />
       <Textarea
         value={text ?? ''}
         onChange={handleSetText}
-        className="h-32 p-3 resize-none font-medium text-gray-400 !text-base placeholder:text-gray-400"
+        className="h-32 p-3 resize-none font-medium text-gray-400 !text-base placeholder:text-gray-400  bg-[#0D0D0D]"
         placeholder="What's happening, anon?"
       />
-      <Input
-        value={revealPhrase ?? ''}
-        onChange={(e) => setRevealPhrase(e.target.value)}
-        placeholder="(optional) Enter phrase to reveal yourself as the author later"
-      />
+      <RevealPhrase />
       <RemoveableImage />
       <RemoveableEmbed />
       <RemoveableQuote />
@@ -660,6 +656,44 @@ function RemoveableQuote() {
       >
         <X />
       </Button>
+    </div>
+  )
+}
+
+function RevealPhrase() {
+  const [enabled, setEnabled] = useState(false)
+  const { revealPhrase, setRevealPhrase } = useCreatePost()
+
+  useEffect(() => {
+    if (!enabled) {
+      setRevealPhrase(null)
+    }
+  }, [enabled])
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div
+        className="flex flex-row items-center gap-2 cursor-pointer"
+        onClick={() => setEnabled(!enabled)}
+        onKeyDown={() => setEnabled(!enabled)}
+      >
+        <Checkbox checked={enabled} />
+        <p className="text-sm">Enable ability to reveal yourself</p>
+      </div>
+      {enabled && (
+        <div className="flex flex-col gap-4">
+          <p className="text-gray-400">
+            Enter a complex secret phrase you'll remember. Use it later to reveal
+            yourself.
+          </p>
+          <Input
+            value={revealPhrase ?? ''}
+            onChange={(e) => setRevealPhrase(e.target.value)}
+            placeholder="a phrase that's hard to guess"
+            className="bg-[#0D0D0D]"
+          />
+        </div>
+      )}
     </div>
   )
 }
