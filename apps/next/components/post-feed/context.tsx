@@ -2,6 +2,7 @@ import { api } from '@/lib/api'
 import { generateProof, ProofType } from '@anon/utils/src/proofs'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
+import { useAccount, useSignMessage } from 'wagmi'
 
 type DeleteState =
   | {
@@ -32,35 +33,42 @@ const PostContext = createContext<PostContextProps | undefined>(undefined)
 
 export const PostProvider = ({
   tokenAddress,
-  userAddress,
   children,
-  getSignature,
 }: {
   tokenAddress: string
-  userAddress?: string
   children: ReactNode
-  getSignature: ({
-    address,
-    timestamp,
-  }: { address: string; timestamp: number }) => Promise<
-    | {
-        signature: string
-        message: string
-      }
-    | undefined
-  >
 }) => {
   const [deleteState, setDeleteState] = useState<DeleteState>({ status: 'idle' })
   const [promoteState, setPromoteState] = useState<PromoteState>({ status: 'idle' })
+  const { address } = useAccount()
+  const { signMessageAsync } = useSignMessage()
+
+  const getSignature = async ({
+    address,
+    timestamp,
+  }: {
+    address: string
+    timestamp: number
+  }) => {
+    try {
+      const message = `${address}:${timestamp}`
+      const signature = await signMessageAsync({
+        message,
+      })
+      return { signature, message }
+    } catch {
+      return
+    }
+  }
 
   const deletePost = async (hash: string) => {
-    if (!userAddress) return
+    if (!address) return
 
     setDeleteState({ status: 'signature' })
     try {
       const timestamp = Math.floor(Date.now() / 1000)
       const signatureData = await getSignature({
-        address: userAddress,
+        address,
         timestamp,
       })
       if (!signatureData) {
@@ -72,7 +80,7 @@ export const PostProvider = ({
 
       const proof = await generateProof({
         tokenAddress,
-        userAddress,
+        userAddress: address,
         proofType: ProofType.DELETE_POST,
         signature: {
           timestamp,
@@ -110,13 +118,13 @@ export const PostProvider = ({
   }
 
   const promotePost = async (hash: string, asReply?: boolean) => {
-    if (!userAddress) return
+    if (!address) return
 
     setPromoteState({ status: 'signature' })
     try {
       const timestamp = Math.floor(Date.now() / 1000)
       const signatureData = await getSignature({
-        address: userAddress,
+        address,
         timestamp,
       })
       if (!signatureData) {
@@ -128,7 +136,7 @@ export const PostProvider = ({
 
       const proof = await generateProof({
         tokenAddress,
-        userAddress,
+        userAddress: address,
         proofType: ProofType.PROMOTE_POST,
         signature: {
           timestamp,

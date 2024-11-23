@@ -5,34 +5,23 @@ import { CircleXIcon } from 'lucide-react'
 import { CircleMinusIcon } from 'lucide-react'
 import { CreatePost } from '../create-post'
 import { ANON_ADDRESS, TOKEN_CONFIG } from '@anon/utils/src/config'
+import { useAccount } from 'wagmi'
 
 export default function ActionComponent({
   tokenAddress,
-  userAddress,
-  getSignature,
 }: {
   tokenAddress: string
-  userAddress: `0x${string}` | undefined
-  getSignature: ({
-    address,
-    timestamp,
-  }: {
-    address: string
-    timestamp: number
-  }) => Promise<
-    | {
-        signature: string
-        message: string
-      }
-    | undefined
-  >
 }) {
-  const { data } = useBalance(tokenAddress, userAddress)
+  const { address } = useAccount()
+  const { data, isLoading } = useBalance(tokenAddress)
 
+  const BALANCE = data ? data / BigInt(10 ** 18) : BigInt(0)
   const FARCASTER_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].postAmount) / BigInt(10 ** 18)
   const TWITTER_PROMOTE =
     BigInt(TOKEN_CONFIG[ANON_ADDRESS].promoteAmount) / BigInt(10 ** 18)
   const DELETE_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].deleteAmount) / BigInt(10 ** 18)
+
+  console.log(BALANCE, FARCASTER_POST, TWITTER_PROMOTE, DELETE_POST)
 
   return (
     <Alert className="flex flex-col gap-4 bg-zinc-900 border border-zinc-700">
@@ -42,8 +31,9 @@ export default function ActionComponent({
       <AlertDescription>
         <p className="text-zinc-400">
           Posts are made anonymous using zk proofs. Due to the complex calculations
-          required, it could take up to a few minutes to post and take other actions.
-          We&apos;ll work on speeding this up in the future.
+          required, it could take up to a few minutes. Do not post porn, doxes, shills, or
+          threats. This is not about censorship resistance - it&apos;s about great
+          anonymous posts.
         </p>
         <br />
         <p className="text-zinc-400 ">Holder requirements:</p>
@@ -53,19 +43,19 @@ export default function ActionComponent({
             tokenNeeded={FARCASTER_POST}
             oldTokenNeeded={BigInt(15_000)}
             string="Post on Farcaster"
-            isConnected={!!userAddress}
+            isConnected={!!address && !isLoading}
           />
           <TokenRequirement
             tokenAmount={data}
             tokenNeeded={TWITTER_PROMOTE}
             string="Promote posts to X/Twitter"
-            isConnected={!!userAddress}
+            isConnected={!!address && !isLoading}
           />
           <TokenRequirement
             tokenAmount={data}
             tokenNeeded={DELETE_POST}
             string="Delete posts"
-            isConnected={!!userAddress}
+            isConnected={!!address && !isLoading}
           />
         </ul>
       </AlertDescription>
@@ -123,12 +113,24 @@ export default function ActionComponent({
           </a>
         </div>
       </div>
-      {userAddress && (
-        <CreatePost
-          tokenAddress={tokenAddress}
-          userAddress={userAddress}
-          getSignature={getSignature}
-        />
+      {address && !isLoading ? (
+        FARCASTER_POST > BALANCE ? (
+          <a
+            href={`https://app.uniswap.org/swap?outputCurrency=${tokenAddress}&chain=base`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded flex flex-row items-center justify-between gap-2">
+              <p className="font-bold">{`Not enough tokens to post. Buy ${
+                FARCASTER_POST - BALANCE
+              } more.`}</p>
+            </div>
+          </a>
+        ) : (
+          <CreatePost />
+        )
+      ) : (
+        <></>
       )}
     </Alert>
   )

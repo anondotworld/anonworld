@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 import { Button } from '../ui/button'
 import { Textarea } from '../ui/textarea'
-import { CreatePostProvider, useCreatePost } from './context'
+import { useCreatePost } from './context'
 import { Image, Link, Loader2, Quote, Reply, SquareSlash, X } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { type ReactNode, useRef, useState } from 'react'
@@ -17,78 +17,24 @@ import {
 
 import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
-import { useBalance } from '@/hooks/use-balance'
-import { TOKEN_CONFIG } from '@anon/utils/src/config'
-import { formatUnits } from 'viem'
-import { useToast } from '@/hooks/use-toast'
 import { api } from '@/lib/api'
 import Confetti from 'confetti-react'
 
 const MAX_EMBEDS = 2
 
-export function CreatePost({
-  tokenAddress,
-  userAddress,
-  onSuccess,
-  getSignature,
-}: {
-  tokenAddress: string
-  userAddress: string
-  onSuccess?: () => void
-  getSignature: ({
-    address,
-    timestamp,
-  }: {
-    address: string
-    timestamp: number
-  }) => Promise<
-    | {
-        signature: string
-        message: string
-      }
-    | undefined
-  >
-}) {
-  const { data } = useBalance(tokenAddress, userAddress)
-
-  if (data === undefined) return null
-
-  const postAmount = TOKEN_CONFIG[tokenAddress].postAmount
-  const difference = BigInt(postAmount) - data
-
-  if (difference > 0)
-    return (
-      <a
-        href={`https://app.uniswap.org/swap?outputCurrency=${tokenAddress}&chain=base`}
-        target="_blank"
-        rel="noreferrer"
-      >
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded flex flex-row items-center justify-between gap-2">
-          <p className="font-bold">{`Not enough tokens to post. Buy ${formatUnits(
-            difference,
-            18
-          )} more.`}</p>
-        </div>
-      </a>
-    )
-
-  return (
-    <CreatePostProvider
-      tokenAddress={tokenAddress}
-      userAddress={userAddress}
-      onSuccess={onSuccess}
-      getSignature={getSignature}
-    >
-      <CreatePostForm />
-    </CreatePostProvider>
-  )
-}
-
-function CreatePostForm() {
-  const { text, setText, createPost, state, quote, embed, setEmbed, setQuote } =
-    useCreatePost()
-  const { toast } = useToast()
-  const [confetti, setConfetti] = useState(false)
+export function CreatePost() {
+  const {
+    text,
+    setText,
+    createPost,
+    state,
+    quote,
+    embed,
+    setEmbed,
+    setQuote,
+    confetti,
+    setConfetti,
+  } = useCreatePost()
 
   const length = new Blob([text ?? '']).size
 
@@ -121,9 +67,6 @@ function CreatePostForm() {
           }
         })
       }
-    } else {
-      // Clear quote if no Warpcast URLs
-      setQuote(null)
     }
     // Handle Twitter URLs
     if (twitterMatches.length > 0) {
@@ -133,18 +76,7 @@ function CreatePostForm() {
       if (!currentEmbed || currentEmbed !== twitterUrl) {
         setEmbed(twitterUrl)
       }
-    } else {
-      // Clear embed if no Twitter URLs
-      setEmbed(null)
     }
-  }
-
-  const handleCreatePost = async () => {
-    await createPost()
-    toast({
-      title: 'Post will be created in 1-2 minutes',
-    })
-    setConfetti(true)
   }
 
   return (
@@ -170,7 +102,7 @@ function CreatePostForm() {
         <div className="flex flex-row items-center gap-4 sm: justify-between">
           <p className="font-medium text-zinc-400">{`${length} / 320`}</p>
           <Button
-            onClick={handleCreatePost}
+            onClick={createPost}
             className="font-bold text-md rounded-md hover:scale-105 transition-all duration-300"
             disabled={!['idle', 'success', 'error'].includes(state.status)}
           >

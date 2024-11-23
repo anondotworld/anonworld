@@ -1,8 +1,10 @@
+import { useToast } from '@/hooks/use-toast'
 import { api } from '@/lib/api'
 import { Cast, Channel } from '@/lib/types'
 import { generateProof, ProofType } from '@anon/utils/src/proofs'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
+import { useAccount, useSignMessage } from 'wagmi'
 
 type State =
   | {
@@ -29,30 +31,17 @@ interface CreatePostContextProps {
   createPost: () => Promise<void>
   embedCount: number
   state: State
+  confetti: boolean
+  setConfetti: (confetti: boolean) => void
 }
 
 const CreatePostContext = createContext<CreatePostContextProps | undefined>(undefined)
 
 export const CreatePostProvider = ({
   tokenAddress,
-  userAddress,
-  onSuccess,
-  getSignature,
   children,
 }: {
   tokenAddress: string
-  userAddress: string
-  onSuccess?: () => void
-  getSignature: ({
-    address,
-    timestamp,
-  }: { address: string; timestamp: number }) => Promise<
-    | {
-        signature: string
-        message: string
-      }
-    | undefined
-  >
   children: ReactNode
 }) => {
   const [text, setText] = useState<string | null>(null)
@@ -62,6 +51,28 @@ export const CreatePostProvider = ({
   const [channel, setChannel] = useState<Channel | null>(null)
   const [parent, setParent] = useState<Cast | null>(null)
   const [state, setState] = useState<State>({ status: 'idle' })
+  const [confetti, setConfetti] = useState(false)
+  const { toast } = useToast()
+  const { address } = useAccount()
+  const { signMessageAsync } = useSignMessage()
+
+  const getSignature = async ({
+    address,
+    timestamp,
+  }: {
+    address: string
+    timestamp: number
+  }) => {
+    try {
+      const message = `${address}:${timestamp}`
+      const signature = await signMessageAsync({
+        message,
+      })
+      return { signature, message }
+    } catch {
+      return
+    }
+  }
 
   const resetState = () => {
     setState({ status: 'idle' })
@@ -74,14 +85,13 @@ export const CreatePostProvider = ({
   }
 
   const createPost = async () => {
-    if (!userAddress) return
-
+    if (!address) return
     setState({ status: 'signature' })
     try {
       const embeds = [image, embed].filter((e) => e !== null) as string[]
       const timestamp = Math.floor(Date.now() / 1000)
       const signatureData = await getSignature({
-        address: userAddress,
+        address,
         timestamp,
       })
       if (!signatureData) {
@@ -93,7 +103,7 @@ export const CreatePostProvider = ({
 
       const proof = await generateProof({
         tokenAddress,
-        userAddress,
+        userAddress: address,
         proofType: ProofType.CREATE_POST,
         signature: {
           timestamp,
@@ -128,8 +138,10 @@ export const CreatePostProvider = ({
       }
 
       resetState()
-
-      onSuccess?.()
+      setConfetti(true)
+      toast({
+        title: 'Post will be created in 1-2 minutes',
+      })
     } catch (e) {
       setState({ status: 'error', error: 'Failed to post' })
       console.error(e)
@@ -156,6 +168,8 @@ export const CreatePostProvider = ({
         embedCount,
         createPost,
         state,
+        confetti,
+        setConfetti,
       }}
     >
       {children}

@@ -1,11 +1,12 @@
 import { erc20Abi } from 'viem'
-import { useReadContract } from 'wagmi'
+import { useAccount, useReadContract } from 'wagmi'
 
-export function useBalance(tokenAddress: string, userAddress?: string) {
+export function useBalance(tokenAddress: string) {
+  const { address } = useAccount()
   return useReadContract({
     address: tokenAddress as `0x${string}`,
     abi: erc20Abi,
     functionName: 'balanceOf',
-    args: userAddress ? [userAddress as `0x${string}`] : undefined,
+    args: address ? [address as `0x${string}`] : undefined,
   })
 }

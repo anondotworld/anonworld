@@ -17,22 +17,19 @@ import { PostProvider, usePost } from './context'
 import { useToast } from '@/hooks/use-toast'
 import { Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
-import { useSignMessage } from 'wagmi'
 import { api } from '@/lib/api'
 import { Checkbox } from '../ui/checkbox'
 import AnimatedTabs from './animated-tabs'
 import { Skeleton } from '../ui/skeleton'
+import { useCreatePost } from '../create-post/context'
 
 export default function PostFeed({
   tokenAddress,
-  userAddress,
 }: {
   tokenAddress: string
-  userAddress?: string
 }) {
   const [selected, setSelected] = useState<'new' | 'trending'>('trending')
-  const { data: balance } = useBalance(tokenAddress, userAddress)
-  const { signMessageAsync } = useSignMessage()
+  const { data: balance } = useBalance(tokenAddress)
 
   const { data: trendingPosts, isLoading: isTrendingLoading } = useQuery({
     queryKey: ['trending', tokenAddress],
@@ -50,40 +47,14 @@ export default function PostFeed({
     },
   })
 
-  const getSignature = async ({
-    address,
-    timestamp,
-  }: {
-    address: string
-    timestamp: number
-  }) => {
-    try {
-      const message = `${address}:${timestamp}`
-      const signature = await signMessageAsync({
-        message,
-      })
-      return { signature, message }
-    } catch {
-      return
-    }
-  }
-
   const canDelete =
-    !!userAddress &&
-    !!balance &&
-    balance >= BigInt(TOKEN_CONFIG[tokenAddress].deleteAmount)
+    !!balance && balance >= BigInt(TOKEN_CONFIG[tokenAddress].deleteAmount)
 
   const canPromote =
-    !!userAddress &&
-    !!balance &&
-    balance >= BigInt(TOKEN_CONFIG[tokenAddress].promoteAmount)
+    !!balance && balance >= BigInt(TOKEN_CONFIG[tokenAddress].promoteAmount)
 
   return (
-    <PostProvider
-      tokenAddress={tokenAddress}
-      userAddress={userAddress}
-      getSignature={getSignature}
-    >
+    <PostProvider tokenAddress={tokenAddress}>
       <div className="flex flex-col gap-4 ">
         <div className="flex flex-row justify-between">
           <AnimatedTabs
@@ -165,6 +136,8 @@ export function Post({
   canDelete: boolean
   canPromote: boolean
 }) {
+  const { setParent } = useCreatePost()
+  const { toast } = useToast()
   const cleanText = (text: string) => {
     if (!text) return ''
 
@@ -180,6 +153,19 @@ export function Post({
         return char
       })
       .join('')
+  }
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(
+      `https://warpcast.com/${cast.author.username}/${cast.hash.slice(0, 10)}`
+    )
+    toast({
+      title: 'Link copied',
+    })
+  }
+
+  const reply = () => {
+    setParent(cast)
   }
 
   // Usage in component
@@ -286,8 +272,22 @@ export function Post({
                 onClick={(e) => e.preventDefault()}
                 onKeyDown={(e) => e.preventDefault()}
               >
-                {canDelete && <DeleteButton cast={cast} />}
+                <p
+                  className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
+                  onClick={copyLink}
+                  onKeyDown={copyLink}
+                >
+                  Copy Link
+                </p>
+                <p
+                  className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
+                  onClick={reply}
+                  onKeyDown={reply}
+                >
+                  Reply
+                </p>
                 {canPromote && <PromoteButton cast={cast} />}
+                {canDelete && <DeleteButton cast={cast} />}
               </div>
             </div>
           </div>

@@ -28,6 +28,11 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
           type: t.Enum(ProofType),
           proof: t.Array(t.Number()),
           publicInputs: t.Array(t.Array(t.Number())),
+          args: t.Optional(
+            t.Object({
+              asReply: t.Boolean(),
+            })
+          ),
         }),
       }
     )
