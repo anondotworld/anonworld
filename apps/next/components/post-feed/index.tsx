@@ -93,7 +93,9 @@ export default function PostFeed({
           />
         </div>
         {selected === 'new' ? (
-          newPosts?.length && newPosts?.length > 0 ? (
+          isNewLoading ? (
+            <SkeletonPosts />
+          ) : newPosts?.length && newPosts?.length > 0 ? (
             <Posts canDelete={canDelete} canPromote={canPromote} casts={newPosts} />
           ) : (
             <h1>Something went wrong. Please refresh the page.</h1>
