@@ -116,6 +116,12 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
 
         await createPostMapping(params.hash, tweetId)
 
+        await neynar.postAsQuote({
+          tokenAddress: params.tokenAddress,
+          quoteFid: cast.cast.author.fid,
+          quoteHash: cast.cast.hash,
+        })
+
         return {
           success: true,
           tweetId,

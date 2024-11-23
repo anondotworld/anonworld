@@ -10,6 +10,7 @@ import {
   GetChannelResponse,
   GetUserResponse,
   PostCastResponse,
+  QuoteCastParams,
   SubmitHashParams,
 } from './types'
 
@@ -204,6 +205,49 @@ class NeynarService {
     return {
       success: true,
     }
+  }
+
+  async postAsQuote(params: QuoteCastParams) {
+    const signerUuid = await getSignerForAddress(params.tokenAddress)
+
+    const body = {
+      signer_uuid: signerUuid.bestOfSignerUuid,
+      embeds: [
+        {
+          cast_id: {
+            hash: params.quoteHash,
+            fid: params.quoteFid,
+          },
+        },
+      ],
+    }
+
+    const duplicateHash = crypto
+      .createHash('sha256')
+      .update(JSON.stringify(body))
+      .digest('hex')
+
+    const exists = await redis.get(`post:hash:${duplicateHash}`)
+    if (exists) {
+      return {
+        success: false,
+      }
+    }
+
+    const response = await this.makeRequest<PostCastResponse>('/farcaster/cast', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+
+    if (!response.success) {
+      return {
+        success: false,
+      }
+    }
+
+    await redis.set(`post:hash:${duplicateHash}`, 'true', 'EX', 60 * 5)
+
+    return response
   }
 }
 

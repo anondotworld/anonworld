@@ -4,7 +4,10 @@
   "private": true,
   "types": "./src",
   "main": "src/index.ts",
-  "files": ["types", "dist"],
+  "files": [
+    "types",
+    "dist"
+  ],
   "scripts": {
     "start": "bun run src/index.ts",
     "start:promote-post": "bun run src/index.ts promote-post",

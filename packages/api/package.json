@@ -4,7 +4,10 @@
   "private": true,
   "types": "./src",
   "main": "src/index.ts",
-  "files": ["types", "dist"],
+  "files": [
+    "types",
+    "dist"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",

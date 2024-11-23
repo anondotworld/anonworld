@@ -16,6 +16,12 @@ export type SubmitHashParams = {
   tokenAddress: string
 }
 
+export type QuoteCastParams = {
+  tokenAddress: string
+  quoteFid: number
+  quoteHash: string
+}
+
 export interface PostCastResponse {
   success: boolean
   cast: {
@@ -428,7 +434,7 @@ export type Cast = {
 }
 
 export type GetChannelResponse = {
-  channel: Channel;
+  channel: Channel
 }
 
 export type Channel = {
@@ -505,7 +511,7 @@ export type GetUserResponse = {
 }
 
 export type User = {
-  object: "user"
+  object: 'user'
   fid: number
   username: string
   display_name: string
@@ -537,9 +543,9 @@ export type User = {
   }
   verified_accounts?: [
     {
-      platform: "x"
+      platform: 'x'
       username: string
-    }
+    },
   ]
   power_badge: boolean
   experimental: {
