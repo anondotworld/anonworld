@@ -27,60 +27,60 @@ export async function promoteToTwitter(cast: Cast, asReply?: boolean) {
 
   let quoteTweetId: string | undefined
   let replyToTweetId: string | undefined
-  if (twitterEmbed && twitterEmbed.url) {
-    const url = new URL(twitterEmbed.url)
-    const tweetId = url.pathname.split('/').pop()
-    if (tweetId) {
-      if (asReply) {
-        replyToTweetId = tweetId
-      } else {
-        quoteTweetId = tweetId
+  let farcasterCashHash: string | undefined
+  let imageUrl: string | undefined
+  const otherEmbeds: string[] = []
+
+  if (cast.embeds) {
+    for (const embed of cast.embeds) {
+      if (embed.url?.includes('x.com') || embed.url?.includes('twitter.com')) {
+        const url = new URL(embed.url)
+        const tweetId = url.pathname.split('/').pop()
+        if (tweetId) {
+          if (asReply) {
+            replyToTweetId = tweetId
+          } else {
+            quoteTweetId = tweetId
+          }
+        }
+      } else if (embed.cast) {
+        farcasterCashHash = embed.cast.hash
+      } else if (embed.metadata?.content_type?.startsWith('image')) {
+        imageUrl = embed.url
+      } else if (embed.url) {
+        otherEmbeds.push(embed.url)
       }
     }
   }
-
-  const otherEmbeds = cast.embeds?.filter(
-    (e) =>
-      !e.url?.includes('x.com') &&
-      !e.url?.includes('twitter.com') &&
-      !e.metadata?.content_type?.startsWith('image')
-  )
-
-  const usedUrls = new Set<string>()
 
   let text = cast.text
+  const usedUrls = new Set<string>()
   for (const embed of otherEmbeds) {
-    if (embed.url) {
-      if (!usedUrls.has(embed.url)) {
-        text += `\n\n${embed.url}`
-        usedUrls.add(embed.url)
-      }
-    } else if (embed.cast) {
-      const url = `https://warpcast.com/${
-        embed.cast.author.username
-      }/${embed.cast.hash.slice(0, 10)}`
-      if (!usedUrls.has(url)) {
-        text += `\n\n${url}`
-        usedUrls.add(url)
-      }
+    if (!usedUrls.has(embed)) {
+      text += `\n\n${embed}`
+      usedUrls.add(embed)
     }
   }
 
-  const image = cast.embeds?.find((e) =>
-    e.metadata?.content_type?.startsWith('image')
-  )?.url
+  const images: string[] = []
+  if (farcasterCashHash) {
+    images.push(`https://client.warpcast.com/v2/cast-image?castHash=${farcasterCashHash}`)
+  }
+  if (imageUrl) {
+    images.push(imageUrl)
+  }
 
-  return await formatAndSubmitToTwitter(text, image, quoteTweetId, replyToTweetId)
+  return await formatAndSubmitToTwitter(text, images, quoteTweetId, replyToTweetId)
 }
 
 async function formatAndSubmitToTwitter(
   text: string,
-  image?: string,
+  images: string[],
   quoteTweetId?: string,
   replyToTweetId?: string
 ) {
-  let mediaId: string | undefined
-  if (image) {
+  const mediaIds: string[] = []
+  for (const image of images) {
     const { data: binaryData, mimeType } = await new Promise<{
       data: Buffer
       mimeType: string
@@ -102,15 +102,17 @@ async function formatAndSubmitToTwitter(
           reject(e)
         })
     })
-    mediaId = await twitterClient.v1.uploadMedia(binaryData as unknown as Buffer, {
-      mimeType,
-    })
+    mediaIds.push(
+      await twitterClient.v1.uploadMedia(binaryData as unknown as Buffer, {
+        mimeType,
+      })
+    )
   }
 
   const params: SendTweetV2Params = {}
-  if (mediaId) {
+  if (mediaIds.length > 0) {
     params.media = {
-      media_ids: [mediaId],
+      media_ids: mediaIds.slice(0, 4) as [string, string, string, string],
     }
   }
 
@@ -129,15 +131,15 @@ async function formatAndSubmitToTwitter(
     for (const mention of mentions) {
       try {
         const farcasterUser = await neynar.getUserByUsername(mention.slice(1))
-    
+
         if (!farcasterUser.user) {
           continue
         }
-    
+
         const connectedTwitter = farcasterUser.user.verified_accounts?.find(
           (va) => va.platform === 'x'
         )
-    
+
         if (connectedTwitter) {
           text = text.replace(mention, `@${connectedTwitter.username}`)
         }
