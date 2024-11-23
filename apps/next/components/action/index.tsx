@@ -51,7 +51,7 @@ export default function ActionComponent({
           <TokenRequirement
             tokenAmount={data}
             tokenNeeded={FARCASTER_POST}
-            string="10,000 $ANON: Post on Farcaster"
+            string="1,000 $ANON: Post on Farcaster"
             isConnected={!!userAddress}
           />
           <TokenRequirement
