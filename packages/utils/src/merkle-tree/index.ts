@@ -98,12 +98,12 @@ async function fetchHolders(args: BuildTreeArgs) {
 }
 
 export async function getTree(tokenAddress: string, proofType: ProofType): Promise<Tree> {
-  const tree = await redis.get(`anon:tree:test:${tokenAddress}:${proofType}`)
+  const tree = await redis.get(`anon:tree:${tokenAddress}:${proofType}`)
   return tree ? JSON.parse(tree) : null
 }
 
 export async function setTree(tokenAddress: string, proofType: ProofType, tree: Tree) {
-  await redis.set(`anon:tree:test:${tokenAddress}:${proofType}`, JSON.stringify(tree))
+  await redis.set(`anon:tree:${tokenAddress}:${proofType}`, JSON.stringify(tree))
   await addRoot(tokenAddress, proofType, tree.root)
 }
 
@@ -113,7 +113,7 @@ export async function addRoot(
   root: string,
   maxRoots = 5
 ) {
-  const key = `anon:roots:test:${tokenAddress}:${proofType}`
+  const key = `anon:roots:${tokenAddress}:${proofType}`
   await redis.lpush(key, root)
   await redis.ltrim(key, 0, maxRoots - 1)
 }
@@ -122,5 +122,5 @@ export async function getValidRoots(
   tokenAddress: string,
   proofType: ProofType
 ): Promise<string[]> {
-  return redis.lrange(`anon:roots:test:${tokenAddress}:${proofType}`, 0, -1)
+  return redis.lrange(`anon:roots:${tokenAddress}:${proofType}`, 0, -1)
 }
