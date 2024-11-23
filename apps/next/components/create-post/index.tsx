@@ -85,17 +85,8 @@ export function CreatePost({
 }
 
 function CreatePostForm() {
-  const {
-    text,
-    setText,
-    createPost,
-    state,
-    quote,
-    embed,
-    setEmbed,
-    embedCount,
-    setQuote,
-  } = useCreatePost()
+  const { text, setText, createPost, state, quote, embed, setEmbed, setQuote } =
+    useCreatePost()
   const { toast } = useToast()
   const [confetti, setConfetti] = useState(false)
 
