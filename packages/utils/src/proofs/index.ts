@@ -84,6 +84,9 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
   )
 
   const node = tree.elements[nodeIndex]
+  if (!node) {
+    return null
+  }
 
   const pubKey = await recoverPublicKey({
     signature: args.signature.signature as `0x${string}`,

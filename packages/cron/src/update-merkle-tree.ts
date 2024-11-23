@@ -19,6 +19,9 @@ async function buildAndCacheTree(
   minAmount: string
 ) {
   const nextTree = await buildHoldersTree({ tokenAddress, minAmount })
+  if (!nextTree) {
+    return
+  }
   console.log(proofType, nextTree.root)
   await setTree(tokenAddress, proofType, nextTree)
 }

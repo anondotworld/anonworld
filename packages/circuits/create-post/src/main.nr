@@ -8,7 +8,7 @@ fn main(
     // Merkle Membership
     note_root: pub Field,
     index: Field,
-    note_hash_path: [Field; 12],
+    note_hash_path: [Field; 13],
     // Signature
     signature: [u8; 64],
     message_hash: [u8; 32],
@@ -38,7 +38,7 @@ fn main(
 }
 
 // Returns the root of the tree from the provided leaf and its hashpath, using mimc hash
-fn compute_root_from_leaf(leaf: Field, index: Field, hash_path: [Field; 12]) -> Field {
+fn compute_root_from_leaf(leaf: Field, index: Field, hash_path: [Field; 13]) -> Field {
     let n = hash_path.len();
     let index_bits = index.to_le_bits(n as u32);
     let mut current = leaf;
