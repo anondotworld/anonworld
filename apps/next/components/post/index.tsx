@@ -435,7 +435,7 @@ function RevealButton({
         })
         router.push(`/posts/${cast.hash}`)
       }
-    } catch (e) {
+    } catch {
       setIsRevealing(false)
       return
     }

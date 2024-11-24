@@ -672,7 +672,7 @@ function RevealPhrase() {
       {enabled && (
         <div className="flex flex-col gap-4">
           <p className="text-gray-400">
-            Enter a complex secret phrase you'll remember. Use it later to reveal
+            Enter a complex secret phrase you&apos;ll remember. Use it later to reveal
             yourself.
           </p>
           <Input

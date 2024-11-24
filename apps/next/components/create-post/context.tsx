@@ -59,24 +59,6 @@ export const CreatePostProvider = ({
   const { address } = useAccount()
   const { signMessageAsync } = useSignMessage()
 
-  const getSignature = async ({
-    address,
-    timestamp,
-  }: {
-    address: string
-    timestamp: number
-  }) => {
-    try {
-      const message = `${address}:${timestamp}`
-      const signature = await signMessageAsync({
-        message,
-      })
-      return { signature, message }
-    } catch {
-      return
-    }
-  }
-
   const resetState = () => {
     setState({ status: 'idle' })
     setText(null)
@@ -112,8 +94,6 @@ export const CreatePostProvider = ({
 
       const messageHash = hashMessage(message)
       const revealHash = revealPhrase ? hashMessage(message + revealPhrase) : null
-
-      console.log(revealHash)
 
       const timestamp = Math.floor(Date.now() / 1000)
 
