@@ -15,13 +15,14 @@ import { useBalance } from '@/hooks/use-balance'
 import { TOKEN_CONFIG } from '@anon/utils/src/config'
 import { PostProvider, usePost } from './context'
 import { useToast } from '@/hooks/use-toast'
-import { Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
+import { Heart, Loader2, MessageSquare, RefreshCcw, Reply } from 'lucide-react'
 import { useState } from 'react'
 import { api } from '@/lib/api'
 import { Checkbox } from '../ui/checkbox'
 import AnimatedTabs from './animated-tabs'
 import { Skeleton } from '../ui/skeleton'
 import { useCreatePost } from '../create-post/context'
+import { useAccount } from 'wagmi'
 
 function formatNumber(num: number): string {
   if (num < 1000) return num.toString()
@@ -34,10 +35,12 @@ function formatNumber(num: number): string {
 
 export default function PostFeed({
   tokenAddress,
+  defaultTab = 'trending',
 }: {
   tokenAddress: string
+  defaultTab?: 'new' | 'trending'
 }) {
-  const [selected, setSelected] = useState<'new' | 'trending'>('trending')
+  const [selected, setSelected] = useState<'new' | 'trending'>(defaultTab)
   const { data: balance } = useBalance(tokenAddress)
 
   const { data: trendingPosts, isLoading: isTrendingLoading } = useQuery({
@@ -145,6 +148,7 @@ export function Post({
   canDelete: boolean
   canPromote: boolean
 }) {
+  const { address } = useAccount()
   const { setParent, setQuote } = useCreatePost()
   const cleanText = (text: string) => {
     if (!text) return ''
@@ -185,7 +189,18 @@ export function Post({
       >
         <div className="flex flex-row gap-4  p-4 sm:p-6  ">
           <div className="flex flex-col gap-2 w-full">
-            <div className=" font-medium whitespace-pre-wrap">{sanitizedText}</div>
+            {cast.parent_hash && (
+              <a
+                href={`https://warpcast.com/~/conversations/${cast.parent_hash}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm text-zinc-400 flex flex-row items-center gap-2 underline decoration-dotted hover:text-zinc-300"
+              >
+                <Reply size={16} className="text-zinc-400" />
+                Replying to post
+              </a>
+            )}
+            <div className="font-medium whitespace-pre-wrap">{sanitizedText}</div>
             {cast.embeds.map((embed) => {
               if (embed.metadata?.image) {
                 return (
@@ -283,20 +298,24 @@ export function Post({
                 onClick={(e) => e.preventDefault()}
                 onKeyDown={(e) => e.preventDefault()}
               >
-                <p
-                  className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
-                  onClick={quote}
-                  onKeyDown={quote}
-                >
-                  Quote
-                </p>
-                <p
-                  className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
-                  onClick={reply}
-                  onKeyDown={reply}
-                >
-                  Reply
-                </p>
+                {address && (
+                  <p
+                    className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
+                    onClick={quote}
+                    onKeyDown={quote}
+                  >
+                    Quote
+                  </p>
+                )}
+                {address && (
+                  <p
+                    className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
+                    onClick={reply}
+                    onKeyDown={reply}
+                  >
+                    Reply
+                  </p>
+                )}
                 {canPromote && <PromoteButton cast={cast} />}
                 {canDelete && <DeleteButton cast={cast} />}
               </div>

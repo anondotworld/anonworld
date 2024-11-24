@@ -113,13 +113,6 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
 
         await validateRoot(ProofType.PROMOTE_POST, params.tokenAddress, params.root)
 
-        const mapping = await getPostMapping(params.hash)
-        if (mapping?.tweetId) {
-          return {
-            success: true,
-          }
-        }
-
         const cast = await neynar.getCast(params.hash)
         if (!cast.cast) {
           return {
@@ -127,7 +120,23 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
           }
         }
 
-        const bestOfTweetId = await promoteToTwitter(cast.cast, body.args?.asReply)
+        const mapping = await getPostMapping(params.hash)
+        if (mapping?.tweetId) {
+          return {
+            success: true,
+          }
+        }
+
+        const parentMapping = cast.cast.parent_hash
+          ? await getPostMapping(cast.cast.parent_hash)
+          : undefined
+
+        const bestOfTweetId = await promoteToTwitter(
+          cast.cast,
+          parentMapping?.tweetId || undefined,
+          body.args?.asReply
+        )
+
         const bestOfResponse = await neynar.postAsQuote({
           tokenAddress: params.tokenAddress,
           quoteFid: cast.cast.author.fid,

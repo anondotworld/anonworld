@@ -20,11 +20,11 @@ export const twitterClient = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET as string,
 })
 
-export async function promoteToTwitter(cast: Cast, asReply?: boolean) {
-  const twitterEmbed = cast.embeds?.find(
-    (e) => e.url?.includes('x.com') || e.url?.includes('twitter.com')
-  )
-
+export async function promoteToTwitter(
+  cast: Cast,
+  parentTweetId?: string,
+  asReply?: boolean
+) {
   let quoteTweetId: string | undefined
   let replyToTweetId: string | undefined
   let farcasterCashHash: string | undefined
@@ -70,7 +70,12 @@ export async function promoteToTwitter(cast: Cast, asReply?: boolean) {
     images.push(imageUrl)
   }
 
-  return await formatAndSubmitToTwitter(text, images, quoteTweetId, replyToTweetId)
+  return await formatAndSubmitToTwitter(
+    text,
+    images,
+    quoteTweetId,
+    parentTweetId || replyToTweetId
+  )
 }
 
 async function formatAndSubmitToTwitter(
