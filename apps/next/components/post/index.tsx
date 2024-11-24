@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
-import { Heart, Loader2, MessageSquare, RefreshCcw, Reply } from 'lucide-react'
+import { Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useCreatePost } from '../create-post/context'
 import { useAccount } from 'wagmi'
