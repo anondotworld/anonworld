@@ -146,7 +146,6 @@ export function Post({
   canPromote: boolean
 }) {
   const { setParent, setQuote } = useCreatePost()
-  const { toast } = useToast()
   const cleanText = (text: string) => {
     if (!text) return ''
 
