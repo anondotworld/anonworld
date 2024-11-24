@@ -7,6 +7,7 @@ export type CreatePostParams = {
   channel: string
   parent: string
   tokenAddress: string
+  revealHash: string
 }
 
 export type SubmitHashParams = {

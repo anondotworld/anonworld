@@ -62,7 +62,7 @@ export default function CreatePostPage({
   return (
     <div className="flex h-screen w-screen flex-col p-4 max-w-screen-sm mx-auto gap-8">
       <div className="flex items-center justify-between">
-        <div className="text-3xl font-bold">$ANON</div>
+        <div className="text-3xl font-bold">anoncast</div>
       </div>
       <Alert>
         <CircleHelp className="h-4 w-4" />

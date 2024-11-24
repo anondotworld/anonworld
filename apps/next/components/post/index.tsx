@@ -1,6 +1,6 @@
 'use client'
 
-import { Cast } from '@/lib/types'
+import { Cast, Reveal } from '@/lib/types'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -16,12 +16,17 @@ import { useToast } from '@/hooks/use-toast'
 import { Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useCreatePost } from '../create-post/context'
-import { useAccount } from 'wagmi'
+import { useAccount, useSignMessage } from 'wagmi'
 import { Checkbox } from '../ui/checkbox'
 import { useBalance } from '@/hooks/use-balance'
 import { TOKEN_CONFIG } from '@anon/utils/src/config'
 import { usePromotePost } from '@/hooks/use-promote-post'
 import { useDeletePost } from '@/hooks/use-delete-post'
+import { api } from '@/lib/api'
+import { useRouter } from 'next/navigation'
+import { hashMessage } from 'viem'
+import { Input } from '../ui/input'
+import { useQuery } from '@tanstack/react-query'
 
 function formatNumber(num: number): string {
   if (num < 1000) return num.toString()
@@ -41,16 +46,21 @@ export function Post({
 }) {
   const { address } = useAccount()
   const { data: balance } = useBalance(tokenAddress)
+  const [reveal, setReveal] = useState(cast.reveal)
 
   const canDelete =
+    address &&
     !!balance &&
     balance >= BigInt(TOKEN_CONFIG[tokenAddress].deleteAmount) &&
     cast.tweetId
 
   const canPromote =
+    address &&
     !!balance &&
     balance >= BigInt(TOKEN_CONFIG[tokenAddress].promoteAmount) &&
     !cast.tweetId
+
+  const canReveal = address && !!cast.reveal && !cast.reveal.revealedAt
 
   const { setParent, setQuote } = useCreatePost()
   const cleanText = (text: string) => {
@@ -108,14 +118,12 @@ export function Post({
                 )}
               </div>
             </div>
-
             <div
               className=" flex flex-row gap-3 items-center"
               onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
             >
               <a
-                href={`https://warpcast.com/~/casts/${cast.hash}`}
+                href={`https://warpcast.com/~/conversations/${cast.hash}`}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -132,6 +140,7 @@ export function Post({
               )}
             </div>
           </div>
+          {reveal?.revealedAt && <RevealBadge reveal={reveal} />}
           <div className="font-medium whitespace-pre-wrap">{sanitizedText}</div>
           {cast.embeds.map((embed) => {
             if (embed.metadata?.image) {
@@ -211,13 +220,11 @@ export function Post({
             <div
               className=" flex flex-row gap-3 items-center"
               onClick={(e) => e.preventDefault()}
-              onKeyDown={(e) => e.preventDefault()}
             >
               {address && (
                 <p
                   className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
                   onClick={quote}
-                  onKeyDown={quote}
                 >
                   Quote
                 </p>
@@ -226,11 +233,11 @@ export function Post({
                 <p
                   className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
                   onClick={reply}
-                  onKeyDown={reply}
                 >
                   Reply
                 </p>
               )}
+              {canReveal && <RevealButton cast={cast} onReveal={setReveal} />}
               {canPromote && <PromoteButton cast={cast} tokenAddress={tokenAddress} />}
               {canDelete && <DeleteButton cast={cast} tokenAddress={tokenAddress} />}
             </div>
@@ -386,5 +393,129 @@ function PromoteButton({ cast, tokenAddress }: { cast: Cast; tokenAddress: strin
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  )
+}
+
+function RevealButton({
+  cast,
+  onReveal,
+}: { cast: Cast; onReveal: (reveal: Reveal) => void }) {
+  const [open, setOpen] = useState(false)
+  const { toast } = useToast()
+  const [value, setValue] = useState('')
+  const [isRevealing, setIsRevealing] = useState(false)
+  const { signMessageAsync } = useSignMessage()
+  const { address } = useAccount()
+  const router = useRouter()
+
+  const handleReveal = async () => {
+    if (!cast.reveal || !address) return
+    setIsRevealing(true)
+    try {
+      const inputHash = hashMessage(JSON.stringify(cast.reveal.input) + value)
+      if (inputHash !== cast.reveal.revealHash) {
+        toast({
+          title: 'Incorrect phrase',
+        })
+      } else {
+        const message = JSON.stringify({
+          revealHash: cast.reveal.revealHash,
+          revealPhrase: value,
+        })
+        const signature = await signMessageAsync({
+          message,
+        })
+        await api.revealPost(cast.hash, message, value, signature, address)
+        onReveal({
+          ...cast.reveal,
+          revealPhrase: value,
+          signature,
+          address,
+          revealedAt: new Date().toISOString(),
+        })
+        router.push(`/posts/${cast.hash}`)
+      }
+    } catch (e) {
+      setIsRevealing(false)
+      return
+    }
+    setIsRevealing(false)
+    setOpen(false)
+  }
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <p className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400">
+          Reveal
+        </p>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Reveal your post</AlertDialogTitle>
+          <AlertDialogDescription>
+            Claim this post by revealing the phrase you chose when you created it.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <Input
+          placeholder="Enter phrase"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <Button onClick={handleReveal} disabled={isRevealing}>
+            {isRevealing ? (
+              <div className="flex flex-row items-center gap-2">
+                <Loader2 className="animate-spin" />
+                <p>Revealing</p>
+              </div>
+            ) : (
+              <p>Reveal</p>
+            )}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
+function RevealBadge({ reveal }: { reveal: Reveal }) {
+  const { data } = useQuery({
+    queryKey: ['identity', reveal.address],
+    queryFn: () => api.getIdentity(reveal.address),
+  })
+
+  const formatAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`
+  }
+
+  return (
+    <div className="flex flex-row items-center w-full">
+      {data?.username && (
+        <a
+          href={`https://warpcast.com/${data.username}`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm font-semibold cursor-pointer hover:text-zinc-400 flex flex-row items-center gap-1 text-green-400 hover:text-green-200"
+        >
+          <span>{`revealed as `}</span>
+          <img src={data.pfp_url} className="w-4 h-4 rounded-full" alt="pfp" />
+          <span>{data.username}</span>
+          <span>{` ${timeAgo(reveal.revealedAt)}`}</span>
+        </a>
+      )}
+      {!data?.username && (
+        <a
+          href={`https://basescan.org/address/${reveal.address}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <span className="text-sm font-semibold cursor-pointer hover:text-zinc-400 text-green-400 hover:text-green-200">
+            {`revealed as ${formatAddress(reveal.address)} ${timeAgo(reveal.revealedAt)}`}
+          </span>
+        </a>
+      )}
+    </div>
   )
 }

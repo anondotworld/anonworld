@@ -24,7 +24,8 @@ fn main(
     quote: pub Field,
     channel: pub Field,
     parent: pub Field,
-) -> pub (u64, [Field; 16], [Field; 16], [Field; 16], Field, Field, Field, Field) {
+    reveal_hash: pub [Field; 2],
+) -> pub (u64, [Field; 16], [Field; 16], [Field; 16], Field, Field, Field, Field, [Field; 2]) {
     let recovered_address = ecrecover::ecrecover(pub_key_x, pub_key_y, signature, message_hash);
     assert(address == recovered_address);
 
@@ -34,7 +35,7 @@ fn main(
     let new_root = compute_root_from_leaf(commitment, index, note_hash_path);
     assert(new_root == note_root);
 
-    (timestamp, text, embed_1, embed_2, quote, channel, parent, token_address)
+    (timestamp, text, embed_1, embed_2, quote, channel, parent, token_address, reveal_hash)
 }
 
 // Returns the root of the tree from the provided leaf and its hashpath, using mimc hash

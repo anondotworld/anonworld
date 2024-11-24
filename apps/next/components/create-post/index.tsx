@@ -4,7 +4,7 @@ import { Textarea } from '../ui/textarea'
 import { useCreatePost } from './context'
 import { Image, Link, Loader2, Quote, Reply, SquareSlash, X } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
-import { type ReactNode, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import Confetti from 'confetti-react'
+import { Checkbox } from '../ui/checkbox'
 
 const MAX_EMBEDS = 2
 
@@ -88,6 +89,7 @@ export function CreatePost() {
         className="h-32 p-3 resize-none font-medium !text-base placeholder:text-zinc-400 bg-zinc-950 border border-zinc-700"
         placeholder="What's happening, anon?"
       />
+      <RevealPhrase />
       <RemoveableImage />
       <RemoveableEmbed />
       <RemoveableQuote />
@@ -362,11 +364,6 @@ function RemoveableEmbed() {
       <div
         className="w-full border rounded-xl overflow-hidden cursor-pointer"
         onClick={() => window.open(embed, '_blank')}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            window.open(embed, '_blank')
-          }
-        }}
       >
         {image && (
           <img
@@ -458,14 +455,6 @@ function RemoveableParent() {
             '_blank'
           )
         }
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            window.open(
-              `https://warpcast.com/${parent.author.username}/${parent.hash}`,
-              '_blank'
-            )
-          }
-        }}
       >
         <p className="text-sm text-zinc-400">Replying to</p>
         {parent.author && (
@@ -637,14 +626,6 @@ function RemoveableQuote() {
             '_blank'
           )
         }
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            window.open(
-              `https://warpcast.com/${quote.author.username}/${quote.hash}`,
-              '_blank'
-            )
-          }
-        }}
       >
         <p className="text-sm text-zinc-400">Quoting</p>
         <div className="flex items-center gap-2">
@@ -665,6 +646,43 @@ function RemoveableQuote() {
       >
         <X />
       </Button>
+    </div>
+  )
+}
+
+function RevealPhrase() {
+  const [enabled, setEnabled] = useState(false)
+  const { revealPhrase, setRevealPhrase } = useCreatePost()
+
+  useEffect(() => {
+    if (!enabled) {
+      setRevealPhrase(null)
+    }
+  }, [enabled])
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div
+        className="flex flex-row items-center gap-2 cursor-pointer"
+        onClick={() => setEnabled(!enabled)}
+      >
+        <Checkbox checked={enabled} />
+        <p className="text-sm">Reveal yourself at a later date</p>
+      </div>
+      {enabled && (
+        <div className="flex flex-col gap-4">
+          <p className="text-gray-400">
+            Enter a complex secret phrase you'll remember. Use it later to reveal
+            yourself.
+          </p>
+          <Input
+            value={revealPhrase ?? ''}
+            onChange={(e) => setRevealPhrase(e.target.value)}
+            placeholder="a phrase that's hard to guess"
+            className="bg-[#0D0D0D]"
+          />
+        </div>
+      )}
     </div>
   )
 }

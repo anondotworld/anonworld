@@ -1,11 +1,17 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
 import { ProofType, verifyProof } from '@anon/utils/src/proofs'
-import { zeroAddress } from 'viem'
+import { verifyMessage, zeroAddress } from 'viem'
 import { CreatePostParams, SubmitHashParams } from '../services/types'
 import { neynar } from '../services/neynar'
 import { promoteToTwitter, twitterClient } from '../services/twitter'
-import { createPostMapping, deletePostMapping, getPostMapping } from '@anon/db'
+import {
+  createPostMapping,
+  createPostReveal,
+  deletePostMapping,
+  getPostMapping,
+  markPostReveal,
+} from '@anon/db'
 import { getQueue, QueueName } from '@anon/queue/src/utils'
 import { Noir } from '@noir-lang/noir_js'
 import { getValidRoots } from '@anon/utils/src/merkle-tree'
@@ -46,7 +52,16 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
 
         await validateRoot(ProofType.CREATE_POST, params.tokenAddress, params.root)
 
-        return await neynar.post(params)
+        const result = await neynar.post(params)
+
+        if (BigInt(params.revealHash) != BigInt(0) && 'cast' in result) {
+          await createPostReveal(
+            result.cast.hash.toLowerCase(),
+            params.revealHash.toLowerCase()
+          )
+        }
+
+        return result
       },
       {
         body: t.Object({
@@ -161,6 +176,41 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
         }),
       }
     )
+    .post(
+      '/reveal',
+      async ({ body }) => {
+        const isValidSignature = await verifyMessage({
+          message: body.message,
+          signature: body.signature as `0x${string}`,
+          address: body.address as `0x${string}`,
+        })
+        if (!isValidSignature) {
+          return {
+            success: false,
+          }
+        }
+
+        await markPostReveal(
+          body.castHash,
+          body.revealPhrase,
+          body.signature,
+          body.address
+        )
+
+        return {
+          success: true,
+        }
+      },
+      {
+        body: t.Object({
+          castHash: t.String(),
+          message: t.String(),
+          revealPhrase: t.String(),
+          signature: t.String(),
+          address: t.String(),
+        }),
+      }
+    )
     .get(
       '/:hash',
       async ({ params, error }) => {
@@ -220,6 +270,13 @@ function extractCreatePostData(data: number[][]): CreatePostParams {
   const parentArray = data[3 + 48 + 2]
   const parent = `0x${Buffer.from(parentArray).toString('hex').slice(-40)}`
 
+  const revealHashArray = data.slice(3 + 48 + 3, 3 + 48 + 3 + 2)
+  // @ts-ignore
+  const revealHashHexes = revealHashArray.map((b) =>
+    Buffer.from(b).toString('hex').slice(-32)
+  )
+  const revealHash = `0x${revealHashHexes.join('')}`
+
   return {
     timestamp,
     root: root as string,
@@ -229,6 +286,7 @@ function extractCreatePostData(data: number[][]): CreatePostParams {
     channel,
     parent: parent === zeroAddress ? '' : parent,
     tokenAddress: tokenAddress as string,
+    revealHash,
   }
 }
 

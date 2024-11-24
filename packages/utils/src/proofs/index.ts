@@ -32,6 +32,7 @@ interface CreatePostArgs {
   quote: string | null
   channel: string | null
   parent: string | null
+  revealHash: string | null
 }
 
 interface SubmitHashArgs {
@@ -128,6 +129,9 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
     input.quote = args.input.quote ?? `0x${BigInt(0).toString(16)}`
     input.channel = stringToHexArray(args.input.channel ?? '', 1)[0]
     input.parent = args.input.parent ?? `0x${BigInt(0).toString(16)}`
+    input.reveal_hash = args.input.revealHash
+      ? chunkHexString(args.input.revealHash.replace('0x', ''), 32)
+      : [`0x${BigInt(0).toString(16)}`, `0x${BigInt(0).toString(16)}`]
   }
 
   // @ts-ignore
