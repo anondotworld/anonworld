@@ -164,15 +164,6 @@ export function Post({
       .join('')
   }
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(
-      `https://warpcast.com/${cast.author.username}/${cast.hash.slice(0, 10)}`
-    )
-    toast({
-      title: 'Link copied',
-    })
-  }
-
   const reply = () => {
     setParent(cast)
     window.scrollTo({ top: 0, behavior: 'smooth' })
