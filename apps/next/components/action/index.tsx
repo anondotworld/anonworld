@@ -21,8 +21,6 @@ export default function ActionComponent({
     BigInt(TOKEN_CONFIG[ANON_ADDRESS].promoteAmount) / BigInt(10 ** 18)
   const DELETE_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].deleteAmount) / BigInt(10 ** 18)
 
-  console.log(BALANCE, FARCASTER_POST, TWITTER_PROMOTE, DELETE_POST)
-
   return (
     <Alert className="flex flex-col gap-4 bg-zinc-900 border border-zinc-700">
       <AlertTitle className="font-semibold text-xl">
@@ -41,7 +39,6 @@ export default function ActionComponent({
           <TokenRequirement
             tokenAmount={data}
             tokenNeeded={FARCASTER_POST}
-            oldTokenNeeded={BigInt(15_000)}
             string="Post on Farcaster"
             isConnected={!!address && !isLoading}
           />

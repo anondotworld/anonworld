@@ -23,6 +23,15 @@ import AnimatedTabs from './animated-tabs'
 import { Skeleton } from '../ui/skeleton'
 import { useCreatePost } from '../create-post/context'
 
+function formatNumber(num: number): string {
+  if (num < 1000) return num.toString()
+  const units = ['K', 'M', 'B', 'T']
+  const unitIndex = Math.floor(Math.log10(num) / 3) - 1
+  const unitValue = 1000 ** (unitIndex + 1)
+  const formattedNumber = (num / unitValue).toFixed(1)
+  return `${formattedNumber}${units[unitIndex]}`
+}
+
 export default function PostFeed({
   tokenAddress,
 }: {
@@ -136,7 +145,7 @@ export function Post({
   canDelete: boolean
   canPromote: boolean
 }) {
-  const { setParent } = useCreatePost()
+  const { setParent, setQuote } = useCreatePost()
   const { toast } = useToast()
   const cleanText = (text: string) => {
     if (!text) return ''
@@ -166,6 +175,12 @@ export function Post({
 
   const reply = () => {
     setParent(cast)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const quote = () => {
+    setQuote(cast)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   // Usage in component
@@ -255,15 +270,21 @@ export function Post({
 
                 <div className="flex flex-row items-center gap-1.5 ">
                   <MessageSquare size={16} className="text-zinc-400" />
-                  <p className="text-sm font-medium">{cast.replies.count}</p>
+                  <p className="text-sm font-medium">
+                    {formatNumber(cast.replies.count)}
+                  </p>
                 </div>
                 <div className="flex flex-row items-center gap-1.5 ">
                   <RefreshCcw size={16} className="text-zinc-400" />
-                  <p className="text-sm font-medium ">{cast.reactions.recasts_count}</p>
+                  <p className="text-sm font-medium ">
+                    {formatNumber(cast.reactions.recasts_count)}
+                  </p>
                 </div>
                 <div className="flex flex-row items-center gap-1.5 w-16">
                   <Heart size={16} className="text-zinc-400" />
-                  <p className="text-sm font-medium">{cast.reactions.likes_count}</p>
+                  <p className="text-sm font-medium">
+                    {formatNumber(cast.reactions.likes_count)}
+                  </p>
                 </div>
               </div>
 
@@ -274,10 +295,10 @@ export function Post({
               >
                 <p
                   className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
-                  onClick={copyLink}
-                  onKeyDown={copyLink}
+                  onClick={quote}
+                  onKeyDown={quote}
                 >
-                  Copy Link
+                  Quote
                 </p>
                 <p
                   className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
