@@ -3,8 +3,23 @@ import { createElysia } from '../utils'
 import { t } from 'elysia'
 import { neynar } from '../services/neynar'
 import { TOKEN_CONFIG } from '@anon/utils/src/config'
+import { Cast } from '../services/types'
+import { getPostMappings } from '@anon/db'
 
 const redis = new Redis(process.env.REDIS_URL as string)
+
+export async function augmentCasts(casts: Cast[]) {
+  const hashes = casts.map((cast) => cast.hash)
+  const [mappings] = await Promise.all([getPostMappings(hashes)])
+
+  return casts.map((cast) => {
+    const mapping = mappings.find((m) => m.castHash === cast.hash)
+    if (mapping) {
+      return { ...cast, tweetId: mapping.tweetId }
+    }
+    return cast
+  })
+}
 
 export const feedRoutes = createElysia({ prefix: '/feed' })
   .get(
@@ -17,7 +32,9 @@ export const feedRoutes = createElysia({ prefix: '/feed' })
 
       const response = await neynar.getUserCasts(TOKEN_CONFIG[params.tokenAddress].fid)
       await redis.set(`new:${params.tokenAddress}`, JSON.stringify(response), 'EX', 30)
-      return response
+      return {
+        casts: await augmentCasts(response.casts),
+      }
     },
     {
       params: t.Object({
@@ -40,7 +57,7 @@ export const feedRoutes = createElysia({ prefix: '/feed' })
       const response = await neynar.getBulkCasts(hashes)
 
       return {
-        casts: response.result.casts,
+        casts: await augmentCasts(response.result.casts),
       }
     },
     {

@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { postMappingTable, signersTable } from './db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 
 const db = drizzle(process.env.DATABASE_URL as string)
 
@@ -41,4 +41,16 @@ export async function getPostMapping(castHash: string) {
     .where(eq(postMappingTable.castHash, castHash))
     .limit(1)
   return row
+}
+
+export async function deletePostMapping(castHash: string) {
+  await db.delete(postMappingTable).where(eq(postMappingTable.castHash, castHash))
+}
+
+export async function getPostMappings(castHashes: string[]) {
+  const rows = await db
+    .select()
+    .from(postMappingTable)
+    .where(inArray(postMappingTable.castHash, castHashes))
+  return rows
 }

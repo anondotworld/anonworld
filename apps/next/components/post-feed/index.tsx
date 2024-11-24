@@ -1,11 +1,11 @@
 import { Cast } from '@/lib/types'
 import { useQuery } from '@tanstack/react-query'
-import { PostProvider } from './context'
 import { useState } from 'react'
 import { api } from '@/lib/api'
 import AnimatedTabs from './animated-tabs'
 import { Skeleton } from '../ui/skeleton'
 import { Post } from '../post'
+import Link from 'next/link'
 
 export default function PostFeed({
   tokenAddress,
@@ -33,32 +33,30 @@ export default function PostFeed({
   })
 
   return (
-    <PostProvider tokenAddress={tokenAddress}>
-      <div className="flex flex-col gap-4 ">
-        <div className="flex flex-row justify-between">
-          <AnimatedTabs
-            tabs={['trending', 'new']}
-            activeTab={selected}
-            onTabChange={(tab) => setSelected(tab as 'new' | 'trending')}
-          />
-        </div>
-        {selected === 'new' ? (
-          isNewLoading ? (
-            <SkeletonPosts />
-          ) : newPosts?.length && newPosts?.length > 0 ? (
-            <Posts casts={newPosts} tokenAddress={tokenAddress} />
-          ) : (
-            <h1>Something went wrong. Please refresh the page.</h1>
-          )
-        ) : isTrendingLoading ? (
+    <div className="flex flex-col gap-4 ">
+      <div className="flex flex-row justify-between">
+        <AnimatedTabs
+          tabs={['trending', 'new']}
+          activeTab={selected}
+          onTabChange={(tab) => setSelected(tab as 'new' | 'trending')}
+        />
+      </div>
+      {selected === 'new' ? (
+        isNewLoading ? (
           <SkeletonPosts />
-        ) : trendingPosts?.length && trendingPosts?.length > 0 ? (
-          <Posts casts={trendingPosts} tokenAddress={tokenAddress} />
+        ) : newPosts?.length && newPosts?.length > 0 ? (
+          <Posts casts={newPosts} tokenAddress={tokenAddress} />
         ) : (
           <h1>Something went wrong. Please refresh the page.</h1>
-        )}
-      </div>
-    </PostProvider>
+        )
+      ) : isTrendingLoading ? (
+        <SkeletonPosts />
+      ) : trendingPosts?.length && trendingPosts?.length > 0 ? (
+        <Posts casts={trendingPosts} tokenAddress={tokenAddress} />
+      ) : (
+        <h1>Something went wrong. Please refresh the page.</h1>
+      )}
+    </div>
   )
 }
 
@@ -98,7 +96,9 @@ function Posts({
   return (
     <div className="flex flex-col gap-4">
       {casts?.map((cast) => (
-        <Post key={cast.hash} cast={cast} tokenAddress={tokenAddress} />
+        <Link href={`/posts/${cast.hash}`} key={cast.hash}>
+          <Post cast={cast} tokenAddress={tokenAddress} />
+        </Link>
       ))}
     </div>
   )
