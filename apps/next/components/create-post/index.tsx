@@ -1,10 +1,23 @@
 /* eslint-disable jsx-a11y/alt-text */
-import { Button } from '../ui/button'
-import { Textarea } from '../ui/textarea'
-import { CreatePostProvider, useCreatePost } from './context'
-import { Image, Link, Loader2, Quote, Reply, SquareSlash, X } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
-import { ReactNode, useRef, useState } from 'react'
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
+import { CreatePostProvider, useCreatePost } from "./context";
+import {
+  Image,
+  Link,
+  Loader2,
+  Quote,
+  Reply,
+  SquareSlash,
+  X,
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { ReactNode, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,18 +26,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../ui/dialog'
+} from "../ui/dialog";
 
-import { Input } from '../ui/input'
-import { useQuery } from '@tanstack/react-query'
-import { useBalance } from '@/hooks/use-balance'
-import { TOKEN_CONFIG } from '@anon/utils/src/config'
-import { formatUnits } from 'viem'
-import { useToast } from '@/hooks/use-toast'
-import { api } from '@/lib/api'
-import Confetti from 'confetti-react'
+import { Input } from "../ui/input";
+import { useQuery } from "@tanstack/react-query";
+import { useBalance } from "@/hooks/use-balance";
+import { TOKEN_CONFIG } from "@anon/utils/src/config";
+import { formatUnits } from "viem";
+import { useToast } from "@/hooks/use-toast";
+import { api } from "@/lib/api";
+import Confetti from "confetti-react";
+import { BadWords } from "@/lib/badWords";
 
-const MAX_EMBEDS = 2
+const MAX_EMBEDS = 2;
 
 export function CreatePost({
   tokenAddress,
@@ -32,29 +46,29 @@ export function CreatePost({
   onSuccess,
   getSignature,
 }: {
-  tokenAddress: string
-  userAddress: string
-  onSuccess?: () => void
+  tokenAddress: string;
+  userAddress: string;
+  onSuccess?: () => void;
   getSignature: ({
     address,
     timestamp,
   }: {
-    address: string
-    timestamp: number
+    address: string;
+    timestamp: number;
   }) => Promise<
     | {
-        signature: string
-        message: string
+        signature: string;
+        message: string;
       }
     | undefined
-  >
+  >;
 }) {
-  const { data } = useBalance(tokenAddress, userAddress)
+  const { data } = useBalance(tokenAddress, userAddress);
 
-  if (data === undefined) return null
+  if (data === undefined) return null;
 
-  const postAmount = TOKEN_CONFIG[tokenAddress].postAmount
-  const difference = BigInt(postAmount) - data
+  const postAmount = TOKEN_CONFIG[tokenAddress].postAmount;
+  const difference = BigInt(postAmount) - data;
 
   if (difference > 0)
     return (
@@ -70,7 +84,7 @@ export function CreatePost({
           )} more.`}</p>
         </div>
       </a>
-    )
+    );
 
   return (
     <CreatePostProvider
@@ -81,77 +95,84 @@ export function CreatePost({
     >
       <CreatePostForm />
     </CreatePostProvider>
-  )
+  );
 }
 
 function CreatePostForm() {
   const { text, setText, createPost, state, quote, embed, setEmbed, setQuote } =
-    useCreatePost()
-  const { toast } = useToast()
-  const [confetti, setConfetti] = useState(false)
+    useCreatePost();
+  const { toast } = useToast();
+  const [confetti, setConfetti] = useState(false);
 
-  const length = new Blob([text ?? '']).size
+  const length = new Blob([text ?? ""]).size;
 
   const handleSetText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (new Blob([e.target.value]).size > 320) return
-    setText(e.target.value)
+    if (new Blob([e.target.value]).size > 320) return;
+    setText(e.target.value);
 
     // Check for Warpcast URLs
-    const warpcastRegex = /https:\/\/warpcast\.com\/[^/]+\/0x[a-fA-F0-9]+/g
-    const warpcastMatches = Array.from(e.target.value.matchAll(warpcastRegex) || []).map(
-      (match) => match[0]
-    )
+    const warpcastRegex = /https:\/\/warpcast\.com\/[^/]+\/0x[a-fA-F0-9]+/g;
+    const warpcastMatches = Array.from(
+      e.target.value.matchAll(warpcastRegex) || []
+    ).map((match) => match[0]);
 
     // Check for Twitter URLs
-    const twitterRegex = /https:\/\/(twitter\.com|x\.com)\/[^/]+\/status\/\d+/g
-    const twitterMatches = Array.from(e.target.value.matchAll(twitterRegex) || []).map(
-      (match) => match[0]
-    )
+    const twitterRegex = /https:\/\/(twitter\.com|x\.com)\/[^/]+\/status\/\d+/g;
+    const twitterMatches = Array.from(
+      e.target.value.matchAll(twitterRegex) || []
+    ).map((match) => match[0]);
 
     // Try to set quote from Warpcast URLs
     if (warpcastMatches.length > 0) {
-      const currentHash = quote?.hash
-      const urlHash = warpcastMatches[0].split('/').pop() // Get hash from URL
+      const currentHash = quote?.hash;
+      const urlHash = warpcastMatches[0].split("/").pop(); // Get hash from URL
 
       if (!quote || currentHash !== urlHash) {
         // If no quote exists or URL hash changed, try to set a new one
         api.getCast(warpcastMatches[0]).then((cast) => {
           if (cast) {
-            setQuote(cast)
+            setQuote(cast);
           }
-        })
+        });
       }
     } else {
       // Clear quote if no Warpcast URLs
-      setQuote(null)
+      setQuote(null);
     }
     // Handle Twitter URLs
     if (twitterMatches.length > 0) {
-      const currentEmbed = embed
-      const twitterUrl = twitterMatches[0]
+      const currentEmbed = embed;
+      const twitterUrl = twitterMatches[0];
 
       if (!currentEmbed || currentEmbed !== twitterUrl) {
-        setEmbed(twitterUrl)
+        setEmbed(twitterUrl);
       }
     } else {
       // Clear embed if no Twitter URLs
-      setEmbed(null)
+      setEmbed(null);
     }
-  }
+  };
 
   const handleCreatePost = async () => {
-    await createPost()
+    const res = BadWords.find((word) => text?.includes(word.word));
+    if (res) {
+      toast({
+        title: `Post contains ${res.type} language`,
+      });
+      return;
+    }
+    await createPost();
     toast({
-      title: 'Post will be created in 1-2 minutes',
-    })
-    setConfetti(true)
-  }
+      title: "Post will be created in 1-2 minutes",
+    });
+    setConfetti(true);
+  };
 
   return (
     <div className="flex flex-col gap-4">
       <RemoveableParent />
       <Textarea
-        value={text ?? ''}
+        value={text ?? ""}
         onChange={handleSetText}
         className="h-32 p-3 resize-none font-medium !text-base placeholder:text-zinc-400 bg-zinc-950 border border-zinc-700"
         placeholder="What's happening, anon?"
@@ -172,20 +193,20 @@ function CreatePostForm() {
           <Button
             onClick={handleCreatePost}
             className="font-bold text-md rounded-md hover:scale-105 transition-all duration-300"
-            disabled={!['idle', 'success', 'error'].includes(state.status)}
+            disabled={!["idle", "success", "error"].includes(state.status)}
           >
-            {state.status === 'generating' ? (
+            {state.status === "generating" ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Generating proof</p>
               </div>
-            ) : state.status === 'signature' ? (
+            ) : state.status === "signature" ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Awaiting signature</p>
               </div>
             ) : (
-              'Post anonymously'
+              "Post anonymously"
             )}
           </Button>
         </div>
@@ -195,29 +216,29 @@ function CreatePostForm() {
           width={window.innerWidth}
           height={window.innerHeight}
           colors={[
-            '#808080', // Mid gray
-            '#999999',
-            '#b3b3b3',
-            '#cccccc',
-            '#e6e6e6',
-            '#ffffff', // Pure white
+            "#808080", // Mid gray
+            "#999999",
+            "#b3b3b3",
+            "#cccccc",
+            "#e6e6e6",
+            "#ffffff", // Pure white
           ]}
           drawShape={(ctx) => {
-            ctx.beginPath()
-            ctx.lineWidth = 3
+            ctx.beginPath();
+            ctx.lineWidth = 3;
 
             // Draw the main curve of the question mark
-            ctx.moveTo(0, -8)
-            ctx.quadraticCurveTo(8, -8, 8, -16)
-            ctx.quadraticCurveTo(8, -30, 0, -30)
-            ctx.quadraticCurveTo(-8, -30, -8, -20)
+            ctx.moveTo(0, -8);
+            ctx.quadraticCurveTo(8, -8, 8, -16);
+            ctx.quadraticCurveTo(8, -30, 0, -30);
+            ctx.quadraticCurveTo(-8, -30, -8, -20);
 
             // Draw the dot of the question mark
-            ctx.moveTo(2, 0)
-            ctx.arc(0, 0, 2, 0, Math.PI * 2, true)
+            ctx.moveTo(2, 0);
+            ctx.arc(0, 0, 2, 0, Math.PI * 2, true);
 
-            ctx.stroke()
-            ctx.closePath()
+            ctx.stroke();
+            ctx.closePath();
           }}
           gravity={0.25}
           recycle={false}
@@ -225,7 +246,7 @@ function CreatePostForm() {
         />
       )}
     </div>
-  )
+  );
 }
 
 function TooltipButton({
@@ -235,11 +256,11 @@ function TooltipButton({
   disabled,
   className,
 }: {
-  children: ReactNode
-  tooltip: string
-  onClick?: () => void
-  disabled?: boolean
-  className?: string
+  children: ReactNode;
+  tooltip: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
 }) {
   return (
     <TooltipProvider>
@@ -260,64 +281,66 @@ function TooltipButton({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
+  );
 }
 
 function UploadImage() {
-  const { setImage, embedCount, image } = useCreatePost()
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { setImage, embedCount, image } = useCreatePost();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
+  const handleImageSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
     if (!files || files.length === 0) {
-      setError('No file selected')
-      return
+      setError("No file selected");
+      return;
     }
 
-    const file = files[0]
-    if (!file.type.startsWith('image/')) {
-      setError('Invalid file type')
-      return
+    const file = files[0];
+    if (!file.type.startsWith("image/")) {
+      setError("Invalid file type");
+      return;
     }
 
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
-      const formData = new FormData()
-      formData.append('image', file, file.name)
+      const formData = new FormData();
+      formData.append("image", file, file.name);
 
-      const response = await fetch('/api/upload-image', {
-        method: 'POST',
+      const response = await fetch("/api/upload-image", {
+        method: "POST",
         body: formData,
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `Upload failed: ${response.status}`)
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Upload failed: ${response.status}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!data.success || !data.data?.link) {
-        throw new Error('Invalid response format')
+        throw new Error("Invalid response format");
       }
 
-      setImage(data.data.link)
-      setError(null)
+      setImage(data.data.link);
+      setError(null);
 
       if (fileInputRef.current) {
-        fileInputRef.current.value = ''
+        fileInputRef.current.value = "";
       }
     } catch (error) {
-      console.error('Upload error:', error)
-      setError(error instanceof Error ? error.message : 'Upload failed')
+      console.error("Upload error:", error);
+      setError(error instanceof Error ? error.message : "Upload failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="relative">
@@ -332,7 +355,7 @@ function UploadImage() {
           type="file"
           multiple={false}
           accept="image/*"
-          style={{ display: 'none' }}
+          style={{ display: "none" }}
           onChange={handleImageSelect}
         />
         {loading && <Loader2 className="animate-spin" />}
@@ -345,12 +368,12 @@ function UploadImage() {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function RemoveableImage() {
-  const { image, setImage } = useCreatePost()
-  if (!image) return null
+  const { image, setImage } = useCreatePost();
+  if (!image) return null;
   return (
     <div className="relative">
       <img src={image} alt="Uploaded" />
@@ -363,20 +386,20 @@ function RemoveableImage() {
         <X />
       </Button>
     </div>
-  )
+  );
 }
 
 function EmbedLink() {
-  const { setEmbed, embedCount, embed } = useCreatePost()
-  const [value, setValue] = useState('')
-  const [open, setOpen] = useState(false)
+  const { setEmbed, embedCount, embed } = useCreatePost();
+  const [value, setValue] = useState("");
+  const [open, setOpen] = useState(false);
 
   const handleEmbed = () => {
     if (value) {
-      setEmbed(value)
+      setEmbed(value);
     }
-    setOpen(false)
-  }
+    setOpen(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -407,41 +430,44 @@ function EmbedLink() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function RemoveableEmbed() {
-  const { embed, setEmbed } = useCreatePost()
+  const { embed, setEmbed } = useCreatePost();
   const { data: opengraph } = useQuery({
-    queryKey: ['opengraph', embed],
+    queryKey: ["opengraph", embed],
     queryFn: embed
       ? async () => {
-          const response = await fetch(`/api/opengraph?url=${embed}`)
-          const data = await response.json()
-          return data
+          const response = await fetch(`/api/opengraph?url=${embed}`);
+          const data = await response.json();
+          return data;
         }
       : undefined,
     enabled: !!embed,
-  })
+  });
 
-  if (!embed || !opengraph) return null
+  if (!embed || !opengraph) return null;
 
   const image =
-    opengraph?.ogImage?.[0]?.url ?? opengraph.twitterImage?.[0]?.url ?? opengraph.favicon
-  const title = opengraph.ogTitle ?? opengraph.twitterTitle ?? opengraph.dcTitle
+    opengraph?.ogImage?.[0]?.url ??
+    opengraph.twitterImage?.[0]?.url ??
+    opengraph.favicon;
+  const title =
+    opengraph.ogTitle ?? opengraph.twitterTitle ?? opengraph.dcTitle;
   const description =
     opengraph.ogDescription ??
     opengraph.twitterDescription?.[0] ??
-    opengraph.dcDescription
+    opengraph.dcDescription;
 
   return (
     <div className="relative">
       <div
         className="w-full border rounded-xl overflow-hidden cursor-pointer"
-        onClick={() => window.open(embed, '_blank')}
+        onClick={() => window.open(embed, "_blank")}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            window.open(embed, '_blank')
+          if (e.key === "Enter") {
+            window.open(embed, "_blank");
           }
         }}
       >
@@ -466,24 +492,24 @@ function RemoveableEmbed() {
         <X />
       </Button>
     </div>
-  )
+  );
 }
 
 function ParentCast() {
-  const { setParent, parent } = useCreatePost()
-  const [open, setOpen] = useState(false)
-  const [value, setValue] = useState('')
-  const [loading, setLoading] = useState(false)
+  const { setParent, parent } = useCreatePost();
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSetParent = async () => {
-    setLoading(true)
+    setLoading(true);
     if (value) {
-      const data = await api.getCast(value)
-      setParent(data ?? null)
+      const data = await api.getCast(value);
+      setParent(data ?? null);
     }
-    setOpen(false)
-    setLoading(false)
-  }
+    setOpen(false);
+    setLoading(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -513,17 +539,17 @@ function ParentCast() {
         </div>
         <DialogFooter>
           <Button onClick={handleSetParent} disabled={loading}>
-            {loading ? <Loader2 className="animate-spin" /> : 'Save'}
+            {loading ? <Loader2 className="animate-spin" /> : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function RemoveableParent() {
-  const { parent, setParent } = useCreatePost()
-  if (!parent) return null
+  const { parent, setParent } = useCreatePost();
+  if (!parent) return null;
 
   return (
     <div className="relative">
@@ -532,15 +558,15 @@ function RemoveableParent() {
         onClick={() =>
           window.open(
             `https://warpcast.com/${parent.author.username}/${parent.hash}`,
-            '_blank'
+            "_blank"
           )
         }
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             window.open(
               `https://warpcast.com/${parent.author.username}/${parent.hash}`,
-              '_blank'
-            )
+              "_blank"
+            );
           }
         }}
       >
@@ -566,41 +592,41 @@ function RemoveableParent() {
         <X />
       </Button>
     </div>
-  )
+  );
 }
 
 function Channel() {
-  const { setChannel, channel } = useCreatePost()
-  const [open, setOpen] = useState(false)
-  const [value, setValue] = useState(channel?.id ?? '')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { setChannel, channel } = useCreatePost();
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(channel?.id ?? "");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSetChannel = async () => {
     if (!value) {
       // clearing the channel
-      setChannel(null)
-      setOpen(false)
-      return
+      setChannel(null);
+      setOpen(false);
+      return;
     }
 
-    setLoading(true)
-    setError(null) // Clear any previous error
+    setLoading(true);
+    setError(null); // Clear any previous error
     try {
-      const data = await api.getChannel(value.replace('/', ''))
+      const data = await api.getChannel(value.replace("/", ""));
       if (!data) {
-        setError("Couldn't find that channel.")
+        setError("Couldn't find that channel.");
       } else {
-        setChannel(data)
-        setOpen(false)
+        setChannel(data);
+        setOpen(false);
       }
     } catch (e) {
-      console.error(e)
-      setError(`Something went wrong.`)
+      console.error(e);
+      setError(`Something went wrong.`);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -623,7 +649,9 @@ function Channel() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Channel</DialogTitle>
-          <DialogDescription>You can set a channel for your post.</DialogDescription>
+          <DialogDescription>
+            You can set a channel for your post.
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4">
           <Input
@@ -636,33 +664,33 @@ function Channel() {
         </div>
         <DialogFooter>
           <Button onClick={handleSetChannel} disabled={loading}>
-            {loading ? <Loader2 className="animate-spin" /> : 'Save'}
+            {loading ? <Loader2 className="animate-spin" /> : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function QuoteCast() {
-  const { setQuote, embedCount, quote, setEmbed } = useCreatePost()
-  const [open, setOpen] = useState(false)
-  const [value, setValue] = useState('')
-  const [loading, setLoading] = useState(false)
+  const { setQuote, embedCount, quote, setEmbed } = useCreatePost();
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSetQuote = async () => {
-    setLoading(true)
+    setLoading(true);
     if (value) {
-      if (value.includes('x.com') || value.includes('twitter.com')) {
-        setEmbed(value)
+      if (value.includes("x.com") || value.includes("twitter.com")) {
+        setEmbed(value);
       } else {
-        const data = await api.getCast(value)
-        setQuote(data ?? null)
+        const data = await api.getCast(value);
+        setQuote(data ?? null);
       }
     }
-    setOpen(false)
-    setLoading(false)
-  }
+    setOpen(false);
+    setLoading(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -692,17 +720,17 @@ function QuoteCast() {
         </div>
         <DialogFooter>
           <Button onClick={handleSetQuote} disabled={loading}>
-            {loading ? <Loader2 className="animate-spin" /> : 'Save'}
+            {loading ? <Loader2 className="animate-spin" /> : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function RemoveableQuote() {
-  const { quote, setQuote } = useCreatePost()
-  if (!quote) return null
+  const { quote, setQuote } = useCreatePost();
+  if (!quote) return null;
 
   return (
     <div className="relative">
@@ -711,15 +739,15 @@ function RemoveableQuote() {
         onClick={() =>
           window.open(
             `https://warpcast.com/${quote.author.username}/${quote.hash}`,
-            '_blank'
+            "_blank"
           )
         }
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             window.open(
               `https://warpcast.com/${quote.author.username}/${quote.hash}`,
-              '_blank'
-            )
+              "_blank"
+            );
           }
         }}
       >
@@ -743,5 +771,5 @@ function RemoveableQuote() {
         <X />
       </Button>
     </div>
-  )
+  );
 }
