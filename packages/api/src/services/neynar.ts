@@ -5,6 +5,7 @@ import {
   CreatePostParams,
   DeleteParams,
   GetBulkCastsResponse,
+  GetBulkUsersResponse,
   GetCastResponse,
   GetCastsResponse,
   GetChannelResponse,
@@ -240,6 +241,12 @@ class NeynarService {
       success: true,
       hash: response.cast.hash,
     }
+  }
+
+  async getBulkUsers(addresses: string[]) {
+    return this.makeRequest<GetBulkUsersResponse>(
+      `/farcaster/user/bulk-by-address?addresses=${addresses.join(',')}`
+    )
   }
 }
 

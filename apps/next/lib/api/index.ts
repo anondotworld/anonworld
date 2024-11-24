@@ -8,6 +8,7 @@ import type {
   UploadImageResponse,
 } from '../types'
 import { ApiClient } from './client'
+import { Identity } from '@anon/api/src/services/types'
 
 const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || '')
 
@@ -96,5 +97,26 @@ export const api = {
     })
 
     return response
+  },
+  revealPost: async (
+    castHash: string,
+    message: string,
+    revealPhrase: string,
+    signature: string,
+    address: string
+  ) => {
+    const response = await apiClient.request<{ success: boolean }>(`/posts/reveal`, {
+      method: 'POST',
+      body: JSON.stringify({ castHash, message, revealPhrase, signature, address }),
+    })
+    return response.data
+  },
+  getPost: async (hash: string) => {
+    const response = await apiClient.request<Cast>(`/posts/${hash}`)
+    return response.data
+  },
+  getIdentity: async (address: string) => {
+    const response = await apiClient.request<Identity>(`/identity?address=${address}`)
+    return response.data
   },
 }

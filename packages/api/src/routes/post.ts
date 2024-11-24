@@ -158,6 +158,24 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
         }),
       }
     )
+    .get(
+      '/:hash',
+      async ({ params, error }) => {
+        const cast = await neynar.getCast(params.hash)
+        if (!cast?.cast) {
+          return error(404, 'Cast not found')
+        }
+
+        // const revealedCast = await augmentCasts([cast.cast])
+        // return revealedCast[0]
+        return cast.cast
+      },
+      {
+        params: t.Object({
+          hash: t.String(),
+        }),
+      }
+    )
 }
 
 function extractCreatePostData(data: number[][]): CreatePostParams {

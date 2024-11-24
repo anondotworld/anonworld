@@ -563,3 +563,42 @@ export type User = {
     blocked_by: boolean
   }
 }
+
+export type GetBulkUsersResponse = Record<string, Array<Identity>>
+
+export type Identity = {
+  object: string
+  fid: number
+  username: string
+  display_name: string
+  pfp_url: string
+  custody_address: string
+  profile: {
+    bio: {
+      text: string
+    }
+    location: {
+      latitude: number
+      longitude: number
+      address: {
+        city: string
+        state: string
+        state_code: string
+        country: string
+        country_code: string
+      }
+    }
+  }
+  follower_count: number
+  following_count: number
+  verifications: Array<string>
+  verified_addresses: {
+    eth_addresses: Array<string>
+    sol_addresses: Array<any>
+  }
+  verified_accounts: Array<{
+    platform: string
+    username: string
+  }>
+  power_badge: boolean
+}

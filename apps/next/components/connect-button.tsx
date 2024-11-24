@@ -1,3 +1,5 @@
+'use client'
+
 import { ConnectButton as RainbowConnectButton } from '@rainbow-me/rainbowkit'
 import { Button } from './ui/button'
 import { useBalance } from '@/hooks/use-balance'

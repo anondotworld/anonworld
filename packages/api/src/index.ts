@@ -53,6 +53,18 @@ import { getProvingBackend, ProofType } from '@anon/utils/src/proofs'
         }),
       }
     )
+    .get(
+      '/identity',
+      async ({ query }) => {
+        const users = await neynar.getBulkUsers([query.address.toLowerCase()])
+        return users?.[query.address.toLowerCase()]?.[0]
+      },
+      {
+        query: t.Object({
+          address: t.String(),
+        }),
+      }
+    )
 
   app.listen(3001)
 
