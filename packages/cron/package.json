@@ -4,13 +4,11 @@
   "private": true,
   "types": "./src",
   "main": "src/index.ts",
-  "files": [
-    "types",
-    "dist"
-  ],
+  "files": ["types", "dist"],
   "scripts": {
     "update-trending": "bun run src/update-trending.ts",
-    "update-merkle-tree": "bun run src/update-merkle-tree.ts"
+    "update-merkle-tree": "bun run src/update-merkle-tree.ts",
+    "profile-proofs": "bun run src/profile-proofs.ts"
   },
   "dependencies": {
     "@anon/utils": "*",

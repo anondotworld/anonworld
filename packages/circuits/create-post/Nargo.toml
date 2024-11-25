@@ -2,7 +2,7 @@
 name = "main"
 type = "bin"
 authors = ["Kartik Patel"]
-compiler_version = "0.17.0"
+compiler_version = "0.36.0"
 
 [dependencies]
-ecrecover = { tag = "v0.19.0", git = "https://github.com/colinnielsen/ecrecover-noir" }
+ecrecover = { tag = "main", git = "https://github.com/signorecello/ecrecover-noir" }
