@@ -191,15 +191,7 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
         }
 
         const address = body.address.toLowerCase()
-        const [cast, users] = await Promise.all([
-          neynar.getCast(body.castHash),
-          neynar.getBulkUsers([address]),
-        ])
-        if (!cast.cast) {
-          return {
-            success: false,
-          }
-        }
+        const users = await neynar.getBulkUsers([address])
 
         await markPostReveal(
           body.castHash,
