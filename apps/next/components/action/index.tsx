@@ -19,6 +19,7 @@ export default function ActionComponent({
   const FARCASTER_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].postAmount) / BigInt(10 ** 18)
   const TWITTER_PROMOTE =
     BigInt(TOKEN_CONFIG[ANON_ADDRESS].promoteAmount) / BigInt(10 ** 18)
+  const DELETE_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].deleteAmount) / BigInt(10 ** 18)
 
   return (
     <Alert className="flex flex-col gap-4 bg-zinc-900 border border-zinc-700">
@@ -45,6 +46,12 @@ export default function ActionComponent({
             tokenAmount={data}
             tokenNeeded={TWITTER_PROMOTE}
             string="Promote posts to X/Twitter"
+            isConnected={!!address && !isLoading}
+          />
+          <TokenRequirement
+            tokenAmount={data}
+            tokenNeeded={DELETE_POST}
+            string="Delete posts (X/Twitter only)"
             isConnected={!!address && !isLoading}
           />
         </ul>
