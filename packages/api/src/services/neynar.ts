@@ -115,7 +115,14 @@ class NeynarService {
     )
   }
 
-  async post(params: CreatePostParams) {
+  async post(params: {
+    tokenAddress: string
+    text: string
+    embeds: string[]
+    quote?: string
+    parent?: string
+    channel?: string
+  }) {
     const signerUuid = await getSignerForAddress(params.tokenAddress)
 
     const embeds: Array<{

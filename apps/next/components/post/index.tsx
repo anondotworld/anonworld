@@ -237,7 +237,13 @@ export function Post({
                   Reply
                 </p>
               )}
-              {canReveal && <RevealButton cast={cast} onReveal={setReveal} />}
+              {canReveal && (
+                <RevealButton
+                  cast={cast}
+                  onReveal={setReveal}
+                  tokenAddress={tokenAddress}
+                />
+              )}
               {canPromote && <PromoteButton cast={cast} tokenAddress={tokenAddress} />}
               {canDelete && <DeleteButton cast={cast} tokenAddress={tokenAddress} />}
             </div>
@@ -399,7 +405,8 @@ function PromoteButton({ cast, tokenAddress }: { cast: Cast; tokenAddress: strin
 function RevealButton({
   cast,
   onReveal,
-}: { cast: Cast; onReveal: (reveal: Reveal) => void }) {
+  tokenAddress,
+}: { cast: Cast; onReveal: (reveal: Reveal) => void; tokenAddress: string }) {
   const [open, setOpen] = useState(false)
   const { toast } = useToast()
   const [value, setValue] = useState('')
@@ -425,7 +432,7 @@ function RevealButton({
         const signature = await signMessageAsync({
           message,
         })
-        await api.revealPost(cast.hash, message, value, signature, address)
+        await api.revealPost(cast.hash, message, value, signature, address, tokenAddress)
         onReveal({
           ...cast.reveal,
           revealPhrase: value,
