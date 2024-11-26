@@ -135,6 +135,11 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
   return await backend.generateProof(witness)
 }
 
+export async function getBackend(proofType: ProofType) {
+  const circuit = getCircuit(proofType)
+  return new BarretenbergBackend(circuit)
+}
+
 export async function verifyProof(proofType: ProofType, proof: ProofData) {
   const circuit = getCircuit(proofType)
   const backend = new BarretenbergBackend(circuit)
