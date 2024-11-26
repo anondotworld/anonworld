@@ -2,7 +2,7 @@
 name = "main"
 type = "bin"
 authors = ["Kartik Patel"]
-compiler_version = "0.35.0"
+compiler_version = "0.36.0"
 
 [dependencies]
 ecrecover = { path = "../ecrecover-noir" }
