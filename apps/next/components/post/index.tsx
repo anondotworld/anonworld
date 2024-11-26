@@ -349,10 +349,8 @@ function PromoteButton({ cast, tokenAddress }: { cast: Cast; tokenAddress: strin
   const [open, setOpen] = useState(false)
   const [asReply, setAsReply] = useState(false)
 
-  const asLaunch = cast.text.includes('@clanker')
-
   const handlePromote = async () => {
-    await promotePost(cast.hash, { asReply, asLaunch })
+    await promotePost(cast.hash, asReply)
     toast({
       title: 'Post will be promoted in 1-2 minutes',
     })
@@ -377,7 +375,7 @@ function PromoteButton({ cast, tokenAddress }: { cast: Cast; tokenAddress: strin
             You will need to delete the post if you want to remove it from X/Twitter.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        {twitterEmbed && !asLaunch && (
+        {twitterEmbed && (
           <div className="flex items-center space-x-2">
             <Checkbox
               id="as-reply"

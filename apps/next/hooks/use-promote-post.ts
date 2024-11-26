@@ -36,10 +36,7 @@ export const usePromotePost = (tokenAddress: string) => {
     }
   }
 
-  const promotePost = async (
-    hash: string,
-    { asReply, asLaunch }: { asReply?: boolean; asLaunch?: boolean }
-  ) => {
+  const promotePost = async (hash: string, asReply?: boolean) => {
     if (!address) return
 
     setPromoteState({ status: 'signature' })
@@ -75,34 +72,18 @@ export const usePromotePost = (tokenAddress: string) => {
       }
 
       if (process.env.NEXT_PUBLIC_DISABLE_QUEUE) {
-        if (asLaunch) {
-          await api.launchPost(
-            Array.from(proof.proof),
-            proof.publicInputs.map((i) => Array.from(i))
-          )
-        } else {
-          await api.promotePost(
-            Array.from(proof.proof),
-            proof.publicInputs.map((i) => Array.from(i)),
-            { asReply }
-          )
-        }
+        await api.promotePost(
+          Array.from(proof.proof),
+          proof.publicInputs.map((i) => Array.from(i)),
+          { asReply }
+        )
       } else {
-        if (asLaunch) {
-          await api.submitAction(
-            ProofType.LAUNCH_POST,
-            Array.from(proof.proof),
-            proof.publicInputs.map((i) => Array.from(i)),
-            {}
-          )
-        } else {
-          await api.submitAction(
-            ProofType.PROMOTE_POST,
-            Array.from(proof.proof),
-            proof.publicInputs.map((i) => Array.from(i)),
-            { asReply }
-          )
-        }
+        await api.submitAction(
+          ProofType.PROMOTE_POST,
+          Array.from(proof.proof),
+          proof.publicInputs.map((i) => Array.from(i)),
+          { asReply }
+        )
       }
 
       setPromoteState({ status: 'idle' })
