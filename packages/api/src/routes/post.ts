@@ -13,141 +13,47 @@ import {
   markPostReveal,
 } from '@anon/db'
 import { getQueue, QueueName } from '@anon/queue/src/utils'
-import { Noir } from '@noir-lang/noir_js'
 import { getValidRoots } from '@anon/utils/src/merkle-tree'
 import { augmentCasts } from './feed'
 
-export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) {
-  return createElysia({ prefix: '/posts' })
-    .decorate('createPostBackend', createPostBackend)
-    .decorate('submitHashBackend', submitHashBackend)
-    .post(
-      '/submit',
-      async ({ body }) => {
-        if (body.type === ProofType.PROMOTE_POST) {
-          await getQueue(QueueName.PromotePost).add(`${body.type}-${Date.now()}`, body)
-        } else {
-          await getQueue(QueueName.Default).add(`${body.type}-${Date.now()}`, body)
-        }
-      },
-      {
-        body: t.Object({
-          type: t.Enum(ProofType),
-          proof: t.Array(t.Number()),
-          publicInputs: t.Array(t.Array(t.Number())),
-        }),
+export const postRoutes = createElysia({ prefix: '/posts' })
+  .post(
+    '/submit',
+    async ({ body }) => {
+      if (body.type === ProofType.PROMOTE_POST) {
+        await getQueue(QueueName.PromotePost).add(`${body.type}-${Date.now()}`, body)
+      } else {
+        await getQueue(QueueName.Default).add(`${body.type}-${Date.now()}`, body)
       }
-    )
-    .post(
-      '/create',
-      async ({ body, createPostBackend }) => {
-        const isValid = await createPostBackend.verifyFinalProof({
-          proof: new Uint8Array(body.proof),
-          publicInputs: body.publicInputs.map((i) => new Uint8Array(i)),
-        })
-        if (!isValid) {
-          throw new Error('Invalid proof')
-        }
-        const params = extractCreatePostData(body.publicInputs)
-
-        await validateRoot(ProofType.CREATE_POST, params.tokenAddress, params.root)
-
-        const result = await neynar.post(params)
-
-        if (BigInt(params.revealHash) != BigInt(0) && 'cast' in result) {
-          await createPostReveal(
-            result.cast.hash.toLowerCase(),
-            params.revealHash.toLowerCase()
-          )
-        }
-
-        return result
-      },
-      {
-        body: t.Object({
-          proof: t.Array(t.Number()),
-          publicInputs: t.Array(t.Array(t.Number())),
-        }),
+    },
+    {
+      body: t.Object({
+        type: t.Enum(ProofType),
+        proof: t.Array(t.Number()),
+        publicInputs: t.Array(t.Array(t.Number())),
+      }),
+    }
+  )
+  .post(
+    '/create',
+    async ({ body }) => {
+      const isValid = await verifyProof(ProofType.CREATE_POST, {
+        proof: new Uint8Array(body.proof),
+        publicInputs: body.publicInputs.map((i) => new Uint8Array(i)),
+      })
+      if (!isValid) {
+        throw new Error('Invalid proof')
       }
-    )
-    .post(
-      '/delete',
-      async ({ body, submitHashBackend }) => {
-        const isValid = await submitHashBackend.verifyFinalProof({
-          proof: new Uint8Array(body.proof),
-          publicInputs: body.publicInputs.map((i) => new Uint8Array(i)),
-        })
-        if (!isValid) {
-          throw new Error('Invalid proof')
-        }
+      const params = extractCreatePostData(body.publicInputs)
 
-        const params = extractSubmitHashData(body.publicInputs)
+      await validateRoot(ProofType.CREATE_POST, params.tokenAddress, params.root)
 
-        await validateRoot(ProofType.DELETE_POST, params.tokenAddress, params.root)
+      const result = await neynar.post(params)
 
-        const postMapping = await getPostMapping(params.hash)
-        if (postMapping) {
-          if (postMapping.tweetId) {
-            await twitterClient.v2.deleteTweet(postMapping.tweetId)
-          }
-          if (postMapping.bestOfHash) {
-            await neynar.delete({
-              hash: postMapping.bestOfHash,
-              tokenAddress: params.tokenAddress,
-            })
-          }
-        }
-
-        await deletePostMapping(params.hash)
-
-        return {
-          success: true,
-        }
-      },
-      {
-        body: t.Object({
-          proof: t.Array(t.Number()),
-          publicInputs: t.Array(t.Array(t.Number())),
-        }),
-      }
-    )
-    .post(
-      '/promote',
-      async ({ body, submitHashBackend }) => {
-        const isValid = await submitHashBackend.verifyFinalProof({
-          proof: new Uint8Array(body.proof),
-          publicInputs: body.publicInputs.map((i) => new Uint8Array(i)),
-        })
-        if (!isValid) {
-          throw new Error('Invalid proof')
-        }
-
-        const params = extractSubmitHashData(body.publicInputs)
-
-        await validateRoot(ProofType.PROMOTE_POST, params.tokenAddress, params.root)
-
-        const cast = await neynar.getCast(params.hash)
-        if (!cast.cast) {
-          return {
-            success: false,
-          }
-        }
-
-        const mapping = await getPostMapping(params.hash)
-        if (mapping?.tweetId) {
-          return {
-            success: true,
-          }
-        }
-
-        const parentMapping = cast.cast.parent_hash
-          ? await getPostMapping(cast.cast.parent_hash)
-          : undefined
-
-        const bestOfTweetId = await promoteToTwitter(
-          cast.cast,
-          parentMapping?.tweetId || undefined,
-          body.args?.asReply
+      if (BigInt(params.revealHash) != BigInt(0) && 'cast' in result) {
+        await createPostReveal(
+          result.cast.hash.toLowerCase(),
+          params.revealHash.toLowerCase()
         )
 
         const parentHash = cast.cast.parent_hash
@@ -286,59 +192,152 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
             success: false,
           }
         }
+        if (postMapping.bestOfHash) {
+          await neynar.delete({
+            hash: postMapping.bestOfHash,
+            tokenAddress: params.tokenAddress,
+          })
+        }
+      }
 
-        const address = body.address.toLowerCase()
-        const users = await neynar.getBulkUsers([address])
+      await deletePostMapping(params.hash)
 
-        await markPostReveal(
-          body.castHash,
-          body.revealPhrase,
-          body.signature,
-          body.address
-        )
+      return {
+        success: true,
+      }
+    },
+    {
+      body: t.Object({
+        proof: t.Array(t.Number()),
+        publicInputs: t.Array(t.Array(t.Number())),
+      }),
+    }
+  )
+  .post(
+    '/promote',
+    async ({ body }) => {
+      const isValid = await verifyProof(ProofType.PROMOTE_POST, {
+        proof: new Uint8Array(body.proof),
+        publicInputs: body.publicInputs.map((i) => new Uint8Array(i)),
+      })
+      if (!isValid) {
+        throw new Error('Invalid proof')
+      }
 
-        const username = users?.[address]?.[0]?.username
+      const params = extractSubmitHashData(body.publicInputs)
 
-        await neynar.post({
-          text: `REVEALED: Posted by ${username ? `@${username}` : `${address}`}`,
-          embeds: [`https://anoncast.org/posts/${body.castHash}`],
-          quote: body.castHash,
-          tokenAddress: body.tokenAddress,
-        })
+      await validateRoot(ProofType.PROMOTE_POST, params.tokenAddress, params.root)
 
+      const cast = await neynar.getCast(params.hash)
+      if (!cast.cast) {
+        return {
+          success: false,
+        }
+      }
+
+      const mapping = await getPostMapping(params.hash)
+      if (mapping?.tweetId) {
         return {
           success: true,
         }
-      },
-      {
-        body: t.Object({
-          castHash: t.String(),
-          message: t.String(),
-          revealPhrase: t.String(),
-          signature: t.String(),
-          address: t.String(),
-          tokenAddress: t.String(),
-        }),
       }
-    )
-    .get(
-      '/:hash',
-      async ({ params, error }) => {
-        const cast = await neynar.getCast(params.hash)
-        if (!cast?.cast) {
-          return error(404, 'Cast not found')
-        }
 
-        const revealedCast = await augmentCasts([cast.cast])
-        return revealedCast[0]
-      },
-      {
-        params: t.Object({
-          hash: t.String(),
-        }),
+      const parentMapping = cast.cast.parent_hash
+        ? await getPostMapping(cast.cast.parent_hash)
+        : undefined
+
+      const bestOfTweetId = await promoteToTwitter(
+        cast.cast,
+        parentMapping?.tweetId || undefined,
+        body.args?.asReply
+      )
+
+      const bestOfResponse = await neynar.postAsQuote({
+        tokenAddress: params.tokenAddress,
+        quoteFid: cast.cast.author.fid,
+        quoteHash: cast.cast.hash,
+      })
+
+      await createPostMapping(params.hash, bestOfTweetId, bestOfResponse.hash)
+
+      return {
+        success: true,
+        tweetId: bestOfTweetId,
+        bestOfHash: bestOfResponse.hash,
       }
-    )
-}
+    },
+    {
+      body: t.Object({
+        proof: t.Array(t.Number()),
+        publicInputs: t.Array(t.Array(t.Number())),
+        args: t.Optional(
+          t.Object({
+            asReply: t.Boolean(),
+          })
+        ),
+      }),
+    }
+  )
+  .post(
+    '/reveal',
+    async ({ body }) => {
+      const isValidSignature = await verifyMessage({
+        message: body.message,
+        signature: body.signature as `0x${string}`,
+        address: body.address as `0x${string}`,
+      })
+      if (!isValidSignature) {
+        return {
+          success: false,
+        }
+      }
+
+      const address = body.address.toLowerCase()
+      const users = await neynar.getBulkUsers([address])
+
+      await markPostReveal(body.castHash, body.revealPhrase, body.signature, body.address)
+
+      const username = users?.[address]?.[0]?.username
+
+      await neynar.post({
+        text: `REVEALED: Posted by ${username ? `@${username}` : `${address}`}`,
+        embeds: [`https://anoncast.org/posts/${body.castHash}`],
+        quote: body.castHash,
+        tokenAddress: body.tokenAddress,
+      })
+
+      return {
+        success: true,
+      }
+    },
+    {
+      body: t.Object({
+        castHash: t.String(),
+        message: t.String(),
+        revealPhrase: t.String(),
+        signature: t.String(),
+        address: t.String(),
+        tokenAddress: t.String(),
+      }),
+    }
+  )
+  .get(
+    '/:hash',
+    async ({ params, error }) => {
+      const cast = await neynar.getCast(params.hash)
+      if (!cast?.cast) {
+        return error(404, 'Cast not found')
+      }
+
+      const revealedCast = await augmentCasts([cast.cast])
+      return revealedCast[0]
+    },
+    {
+      params: t.Object({
+        hash: t.String(),
+      }),
+    }
+  )
 
 function extractCreatePostData(data: number[][]): CreatePostParams {
   const root = `0x${Buffer.from(data[0]).toString('hex')}`

@@ -139,23 +139,6 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
   return await noir.generateFinalProof(input)
 }
 
-export async function getProvingBackend(proofType: ProofType) {
-  const circuit = getCircuit(proofType)
-  // @ts-ignore
-  const backend = new BarretenbergBackend(circuit)
-  // @ts-ignore
-  const noir = new Noir(circuit, backend)
-
-  await backend.instantiate()
-
-  await backend['api'].acirInitProvingKey(
-    backend['acirComposer'],
-    backend['acirUncompressedBytecode']
-  )
-
-  return noir
-}
-
 export async function verifyProof(proofType: ProofType, proof: ProofData) {
   const circuit = getCircuit(proofType)
   // @ts-ignore
