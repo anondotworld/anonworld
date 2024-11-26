@@ -213,6 +213,8 @@ export const postRoutes = createElysia({ prefix: '/posts' })
           throw new Error('Invalid proof')
         }
         const params = extractCreatePostData(body.publicInputs)
+        console.log(params)
+        return
 
         await validateRoot(ProofType.CREATE_POST, params.tokenAddress, params.root)
 

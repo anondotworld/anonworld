@@ -1,6 +1,4 @@
-import { CreatePostParams } from '@anon/api/src/services/types'
 import { generateProof, ProofType, verifyProof } from '@anon/utils/src/proofs'
-import { zeroAddress } from 'viem'
 
 const ITERATIONS = 5
 
@@ -36,9 +34,6 @@ async function main() {
       throw new Error('No proof generated')
     }
 
-    const params = extractCreatePostData(proof.publicInputs)
-    console.log(params)
-
     const verifyStartTime = Date.now()
     await verifyProof(ProofType.CREATE_POST, proof)
     const verifyTime = Date.now() - verifyStartTime
@@ -71,51 +66,3 @@ main()
     process.exit(1)
   })
   .finally(() => process.exit(0))
-
-function extractCreatePostData(data: string[]): CreatePostParams {
-  const root = data[0]
-
-  const tokenAddress = `0x${data[1].slice(-40)}`
-
-  const timestamp = parseInt(data[2], 16)
-
-  const textArrays = data.slice(3, 3 + 16)
-  const textBytes = textArrays.map((hexString) => Buffer.from(hexString.slice(2), 'hex'))
-  const text = Buffer.concat(textBytes).toString('utf-8').replace(/\0/g, '')
-
-  const embed1Array = data.slice(3 + 16, 3 + 32)
-  const embed1Bytes = embed1Array.map((hexString) =>
-    Buffer.from(hexString.slice(2), 'hex')
-  )
-  const embed1 = Buffer.concat(embed1Bytes).toString('utf-8').replace(/\0/g, '')
-
-  const embed2Array = data.slice(3 + 32, 3 + 48)
-  const embed2Bytes = embed2Array.map((hexString) =>
-    Buffer.from(hexString.slice(2), 'hex')
-  )
-  const embed2 = Buffer.concat(embed2Bytes).toString('utf-8').replace(/\0/g, '')
-
-  const quote = `0x${data[3 + 48].slice(-40)}`
-
-  const channel = Buffer.from(data[3 + 48 + 1].slice(2), 'hex')
-    .toString('utf-8')
-    .replace(/\0/g, '')
-
-  const parent = `0x${data[3 + 48 + 2].slice(-40)}`
-
-  const revealHashArray = data.slice(3 + 48 + 3, 3 + 48 + 3 + 2)
-  const revealHashHexes = revealHashArray.map((b) => b.slice(-32))
-  const revealHash = `0x${revealHashHexes.join('')}`
-
-  return {
-    timestamp,
-    root: root as string,
-    text,
-    embeds: [embed1, embed2].filter((e) => e !== ''),
-    quote: quote === zeroAddress ? '' : quote,
-    channel,
-    parent: parent === zeroAddress ? '' : parent,
-    tokenAddress: tokenAddress as string,
-    revealHash,
-  }
-}
