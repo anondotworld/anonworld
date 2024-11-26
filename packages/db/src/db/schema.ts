@@ -24,3 +24,9 @@ export const postRevealTable = pgTable('post_reveal', {
   address: varchar({ length: 255 }),
   revealedAt: timestamp(),
 })
+
+export const launchMappingTable = pgTable('launch_mapping', {
+  castHash: varchar({ length: 255 }).primaryKey(),
+  tweetId: varchar({ length: 255 }),
+  promotedAt: timestamp(),
+})

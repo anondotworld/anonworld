@@ -1,6 +1,11 @@
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { postMappingTable, postRevealTable, signersTable } from './db/schema'
+import {
+  launchMappingTable,
+  postMappingTable,
+  postRevealTable,
+  signersTable,
+} from './db/schema'
 import { eq, inArray } from 'drizzle-orm'
 
 const db = drizzle(process.env.DATABASE_URL as string)
@@ -94,4 +99,17 @@ export async function getPostReveals(castHashes: string[]) {
     .from(postRevealTable)
     .where(inArray(postRevealTable.castHash, castHashes))
   return rows
+}
+
+export async function createLaunchMapping(castHash: string, tweetId?: string) {
+  await db.insert(launchMappingTable).values({ castHash, tweetId }).onConflictDoNothing()
+}
+
+export async function getLaunchMappping(castHash: string) {
+  const [row] = await db
+    .select()
+    .from(launchMappingTable)
+    .where(eq(launchMappingTable.castHash, castHash))
+    .limit(1)
+  return row
 }

@@ -6,6 +6,7 @@ import { CreatePostParams, SubmitHashParams } from '../services/types'
 import { neynar } from '../services/neynar'
 import { promoteToTwitter, twitterClient } from '../services/twitter'
 import {
+  createLaunchMapping,
   createPostMapping,
   createPostReveal,
   deletePostMapping,
