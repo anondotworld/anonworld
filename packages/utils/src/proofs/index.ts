@@ -3,7 +3,7 @@ import createPostCircuit from '@anon/circuits/create-post/target/main.json'
 import submitHashCircuit from '@anon/circuits/submit-hash/target/main.json'
 import { recoverPublicKey } from 'viem'
 import { BarretenbergBackend } from '@noir-lang/backend_barretenberg'
-import { Noir } from '@noir-lang/noir_js'
+import { type Noir } from '@noir-lang/noir_js'
 
 export interface Tree {
   elements: {
@@ -47,6 +47,29 @@ interface ProofArgs {
   input: CreatePostArgs | SubmitHashArgs
 }
 
+type ProverModules = {
+  Noir: typeof Noir
+  BarretenbergBackend: typeof BarretenbergBackend
+}
+
+let proverPromise: Promise<ProverModules> | null = null
+
+export async function initProver(): Promise<ProverModules> {
+  if (!proverPromise) {
+    proverPromise = (async () => {
+      const [{ Noir }, { BarretenbergBackend }] = await Promise.all([
+        import('@noir-lang/noir_js'),
+        import('@noir-lang/backend_barretenberg'),
+      ])
+      return {
+        Noir,
+        BarretenbergBackend,
+      }
+    })()
+  }
+  return proverPromise
+}
+
 async function getTree(args: {
   tokenAddress: string
   proofType: ProofType
@@ -65,6 +88,7 @@ async function getTree(args: {
 }
 
 export async function generateProof(args: ProofArgs): Promise<ProofData | null> {
+  const { BarretenbergBackend, Noir } = await initProver()
   const tree = await getTree({
     tokenAddress: args.tokenAddress,
     proofType: args.proofType,
@@ -136,11 +160,13 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
 }
 
 export async function getBackend(proofType: ProofType) {
+  const { BarretenbergBackend } = await initProver()
   const circuit = getCircuit(proofType)
   return new BarretenbergBackend(circuit)
 }
 
 export async function verifyProof(proofType: ProofType, proof: ProofData) {
+  const { BarretenbergBackend } = await initProver()
   const circuit = getCircuit(proofType)
   const backend = new BarretenbergBackend(circuit)
 
