@@ -35,6 +35,8 @@ export function CreatePost({ variant }: { variant: 'post' | 'launch' }) {
     setQuote,
     confetti,
     setConfetti,
+    launch,
+    setLaunch,
   } = useCreatePost()
 
   const length = new Blob([text ?? '']).size
@@ -79,6 +81,15 @@ export function CreatePost({ variant }: { variant: 'post' | 'launch' }) {
       }
     }
   }
+
+  // Set launch state
+  useEffect(() => {
+    if (variant === 'launch') {
+      setLaunch(true)
+    } else {
+      setLaunch(false)
+    }
+  }, [variant, setLaunch])
 
   return (
     <div className="flex flex-col gap-4">
