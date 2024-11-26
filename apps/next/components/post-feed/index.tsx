@@ -6,6 +6,7 @@ import AnimatedTabs from './animated-tabs'
 import { Skeleton } from '../ui/skeleton'
 import { Post } from '../post'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export function PostFeed({
   tokenAddress,
@@ -15,6 +16,7 @@ export function PostFeed({
   defaultTab?: 'new' | 'trending'
 }) {
   const [selected, setSelected] = useState<'new' | 'trending'>(defaultTab)
+  const router = useRouter()
 
   const { data: trendingPosts, isLoading: isTrendingLoading } = useQuery({
     queryKey: ['trending', tokenAddress],
@@ -38,7 +40,10 @@ export function PostFeed({
         <AnimatedTabs
           tabs={['trending', 'new']}
           activeTab={selected}
-          onTabChange={(tab) => setSelected(tab as 'new' | 'trending')}
+          onTabChange={(tab) => {
+            setSelected(tab as 'new' | 'trending')
+            router.push(tab === 'new' ? '/anoncast/new' : '/')
+          }}
           layoutId="feed-tabs"
         />
       </div>
@@ -69,7 +74,7 @@ export function PromotedFeed({
   defaultTab?: 'new' | 'promoted'
 }) {
   const [selected, setSelected] = useState<'new' | 'promoted'>(defaultTab)
-
+  const router = useRouter()
   const { data: promotedLaunches, isLoading: isPromotedLoading } = useQuery({
     queryKey: ['launches', 'promoted', tokenAddress],
     queryFn: async (): Promise<Cast[]> => {
@@ -92,7 +97,10 @@ export function PromotedFeed({
         <AnimatedTabs
           tabs={['promoted', 'new']}
           activeTab={selected}
-          onTabChange={(tab) => setSelected(tab as 'new' | 'promoted')}
+          onTabChange={(tab) => {
+            setSelected(tab as 'new' | 'promoted')
+            router.push(tab === 'new' ? '/anonfun/new' : '/anonfun')
+          }}
           layoutId="launch-tabs"
         />
       </div>

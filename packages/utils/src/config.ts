@@ -17,7 +17,7 @@ export const TOKEN_CONFIG: Record<
   [ANON_ADDRESS]: {
     ticker: 'ANON',
     postAmount: '5000000000000000000000',
-    launchAmount: '1000000000000000000000000',
+    launchAmount: '2000000000000000000000000',
     promoteAmount: '2000000000000000000000000',
     deleteAmount: '2000000000000000000000000',
     farcasterUsername: 'anoncast',

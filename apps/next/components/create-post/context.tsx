@@ -2,6 +2,7 @@ import { useToast } from '@/hooks/use-toast'
 import { api } from '@/lib/api'
 import type { Cast, Channel } from '@/lib/types'
 import { generateProof, ProofType } from '@anon/utils/src/proofs'
+import { useRouter } from 'next/navigation'
 import { createContext, useContext, useState, type ReactNode } from 'react'
 import { hashMessage } from 'viem'
 import { useAccount, useSignMessage } from 'wagmi'
@@ -43,10 +44,12 @@ const CreatePostContext = createContext<CreatePostContextProps | undefined>(unde
 
 export const CreatePostProvider = ({
   tokenAddress,
+  initialVariant,
   children,
 }: {
   tokenAddress: string
   children: ReactNode
+  initialVariant?: 'anoncast' | 'anonfun'
 }) => {
   const [text, setText] = useState<string | null>(null)
   const [image, setImage] = useState<string | null>(null)
@@ -60,7 +63,10 @@ export const CreatePostProvider = ({
   const { toast } = useToast()
   const { address } = useAccount()
   const { signMessageAsync } = useSignMessage()
-  const [variant, setVariant] = useState<'anoncast' | 'anonfun'>('anoncast')
+  const [variant, setVariant] = useState<'anoncast' | 'anonfun'>(
+    initialVariant || 'anoncast'
+  )
+  const router = useRouter()
 
   const resetState = () => {
     setState({ status: 'idle' })
@@ -148,6 +154,11 @@ export const CreatePostProvider = ({
 
   const embedCount = [image, embed, quote].filter((e) => e !== null).length
 
+  const handleSetVariant = (variant: 'anoncast' | 'anonfun') => {
+    setVariant(variant)
+    router.push(variant === 'anoncast' ? '/' : '/anonfun')
+  }
+
   return (
     <CreatePostContext.Provider
       value={{
@@ -171,7 +182,7 @@ export const CreatePostProvider = ({
         revealPhrase,
         setRevealPhrase,
         variant,
-        setVariant,
+        setVariant: handleSetVariant,
       }}
     >
       {children}

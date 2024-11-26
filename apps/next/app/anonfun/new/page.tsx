@@ -8,7 +8,7 @@ import { CreatePostProvider, useCreatePost } from '@/components/create-post/cont
 
 export default function Home() {
   return (
-    <CreatePostProvider tokenAddress={ANON_ADDRESS}>
+    <CreatePostProvider tokenAddress={ANON_ADDRESS} initialVariant="anonfun">
       <Inner />
     </CreatePostProvider>
   )
@@ -41,8 +41,12 @@ function Inner() {
           />
         )}
       </div>
-      {variant === 'anoncast' && <PostFeed tokenAddress={ANON_ADDRESS} />}
-      {variant === 'anonfun' && <PromotedFeed tokenAddress={ANON_ADDRESS} />}
+      {variant === 'anoncast' && (
+        <PostFeed tokenAddress={ANON_ADDRESS} defaultTab="new" />
+      )}
+      {variant === 'anonfun' && (
+        <PromotedFeed tokenAddress={ANON_ADDRESS} defaultTab="new" />
+      )}
     </div>
   )
 }

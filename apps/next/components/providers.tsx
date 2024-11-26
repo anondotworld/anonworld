@@ -7,8 +7,6 @@ import { WagmiProvider } from 'wagmi'
 import { base } from 'wagmi/chains'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
-import { ANON_ADDRESS } from '@anon/utils/src/config'
-import { CreatePostProvider } from './create-post/context'
 
 const config = getDefaultConfig({
   appName: 'My RainbowKit App',
@@ -30,11 +28,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider>
-            <CreatePostProvider tokenAddress={ANON_ADDRESS}>
-              {children}
-            </CreatePostProvider>
-          </RainbowKitProvider>
+          <RainbowKitProvider>{children}</RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </ThemeProvider>

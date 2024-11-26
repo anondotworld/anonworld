@@ -8,7 +8,7 @@ import { CreatePostProvider, useCreatePost } from '@/components/create-post/cont
 
 export default function Home() {
   return (
-    <CreatePostProvider tokenAddress={ANON_ADDRESS}>
+    <CreatePostProvider tokenAddress={ANON_ADDRESS} initialVariant="anoncast">
       <Inner />
     </CreatePostProvider>
   )
