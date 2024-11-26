@@ -48,7 +48,7 @@ export const api = {
     type: ProofType,
     proof: number[],
     publicInputs: number[][],
-    args: { asReply?: boolean; asLaunch?: boolean }
+    args: { asReply?: boolean }
   ) => {
     await apiClient.request(`/posts/submit`, {
       method: 'POST',

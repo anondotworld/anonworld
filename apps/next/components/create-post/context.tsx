@@ -43,12 +43,9 @@ const CreatePostContext = createContext<CreatePostContextProps | undefined>(unde
 
 export const CreatePostProvider = ({
   tokenAddress,
-  // TODO: Implement launchAddress for launch variant
-  launchAddress,
   children,
 }: {
   tokenAddress: string
-  launchAddress: string
   children: ReactNode
 }) => {
   const [text, setText] = useState<string | null>(null)
@@ -58,7 +55,6 @@ export const CreatePostProvider = ({
   const [channel, setChannel] = useState<Channel | null>(null)
   const [parent, setParent] = useState<Cast | null>(null)
   const [revealPhrase, setRevealPhrase] = useState<string | null>(null)
-  const [launch, setLaunch] = useState(false)
   const [state, setState] = useState<State>({ status: 'idle' })
   const [confetti, setConfetti] = useState(false)
   const { toast } = useToast()
@@ -75,7 +71,6 @@ export const CreatePostProvider = ({
     setChannel(null)
     setParent(null)
     setRevealPhrase(null)
-    setLaunch(false)
   }
 
   const createPost = async () => {
@@ -136,7 +131,7 @@ export const CreatePostProvider = ({
           ProofType.CREATE_POST,
           Array.from(proof.proof),
           proof.publicInputs.map((i) => Array.from(i)),
-          { asLaunch: launch }
+          {}
         )
       }
 
