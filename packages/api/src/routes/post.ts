@@ -6,7 +6,6 @@ import { CreatePostParams, SubmitHashParams } from '../services/types'
 import { neynar } from '../services/neynar'
 import { promoteToTwitter, twitterClient } from '../services/twitter'
 import {
-  createLaunchMapping,
   createPostMapping,
   createPostReveal,
   deletePostMapping,
@@ -124,9 +123,6 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
         }
 
         const params = extractSubmitHashData(body.publicInputs)
-
-        // TODO: Need to implement launch mapping for existing casts
-        const isLaunch = body.args?.asLaunch
 
         await validateRoot(ProofType.PROMOTE_POST, params.tokenAddress, params.root)
 
