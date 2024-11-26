@@ -1,7 +1,10 @@
 {
   "name": "anon",
   "private": true,
-  "workspaces": ["packages/*", "apps/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
     "build": "bun run --filter '**' build",
     "next:dev": "bun run --filter @anon/next dev",

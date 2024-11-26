@@ -1,5 +1,5 @@
 use dep::std;
-use dep::ecrecover;
+// use dep::ecrecover;
 
 fn main(
     // Token Balance
@@ -21,27 +21,27 @@ fn main(
     text: pub [Field; 16],
     embed_1: pub [Field; 16],
     embed_2: pub [Field; 16],
-    quote: pub Field,
+    quote_hash: pub Field,
     channel: pub Field,
     parent: pub Field,
-    reveal_hash: pub [Field; 2],
+    reveal_hash: pub [Field; 2]
 ) -> pub (u64, [Field; 16], [Field; 16], [Field; 16], Field, Field, Field, Field, [Field; 2]) {
     let recovered_address = ecrecover::ecrecover(pub_key_x, pub_key_y, signature, message_hash);
     assert(address == recovered_address);
 
-    let commitment = std::hash::mimc_bn254([address, balance]);
+    let commitment = std::hash::mimc::mimc_bn254([address, balance]);
 
     // Check that the input note commitment is in the root
     let new_root = compute_root_from_leaf(commitment, index, note_hash_path);
     assert(new_root == note_root);
 
-    (timestamp, text, embed_1, embed_2, quote, channel, parent, token_address, reveal_hash)
+    (timestamp, text, embed_1, embed_2, quote_hash, channel, parent, token_address, reveal_hash)
 }
 
 // Returns the root of the tree from the provided leaf and its hashpath, using mimc hash
 fn compute_root_from_leaf(leaf: Field, index: Field, hash_path: [Field; 13]) -> Field {
     let n = hash_path.len();
-    let index_bits = index.to_le_bits(n as u32);
+    let index_bits: [u1; 13]   = index.to_le_bits();
     let mut current = leaf;
     for i in 0..n {
         let path_bit = index_bits[i] as bool;
@@ -51,7 +51,7 @@ fn compute_root_from_leaf(leaf: Field, index: Field, hash_path: [Field; 13]) -> 
             (current, hash_path[i])
         };
 
-        current = std::hash::mimc_bn254([hash_left, hash_right]);
+        current = std::hash::mimc::mimc_bn254([hash_left, hash_right]);
     }
     current
 }
