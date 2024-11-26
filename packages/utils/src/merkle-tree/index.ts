@@ -1,7 +1,7 @@
 import { buildMimc7 as buildMimc } from 'circomlibjs'
 import { MerkleTreeMiMC, MiMC7 } from '../proofs/merkle-tree'
 import { Redis } from 'ioredis'
-import { ProofType, Tree } from '../proofs'
+import { ProofType, Tree } from '../proofs/generate'
 
 const redis = new Redis(process.env.REDIS_URL as string)
 

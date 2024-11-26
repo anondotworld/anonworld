@@ -1,6 +1,7 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import { ProofType, verifyProof } from '@anon/utils/src/proofs'
+import { ProofType } from '@anon/utils/src/proofs/generate'
+import { verifyProof } from '@anon/utils/src/proofs/verify'
 import { verifyMessage, zeroAddress } from 'viem'
 import { CreatePostParams, SubmitHashParams } from '../services/types'
 import { neynar } from '../services/neynar'
@@ -13,7 +14,6 @@ import {
   markPostReveal,
 } from '@anon/db'
 import { getQueue, QueueName } from '@anon/queue/src/utils'
-import { BarretenbergBackend } from '@noir-lang/backend_barretenberg'
 import { getValidRoots } from '@anon/utils/src/merkle-tree'
 import { augmentCasts } from './feed'
 

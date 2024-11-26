@@ -1,4 +1,4 @@
-import { ProofType } from '@anon/utils/src/proofs'
+import { ProofType } from '@anon/utils/src/proofs/generate'
 import { QueueArgs } from './utils'
 
 export async function handler(data: QueueArgs) {

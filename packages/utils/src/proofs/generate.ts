@@ -1,9 +1,8 @@
 import { ProofData } from '@noir-lang/types'
-import createPostCircuit from '@anon/circuits/create-post/target/main.json'
-import submitHashCircuit from '@anon/circuits/submit-hash/target/main.json'
 import { recoverPublicKey } from 'viem'
 import { BarretenbergBackend } from '@noir-lang/backend_barretenberg'
 import { type Noir } from '@noir-lang/noir_js'
+import { chunkHexString, getCircuit, stringToHexArray } from './utils'
 
 export interface Tree {
   elements: {
@@ -158,60 +157,4 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
 
   const { witness } = await noir.execute(input)
   return await backend.generateProof(witness)
-}
-
-// export async function getBackend(proofType: ProofType) {
-//   const { BarretenbergBackend } = await initProver()
-//   const circuit = getCircuit(proofType)
-//   return new BarretenbergBackend(circuit)
-// }
-
-export async function verifyProof(proofType: ProofType, proof: ProofData) {
-  const { BarretenbergBackend } = await initProver()
-  const circuit = getCircuit(proofType)
-  const backend = new BarretenbergBackend(circuit)
-
-  return await backend.verifyProof(proof)
-}
-
-function getCircuit(type: ProofType) {
-  switch (type) {
-    case ProofType.CREATE_POST:
-      return createPostCircuit
-  }
-  return submitHashCircuit
-}
-
-function stringToHexArray(input: string, length: number): string[] {
-  // Convert the string to a UTF-8 byte array
-  const encoder = new TextEncoder()
-  const byteArray = encoder.encode(input)
-
-  // Convert the byte array to a hexadecimal string
-  let hexString = ''
-  for (const byte of Array.from(byteArray)) {
-    hexString += byte.toString(16).padStart(2, '0')
-  }
-
-  const totalLength = 60 * length // 16 elements of 60 characters
-  hexString = hexString.padEnd(totalLength, '0')
-
-  // Split the hexadecimal string into chunks of 60 characters (30 bytes)
-  const chunkSize = 60
-  const hexArray: string[] = []
-  for (let i = 0; i < hexString.length; i += chunkSize) {
-    hexArray.push(
-      `0x${hexString.substring(i, Math.min(i + chunkSize, hexString.length))}`
-    )
-  }
-
-  return hexArray
-}
-
-function chunkHexString(hexString: string, chunkSize: number): string[] {
-  const chunks: string[] = []
-  for (let i = 0; i < hexString.length; i += chunkSize) {
-    chunks.push(`0x${hexString.slice(i, i + chunkSize)}`)
-  }
-  return chunks
 }

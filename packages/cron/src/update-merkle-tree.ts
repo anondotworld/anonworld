@@ -1,6 +1,6 @@
 import { buildHoldersTree, setTree } from '@anon/utils/src/merkle-tree'
 import { TOKEN_CONFIG, ANON_ADDRESS } from '@anon/utils/src/config'
-import { ProofType } from '@anon/utils/src/proofs'
+import { ProofType } from '@anon/utils/src/proofs/generate'
 
 const main = async () => {
   const config = TOKEN_CONFIG[ANON_ADDRESS]
