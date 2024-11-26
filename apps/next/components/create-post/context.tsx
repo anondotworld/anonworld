@@ -1,7 +1,7 @@
 import { useToast } from '@/hooks/use-toast'
 import { api } from '@/lib/api'
 import { Cast, Channel } from '@/lib/types'
-import { generateProof, ProofType } from '@anon/utils/src/proofs'
+import { generateProof, ProofType } from '@anon/utils/src/proofs/generate'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
 import { useAccount, useSignMessage } from 'wagmi'

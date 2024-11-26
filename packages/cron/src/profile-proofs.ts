@@ -1,5 +1,5 @@
-import { generateProof, ProofType, verifyProof } from '@anon/utils/src/proofs'
-
+import { generateProof, ProofType } from '@anon/utils/src/proofs/generate'
+import { verifyProof } from '@anon/utils/src/proofs/verify'
 const ITERATIONS = 1
 
 async function main() {
