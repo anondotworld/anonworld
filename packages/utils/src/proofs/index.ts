@@ -75,11 +75,8 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
   }
 
   const circuit = getCircuit(args.proofType)
-
-  // @ts-ignore
   const backend = new BarretenbergBackend(circuit)
-  // @ts-ignore
-  const noir = new Noir(circuit, backend)
+  const noir = new Noir(circuit)
 
   const nodeIndex = tree.elements.findIndex(
     (i) => i.address === args.userAddress.toLowerCase()
@@ -127,7 +124,7 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
       args.input.embeds.length > 1 ? args.input.embeds[1] : '',
       16
     )
-    input.quote = args.input.quote ?? `0x${BigInt(0).toString(16)}`
+    input.quote_hash = args.input.quote ?? `0x${BigInt(0).toString(16)}`
     input.channel = stringToHexArray(args.input.channel ?? '', 1)[0]
     input.parent = args.input.parent ?? `0x${BigInt(0).toString(16)}`
     input.reveal_hash = args.input.revealHash
@@ -135,25 +132,15 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
       : [`0x${BigInt(0).toString(16)}`, `0x${BigInt(0).toString(16)}`]
   }
 
-  // @ts-ignore
-  return await noir.generateFinalProof(input)
+  const { witness } = await noir.execute(input)
+  return await backend.generateProof(witness)
 }
 
 export async function verifyProof(proofType: ProofType, proof: ProofData) {
   const circuit = getCircuit(proofType)
-  // @ts-ignore
   const backend = new BarretenbergBackend(circuit)
-  // @ts-ignore
-  const noir = new Noir(circuit, backend)
 
-  await backend.instantiate()
-
-  await backend['api'].acirInitProvingKey(
-    backend['acirComposer'],
-    backend['acirUncompressedBytecode']
-  )
-
-  return await noir.verifyFinalProof(proof)
+  return await backend.verifyProof(proof)
 }
 
 function getCircuit(type: ProofType) {

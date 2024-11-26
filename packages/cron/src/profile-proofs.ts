@@ -1,37 +1,68 @@
 import { generateProof, ProofType, verifyProof } from '@anon/utils/src/proofs'
 
-async function main() {
-  console.time('proof')
-  const proof = await generateProof({
-    tokenAddress: '0x0db510e79909666d6dec7f5e49370838c16d950f',
-    userAddress: '0x333601a803CAc32B7D17A38d32c9728A93b422f4',
-    proofType: 0,
-    signature: {
-      timestamp: 1732347401,
-      signature:
-        '0xeee23083c8d17575d2b3f96afcddc2b31979d5c8c7d2ee0fadd1d42404aa3ee86bc765d1b6dd283f7cb8f27437f748b58e948e764051f4c98f38adb28a0ff65b1c',
-      messageHash: '0xd1e49abf2d4d64466cc5d72ee0716aeee5506ff3cf4a5c0e43b74b8bc9580e12',
-    },
-    input: {
-      text: '?',
-      embeds: [],
-      quote: null,
-      channel: null,
-      parent: null,
-      revealHash: null,
-    },
-  })
-  console.timeEnd('proof')
+const ITERATIONS = 5
 
-  if (!proof) {
-    throw new Error('No proof generated')
+async function main() {
+  const results = []
+
+  for (let i = 0; i < ITERATIONS; i++) {
+    const proofStartTime = Date.now()
+    const proof = await generateProof({
+      tokenAddress: '0x0db510e79909666d6dec7f5e49370838c16d950f',
+      userAddress: '0x333601a803CAc32B7D17A38d32c9728A93b422f4',
+      proofType: 0,
+      signature: {
+        timestamp: 1732347401,
+        signature:
+          '0xeee23083c8d17575d2b3f96afcddc2b31979d5c8c7d2ee0fadd1d42404aa3ee86bc765d1b6dd283f7cb8f27437f748b58e948e764051f4c98f38adb28a0ff65b1c',
+        messageHash: '0xd1e49abf2d4d64466cc5d72ee0716aeee5506ff3cf4a5c0e43b74b8bc9580e12',
+      },
+      input: {
+        text: '?',
+        embeds: [],
+        quote: null,
+        channel: null,
+        parent: null,
+        revealHash: null,
+      },
+    })
+    const proofTime = Date.now() - proofStartTime
+
+    console.log(`${i + 1} Proof Time: ${proofTime}ms`)
+
+    if (!proof) {
+      throw new Error('No proof generated')
+    }
+
+    const verifyStartTime = Date.now()
+    await verifyProof(ProofType.CREATE_POST, proof)
+    const verifyTime = Date.now() - verifyStartTime
+
+    console.log(`${i + 1} Verify Time: ${verifyTime}ms`)
+
+    results.push({
+      iteration: i + 1,
+      proofTime: (proofTime / 1000).toFixed(3),
+      verifyTime: (verifyTime / 1000).toFixed(3),
+    })
   }
 
-  console.time('verify')
-  await verifyProof(ProofType.CREATE_POST, proof)
-  console.timeEnd('verify')
+  console.table(results)
+
+  const averageProofTime = (
+    results.reduce((sum, result) => sum + parseFloat(result.proofTime), 0) / ITERATIONS
+  ).toFixed(3)
+  const averageVerifyTime = (
+    results.reduce((sum, result) => sum + parseFloat(result.verifyTime), 0) / ITERATIONS
+  ).toFixed(3)
+
+  console.log(`Average Proof Time: ${averageProofTime} seconds`)
+  console.log(`Average Verify Time: ${averageVerifyTime} seconds`)
 }
 
 main()
-  .catch(console.error)
-  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })
+  .finally(() => process.exit(0))

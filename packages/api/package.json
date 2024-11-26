@@ -18,8 +18,6 @@
     "@anon/db": "*",
     "@anon/utils": "*",
     "@elysiajs/cors": "^1.1.1",
-    "@noir-lang/backend_barretenberg": "^0.17.0",
-    "@noir-lang/noir_js": "^0.17.0",
     "elysia": "^1.1.25",
     "ioredis": "^5.4.1",
     "logestic": "^1.2.4",
