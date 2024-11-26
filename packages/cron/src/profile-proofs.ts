@@ -1,6 +1,6 @@
 import { generateProof, ProofType, verifyProof } from '@anon/utils/src/proofs'
 
-const ITERATIONS = 5
+const ITERATIONS = 1
 
 async function main() {
   const results = []
@@ -26,24 +26,27 @@ async function main() {
         revealHash: '0xf20a9b18aa1bb2d609ae95654e84798a0a958dbda49bb082bd10b427ad6da451',
       },
     })
-    const proofTime = Date.now() - proofStartTime
 
-    console.log(`${i + 1} Proof Time: ${proofTime}ms`)
+    const proofTime = (Date.now() - proofStartTime) / 1000
+    console.log(`${i + 1} Proof Time: ${proofTime.toFixed(3)}s`)
 
     if (!proof) {
-      throw new Error('No proof generated')
+      throw new Error('Proof not generated')
     }
 
     const verifyStartTime = Date.now()
-    await verifyProof(ProofType.CREATE_POST, proof)
-    const verifyTime = Date.now() - verifyStartTime
+    const verified = await verifyProof(ProofType.CREATE_POST, proof)
 
-    console.log(`${i + 1} Verify Time: ${verifyTime}ms`)
+    const verifyTime = (Date.now() - verifyStartTime) / 1000
+    console.log(`${i + 1} Verify Time: ${verifyTime.toFixed(3)}s`)
+    if (!verified) {
+      throw new Error('Proof not verified')
+    }
 
     results.push({
       iteration: i + 1,
-      proofTime: (proofTime / 1000).toFixed(3),
-      verifyTime: (verifyTime / 1000).toFixed(3),
+      proofTime: proofTime.toFixed(3),
+      verifyTime: verifyTime.toFixed(3),
     })
   }
 
