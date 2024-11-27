@@ -4,7 +4,7 @@ import { ProofType } from '@anon/utils/src/proofs/generate'
 import { verifyMessage, zeroAddress } from 'viem'
 import { CreatePostParams, SubmitHashParams } from '../services/types'
 import { neynar } from '../services/neynar'
-import { promoteToTwitter, twitterClient } from '../services/twitter'
+import { promoteToTwitter, getTwitterClient } from '../services/twitter'
 import {
   createPostMapping,
   createPostReveal,
@@ -93,7 +93,7 @@ export function getPostRoutes(
         const postMapping = await getPostMapping(params.hash)
         if (postMapping) {
           if (postMapping.tweetId) {
-            await twitterClient.v2.deleteTweet(postMapping.tweetId)
+            await getTwitterClient().v2.deleteTweet(postMapping.tweetId)
           }
           if (postMapping.bestOfHash) {
             await neynar.delete({
