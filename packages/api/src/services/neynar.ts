@@ -136,6 +136,7 @@ class NeynarService {
     parent?: string
     channel?: string
     launchSigner?: boolean
+    bestOfSigner?: boolean
   }) {
     const signerUuid = await getSignerForAddress(params.tokenAddress)
     if (!signerUuid) {
@@ -168,7 +169,9 @@ class NeynarService {
     const body = {
       signer_uuid: params.launchSigner
         ? signerUuid.launchSignerUuid
-        : signerUuid.signerUuid,
+        : params.bestOfSigner
+          ? signerUuid.bestOfSignerUuid
+          : signerUuid.signerUuid,
       parent: params.parent,
       parent_author_fid: parentAuthorFid,
       text: params.text,

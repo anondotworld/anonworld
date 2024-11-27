@@ -150,22 +150,43 @@ export function getPostRoutes(createPostBackend: Noir, submitHashBackend: Noir) 
           body.args?.asReply
         )
 
-        const bestOfResponse = await neynar.postAsQuote({
+        const parentHash = cast.cast.parent_hash
+        const channelId = cast.cast.channel?.id
+        const embeds: string[] = []
+        let quoteHash: string | undefined
+        for (const embed of cast.cast.embeds || []) {
+          if (embed.url) {
+            embeds.push(embed.url)
+          } else if (embed.cast) {
+            quoteHash = embed.cast.hash
+          }
+        }
+
+        const bestOfResponse = await neynar.post({
           tokenAddress: params.tokenAddress,
-          quoteFid: cast.cast.author.fid,
-          quoteHash: cast.cast.hash,
+          text: cast.cast.text,
+          embeds,
+          quote: quoteHash,
+          parent: parentHash,
+          channel: channelId,
+          bestOfSigner: true,
         })
 
-        await createPostMapping({
-          castHash: params.hash,
-          tweetId: bestOfTweetId,
-          bestOfHash: bestOfResponse.hash,
-        })
+        if ('cast' in bestOfResponse) {
+          await createPostMapping({
+            castHash: params.hash,
+            tweetId: bestOfTweetId,
+            bestOfHash: bestOfResponse.cast.hash,
+          })
+          return {
+            success: true,
+            tweetId: bestOfTweetId,
+            bestOfHash: bestOfResponse.cast.hash,
+          }
+        }
 
         return {
-          success: true,
-          tweetId: bestOfTweetId,
-          bestOfHash: bestOfResponse.hash,
+          success: false,
         }
       },
       {
