@@ -10,7 +10,7 @@ export enum QueueName {
 export type QueueArgs = {
   type: ProofType
   proof: number[]
-  publicInputs: string[]
+  publicInputs: number[][]
 }
 
 type QueueType = {
