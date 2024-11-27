@@ -8,6 +8,14 @@ export async function getProvingBackend(proofType: ProofType) {
   const circuit = getCircuit(proofType)
   const backend = new BarretenbergBackend(circuit)
   const noir = new Noir(circuit, backend)
+
+  await backend.instantiate()
+
+  await backend['api'].acirInitProvingKey(
+    backend['acirComposer'],
+    backend['acirUncompressedBytecode']
+  )
+
   return noir
 }
 
