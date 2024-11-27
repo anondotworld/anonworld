@@ -1,6 +1,5 @@
-import { ProofData } from '@noir-lang/types'
 import { recoverPublicKey } from 'viem'
-import { BarretenbergBackend } from '@noir-lang/backend_barretenberg'
+import { UltraPlonkBackend, ProofData } from '@aztec/bb.js'
 import { type Noir } from '@noir-lang/noir_js'
 import { chunkHexString, getCircuit, stringToHexArray } from './utils'
 
@@ -48,7 +47,7 @@ interface ProofArgs {
 
 type ProverModules = {
   Noir: typeof Noir
-  BarretenbergBackend: typeof BarretenbergBackend
+  UltraPlonkBackend: typeof UltraPlonkBackend
 }
 
 let proverPromise: Promise<ProverModules> | null = null
@@ -56,13 +55,13 @@ let proverPromise: Promise<ProverModules> | null = null
 export async function initProver(): Promise<ProverModules> {
   if (!proverPromise) {
     proverPromise = (async () => {
-      const [{ Noir }, { BarretenbergBackend }] = await Promise.all([
+      const [{ Noir }, { UltraPlonkBackend }] = await Promise.all([
         import('@noir-lang/noir_js'),
-        import('@noir-lang/backend_barretenberg'),
+        import('@aztec/bb.js'),
       ])
       return {
         Noir,
-        BarretenbergBackend,
+        UltraPlonkBackend,
       }
     })()
   }
@@ -87,7 +86,7 @@ async function getTree(args: {
 }
 
 export async function generateProof(args: ProofArgs): Promise<ProofData | null> {
-  const { BarretenbergBackend, Noir } = await initProver()
+  const { UltraPlonkBackend, Noir } = await initProver()
   const tree = await getTree({
     tokenAddress: args.tokenAddress,
     proofType: args.proofType,
@@ -97,7 +96,8 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
   }
 
   const circuit = getCircuit(args.proofType)
-  const backend = new BarretenbergBackend(circuit)
+  const backend = new UltraPlonkBackend(circuit.bytecode)
+  await backend.instantiate()
   const noir = new Noir(circuit)
 
   const nodeIndex = tree.elements.findIndex(
