@@ -45,6 +45,10 @@ class NeynarService {
       anonfun?: boolean
     }
   ): Promise<T> {
+    if (!this.apiKey && !this.anonfunApiKey) {
+      return null as T
+    }
+
     const { maxRetries = 1, retryDelay = 10000, method, body, anonfun } = options ?? {}
     let retries = 0
 
