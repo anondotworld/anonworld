@@ -11,6 +11,7 @@ export const TOKEN_CONFIG: Record<
     deleteAmount: string
     farcasterUsername: string
     fid: number
+    bestOfFid: number
     launchFid: number
   }
 > = {
@@ -21,7 +22,8 @@ export const TOKEN_CONFIG: Record<
     promoteAmount: '2000000000000000000000000',
     deleteAmount: '2000000000000000000000000',
     farcasterUsername: 'anoncast',
-    fid: 880094,
+    fid: 883287,
+    bestOfFid: 880094,
     launchFid: 883713,
   },
   [COMMENT_ADDRESS]: {
@@ -31,7 +33,8 @@ export const TOKEN_CONFIG: Record<
     promoteAmount: '1',
     deleteAmount: '1',
     farcasterUsername: 'comment',
-    fid: 880094,
+    fid: 883287,
+    bestOfFid: 880094,
     launchFid: 883713,
   },
 }

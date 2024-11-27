@@ -55,12 +55,13 @@ export const feedRoutes = createElysia({ prefix: '/feed' })
     '/:tokenAddress/new',
     async ({ params }) => {
       let response: GetCastsResponse
-      const cached = await redis.get(`new:${params.tokenAddress}`)
+      const fid = TOKEN_CONFIG[params.tokenAddress].fid
+      const cached = await redis.get(`new:${fid}`)
       if (cached) {
         response = JSON.parse(cached)
       } else {
-        response = await neynar.getUserCasts(TOKEN_CONFIG[params.tokenAddress].fid)
-        await redis.set(`new:${params.tokenAddress}`, JSON.stringify(response), 'EX', 30)
+        response = await neynar.getUserCasts(fid)
+        await redis.set(`new:${fid}`, JSON.stringify(response), 'EX', 30)
       }
 
       return {
@@ -76,7 +77,8 @@ export const feedRoutes = createElysia({ prefix: '/feed' })
   .get(
     '/:tokenAddress/trending',
     async ({ params }) => {
-      const trending = await redis.get(`trending:${params.tokenAddress}`)
+      const fid = TOKEN_CONFIG[params.tokenAddress].bestOfFid
+      const trending = await redis.get(`trending:${fid}`)
       if (!trending) {
         return {
           casts: [],
@@ -101,13 +103,19 @@ export const feedRoutes = createElysia({ prefix: '/feed' })
     '/:tokenAddress/launches/new',
     async ({ params }) => {
       let response: Cast[]
-      const cached = await redis.get(`launches:new:${params.tokenAddress}`)
+      const cached = null
       if (cached) {
         response = JSON.parse(cached)
       } else {
         const searchResponse = await neynar.getUserCasts(
           TOKEN_CONFIG[params.tokenAddress].fid
         )
+        if (searchResponse.casts.length === 0) {
+          return {
+            casts: [],
+          }
+        }
+
         response = searchResponse.casts.filter(({ text }) =>
           text.toLowerCase().includes('@clanker')
         )

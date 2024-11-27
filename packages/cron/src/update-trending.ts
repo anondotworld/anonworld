@@ -43,7 +43,7 @@ async function getCastData(hashes: string[]): Promise<Cast[]> {
 }
 
 async function main() {
-  const messages = await getCastMessages(TOKEN_CONFIG[ANON_ADDRESS].fid)
+  const messages = await getCastMessages(TOKEN_CONFIG[ANON_ADDRESS].bestOfFid)
   if (messages.length === 0) {
     return
   }
@@ -71,7 +71,10 @@ async function main() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 25)
 
-  await redis.set(`trending:${ANON_ADDRESS}`, JSON.stringify(sortedCasts))
+  await redis.set(
+    `trending:${TOKEN_CONFIG[ANON_ADDRESS].bestOfFid}`,
+    JSON.stringify(sortedCasts)
+  )
 }
 
 main()
