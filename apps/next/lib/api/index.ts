@@ -1,4 +1,4 @@
-import type { ProofType, Tree } from '@anon/utils/src/proofs'
+import type { ProofType, Tree } from '@anon/utils/src/proofs/generate'
 import type {
   Cast,
   Channel,
@@ -47,7 +47,7 @@ export const api = {
   submitAction: async (
     type: ProofType,
     proof: number[],
-    publicInputs: string[],
+    publicInputs: number[][],
     args: { asReply?: boolean }
   ) => {
     await apiClient.request(`/posts/submit`, {
@@ -55,14 +55,14 @@ export const api = {
       body: JSON.stringify({ type, proof, publicInputs, args }),
     })
   },
-  createPost: async (proof: number[], publicInputs: string[]) => {
+  createPost: async (proof: number[], publicInputs: number[][]) => {
     const response = await apiClient.request<PostCastResponse>(`/posts/create`, {
       method: 'POST',
       body: JSON.stringify({ proof, publicInputs }),
     })
     return response.data
   },
-  deletePost: async (proof: number[], publicInputs: string[]) => {
+  deletePost: async (proof: number[], publicInputs: number[][]) => {
     const response = await apiClient.request<{ success: boolean }>(`/posts/delete`, {
       method: 'POST',
       body: JSON.stringify({ proof, publicInputs }),

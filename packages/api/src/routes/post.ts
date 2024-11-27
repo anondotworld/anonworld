@@ -215,14 +215,14 @@ export const postRoutes = createElysia({ prefix: '/posts' })
     async ({ body }) => {
       const isValid = await verifyProof(ProofType.CREATE_POST, {
         proof: new Uint8Array(body.proof),
-        publicInputs: body.publicInputs,
+        publicInputs: body.publicInputs.map((input) => new Uint8Array(input)),
       })
       if (!isValid) {
         throw new Error('Invalid proof')
       }
 
-      const params = extractCreatePostData(body.publicInputs)
-      console.log(params)
+      // const params = extractCreatePostData(body.publicInputs)
+      console.log(isValid)
       return
 
       await validateRoot(ProofType.CREATE_POST, params.tokenAddress, params.root)
@@ -241,7 +241,7 @@ export const postRoutes = createElysia({ prefix: '/posts' })
     {
       body: t.Object({
         proof: t.Array(t.Number()),
-        publicInputs: t.Array(t.String()),
+        publicInputs: t.Array(t.Array(t.Number())),
       }),
     }
   )
@@ -250,7 +250,7 @@ export const postRoutes = createElysia({ prefix: '/posts' })
     async ({ body }) => {
       const isValid = await verifyProof(ProofType.DELETE_POST, {
         proof: new Uint8Array(body.proof),
-        publicInputs: body.publicInputs,
+        publicInputs: body.publicInputs.map((input) => new Uint8Array(input)),
       })
       if (!isValid) {
         throw new Error('Invalid proof')
@@ -282,7 +282,7 @@ export const postRoutes = createElysia({ prefix: '/posts' })
     {
       body: t.Object({
         proof: t.Array(t.Number()),
-        publicInputs: t.Array(t.String()),
+        publicInputs: t.Array(t.Array(t.Number())),
       }),
     }
   )
@@ -291,7 +291,7 @@ export const postRoutes = createElysia({ prefix: '/posts' })
     async ({ body }) => {
       const isValid = await verifyProof(ProofType.PROMOTE_POST, {
         proof: new Uint8Array(body.proof),
-        publicInputs: body.publicInputs,
+        publicInputs: body.publicInputs.map((input) => new Uint8Array(input)),
       })
       if (!isValid) {
         throw new Error('Invalid proof')
@@ -342,7 +342,7 @@ export const postRoutes = createElysia({ prefix: '/posts' })
     {
       body: t.Object({
         proof: t.Array(t.Number()),
-        publicInputs: t.Array(t.String()),
+        publicInputs: t.Array(t.Array(t.Number())),
         args: t.Optional(
           t.Object({
             asReply: t.Boolean(),

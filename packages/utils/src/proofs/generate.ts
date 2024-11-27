@@ -1,6 +1,7 @@
 import { recoverPublicKey } from 'viem'
-import { UltraPlonkBackend, ProofData } from '@aztec/bb.js'
+import { BarretenbergBackend } from '@noir-lang/backend_barretenberg'
 import { type Noir } from '@noir-lang/noir_js'
+import { ProofData } from '@noir-lang/types'
 import { chunkHexString, getCircuit, stringToHexArray } from './utils'
 
 export interface Tree {
@@ -48,7 +49,7 @@ interface ProofArgs {
 
 type ProverModules = {
   Noir: typeof Noir
-  UltraPlonkBackend: typeof UltraPlonkBackend
+  BarretenbergBackend: typeof BarretenbergBackend
 }
 
 let proverPromise: Promise<ProverModules> | null = null
@@ -56,13 +57,13 @@ let proverPromise: Promise<ProverModules> | null = null
 export async function initProver(): Promise<ProverModules> {
   if (!proverPromise) {
     proverPromise = (async () => {
-      const [{ Noir }, { UltraPlonkBackend }] = await Promise.all([
+      const [{ Noir }, { BarretenbergBackend }] = await Promise.all([
         import('@noir-lang/noir_js'),
-        import('@aztec/bb.js'),
+        import('@noir-lang/backend_barretenberg'),
       ])
       return {
         Noir,
-        UltraPlonkBackend,
+        BarretenbergBackend,
       }
     })()
   }
@@ -87,7 +88,7 @@ async function getTree(args: {
 }
 
 export async function generateProof(args: ProofArgs): Promise<ProofData | null> {
-  const { UltraPlonkBackend, Noir } = await initProver()
+  const { BarretenbergBackend, Noir } = await initProver()
   const tree = await getTree({
     tokenAddress: args.tokenAddress,
     proofType: args.proofType,
@@ -97,9 +98,8 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
   }
 
   const circuit = getCircuit(args.proofType)
-  const backend = new UltraPlonkBackend(circuit.bytecode)
-  await backend.instantiate()
-  const noir = new Noir(circuit)
+  const backend = new BarretenbergBackend(circuit)
+  const noir = new Noir(circuit, backend)
 
   const nodeIndex = tree.elements.findIndex(
     (i) => i.address === args.userAddress.toLowerCase()
@@ -155,6 +155,5 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
       : [`0x${BigInt(0).toString(16)}`, `0x${BigInt(0).toString(16)}`]
   }
 
-  const { witness } = await noir.execute(input)
-  return await backend.generateProof(witness)
+  return await noir.generateFinalProof(input)
 }

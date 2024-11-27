@@ -72,12 +72,16 @@ export const usePromotePost = (tokenAddress: string) => {
       }
 
       if (process.env.NEXT_PUBLIC_DISABLE_QUEUE) {
-        await api.promotePost(Array.from(proof.proof), proof.publicInputs, { asReply })
+        await api.promotePost(
+          Array.from(proof.proof),
+          proof.publicInputs.map((input) => Array.from(input)),
+          { asReply }
+        )
       } else {
         await api.submitAction(
           ProofType.PROMOTE_POST,
           Array.from(proof.proof),
-          proof.publicInputs,
+          proof.publicInputs.map((input) => Array.from(input)),
           { asReply }
         )
       }
