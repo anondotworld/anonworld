@@ -98,7 +98,9 @@ export async function generateProof(args: ProofArgs): Promise<ProofData | null> 
   }
 
   const circuit = getCircuit(args.proofType)
+  // @ts-ignore
   const backend = new BarretenbergBackend(circuit)
+  // @ts-ignore
   const noir = new Noir(circuit, backend)
 
   const nodeIndex = tree.elements.findIndex(

@@ -6,7 +6,9 @@ import { ProofType } from './generate'
 
 export async function getProvingBackend(proofType: ProofType) {
   const circuit = getCircuit(proofType)
+  // @ts-ignore
   const backend = new BarretenbergBackend(circuit)
+  // @ts-ignore
   const noir = new Noir(circuit, backend)
 
   await backend.instantiate()
@@ -20,14 +22,6 @@ export async function getProvingBackend(proofType: ProofType) {
 }
 
 export async function verifyProof(proofType: ProofType, proof: ProofData) {
-  const circuit = getCircuit(proofType)
-  const backend = new BarretenbergBackend(circuit)
-  const noir = new Noir(circuit, backend)
-  await backend.instantiate()
-
-  await backend['api'].acirInitProvingKey(
-    backend['acirComposer'],
-    backend['acirUncompressedBytecode']
-  )
+  const noir = await getProvingBackend(proofType)
   return await noir.verifyFinalProof(proof)
 }
