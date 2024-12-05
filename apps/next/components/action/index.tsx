@@ -4,30 +4,27 @@ import { CircleCheckIcon } from 'lucide-react'
 import { CircleXIcon } from 'lucide-react'
 import { CircleMinusIcon } from 'lucide-react'
 import { CreatePost } from '../create-post'
-import { ANON_ADDRESS, TOKEN_CONFIG } from '@anon/utils/src/config'
+import { TOKEN_ADDRESS, POST_AMOUNT, PROMOTE_AMOUNT, DELETE_AMOUNT } from '@/lib/utils'
 import { useAccount } from 'wagmi'
 
 export default function ActionComponent({
-  tokenAddress,
   variant = 'post',
   title,
   description,
   requirements,
 }: {
-  tokenAddress: string
   variant?: 'post' | 'launch'
   title?: string
   description?: string
   requirements?: Array<{ amount: number; label: string }>
 }) {
   const { address } = useAccount()
-  const { data, isLoading } = useBalance(tokenAddress)
+  const { data, isLoading } = useBalance()
 
   const BALANCE = data ? data / BigInt(10 ** 18) : BigInt(0)
-  const FARCASTER_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].postAmount) / BigInt(10 ** 18)
-  const TWITTER_PROMOTE =
-    BigInt(TOKEN_CONFIG[ANON_ADDRESS].promoteAmount) / BigInt(10 ** 18)
-  const DELETE_POST = BigInt(TOKEN_CONFIG[ANON_ADDRESS].deleteAmount) / BigInt(10 ** 18)
+  const FARCASTER_POST = BigInt(POST_AMOUNT) / BigInt(10 ** 18)
+  const TWITTER_PROMOTE = BigInt(PROMOTE_AMOUNT) / BigInt(10 ** 18)
+  const DELETE_POST = BigInt(DELETE_AMOUNT) / BigInt(10 ** 18)
 
   // Default values for post variant
   const defaultTitle = 'Post anonymously to Farcaster and X/Twitter'
@@ -122,7 +119,7 @@ export default function ActionComponent({
       {address && !isLoading ? (
         FARCASTER_POST > BALANCE ? (
           <a
-            href={`https://app.uniswap.org/swap?outputCurrency=${tokenAddress}&chain=base`}
+            href={`https://app.uniswap.org/swap?outputCurrency=${TOKEN_ADDRESS}&chain=base`}
             target="_blank"
             rel="noreferrer"
           >

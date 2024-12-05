@@ -1,3 +1,5 @@
+'use client'
+
 /* eslint-disable jsx-a11y/alt-text */
 import { Button } from '../ui/button'
 import { Textarea } from '../ui/textarea'

@@ -1,3 +1,5 @@
+'use client'
+
 import { Cast } from '@/lib/types'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -9,27 +11,25 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 export function PostFeed({
-  tokenAddress,
   defaultTab = 'trending',
 }: {
-  tokenAddress: string
   defaultTab?: 'new' | 'trending'
 }) {
   const [selected, setSelected] = useState<'new' | 'trending'>(defaultTab)
   const router = useRouter()
 
   const { data: trendingPosts, isLoading: isTrendingLoading } = useQuery({
-    queryKey: ['trending', tokenAddress],
+    queryKey: ['trending'],
     queryFn: async (): Promise<Cast[]> => {
-      const response = await api.getTrendingPosts(tokenAddress)
+      const response = await api.getTrendingPosts()
       return response?.casts || []
     },
   })
 
   const { data: newPosts, isLoading: isNewLoading } = useQuery({
-    queryKey: ['posts', tokenAddress],
+    queryKey: ['posts'],
     queryFn: async (): Promise<Cast[]> => {
-      const response = await api.getNewPosts(tokenAddress)
+      const response = await api.getNewPosts()
       return response?.casts || []
     },
   })
@@ -51,14 +51,14 @@ export function PostFeed({
         isNewLoading ? (
           <SkeletonPosts />
         ) : newPosts?.length && newPosts?.length > 0 ? (
-          <Posts casts={newPosts} tokenAddress={tokenAddress} />
+          <Posts casts={newPosts} />
         ) : (
           <h1>Something went wrong. Please refresh the page.</h1>
         )
       ) : isTrendingLoading ? (
         <SkeletonPosts />
       ) : trendingPosts?.length && trendingPosts?.length > 0 ? (
-        <Posts casts={trendingPosts} tokenAddress={tokenAddress} />
+        <Posts casts={trendingPosts} />
       ) : (
         <h1>Something went wrong. Please refresh the page.</h1>
       )}
@@ -67,26 +67,24 @@ export function PostFeed({
 }
 
 export function PromotedFeed({
-  tokenAddress,
   defaultTab = 'promoted',
 }: {
-  tokenAddress: string
   defaultTab?: 'new' | 'promoted'
 }) {
   const [selected, setSelected] = useState<'new' | 'promoted'>(defaultTab)
   const router = useRouter()
   const { data: promotedLaunches, isLoading: isPromotedLoading } = useQuery({
-    queryKey: ['launches', 'promoted', tokenAddress],
+    queryKey: ['launches', 'promoted'],
     queryFn: async (): Promise<Cast[]> => {
-      const response = await api.getPromotedLaunches(tokenAddress)
+      const response = await api.getPromotedLaunches()
       return response?.casts || []
     },
   })
 
   const { data: newLaunches, isLoading: isNewLoading } = useQuery({
-    queryKey: ['launches', 'new', tokenAddress],
+    queryKey: ['launches', 'new'],
     queryFn: async (): Promise<Cast[]> => {
-      const response = await api.getNewLaunches(tokenAddress)
+      const response = await api.getNewLaunches()
       return response?.casts || []
     },
   })
@@ -108,14 +106,14 @@ export function PromotedFeed({
         isNewLoading ? (
           <SkeletonPosts />
         ) : newLaunches?.length && newLaunches?.length > 0 ? (
-          <Posts casts={newLaunches} tokenAddress={tokenAddress} />
+          <Posts casts={newLaunches} />
         ) : (
           <h1>Something went wrong. Please refresh the page.</h1>
         )
       ) : isPromotedLoading ? (
         <SkeletonPosts />
       ) : promotedLaunches?.length && promotedLaunches?.length > 0 ? (
-        <Posts casts={promotedLaunches} tokenAddress={tokenAddress} />
+        <Posts casts={promotedLaunches} />
       ) : (
         <h1>Something went wrong. Please refresh the page.</h1>
       )}
@@ -151,16 +149,14 @@ function SkeletonPost() {
 
 function Posts({
   casts,
-  tokenAddress,
 }: {
   casts?: Cast[]
-  tokenAddress: string
 }) {
   return (
     <div className="flex flex-col gap-4">
       {casts?.map((cast) => (
         <Link href={`/posts/${cast.hash}`} key={cast.hash}>
-          <Post cast={cast} tokenAddress={tokenAddress} />
+          <Post cast={cast} />
         </Link>
       ))}
     </div>

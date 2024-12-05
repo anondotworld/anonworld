@@ -32,7 +32,8 @@
         "useConst": "off",
         "useEnumInitializers": "off",
         "useTemplate": "off",
-        "useSelfClosingElements": "off"
+        "useSelfClosingElements": "off",
+        "useImportType": "off"
       },
       "security": {
         "noDangerouslySetInnerHtml": "off",

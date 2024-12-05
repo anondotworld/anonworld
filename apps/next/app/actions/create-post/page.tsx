@@ -2,7 +2,7 @@
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { api } from '@/lib/api'
-import { ANON_ADDRESS } from '@anon/utils/src/config'
+import { TOKEN_ADDRESS } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import { CircleHelp, ExternalLink, Loader2 } from 'lucide-react'
 import React from 'react'
@@ -21,7 +21,7 @@ async function getConnectedAddress(data: string) {
   const balances = await Promise.all(
     frameData.action.interactor.verified_addresses.eth_addresses.map(async (address) => {
       const balance = await client.readContract({
-        address: ANON_ADDRESS,
+        address: TOKEN_ADDRESS,
         abi: erc20Abi,
         functionName: 'balanceOf',
         args: [address as `0x${string}`],

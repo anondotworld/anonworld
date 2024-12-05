@@ -1,25 +1,13 @@
 {
   "name": "anon",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
+  "workspaces": ["packages/*", "apps/*"],
   "scripts": {
     "build": "bun run --filter '**' build",
     "next:dev": "bun run --filter @anon/next dev",
     "api:dev": "bun run --filter @anon/api dev",
     "api:start": "bun run --filter @anon/api start",
     "db:push": "bun run --filter @anon/db push",
-    "cron:update-trending": "bun run --filter @anon/cron update-trending",
-    "cron:update-merkle-tree": "bun run --filter @anon/cron update-merkle-tree",
-    "cron:profile-proofs": "bun run --filter @anon/cron profile-proofs",
-    "circuits:compile": "bun run --filter @anon/circuits compile",
-    "queue:start": "bun run --filter @anon/queue start",
-    "queue:start:manual": "bun run --filter @anon/queue start:manual",
-    "queue:start:promote-post": "bun run --filter @anon/queue start promote-post",
-    "queue:ui": "bun run --filter @anon/queue ui",
-    "queue:process-failed": "bun run --filter @anon/queue process-failed",
-    "queue:process-failed:promote-post": "bun run --filter @anon/queue process-failed:promote-post"
+    "cron:update-trending": "bun run --filter @anon/api update-trending"
   }
 }

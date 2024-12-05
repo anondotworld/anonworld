@@ -19,7 +19,7 @@ import { useCreatePost } from '../create-post/context'
 import { useAccount, useSignMessage } from 'wagmi'
 import { Checkbox } from '../ui/checkbox'
 import { useBalance } from '@/hooks/use-balance'
-import { TOKEN_CONFIG } from '@anon/utils/src/config'
+import { DELETE_AMOUNT, PROMOTE_AMOUNT, LAUNCH_AMOUNT, LAUNCH_FID } from '@/lib/utils'
 import { usePromotePost } from '@/hooks/use-promote-post'
 import { useDeletePost } from '@/hooks/use-delete-post'
 import { api } from '@/lib/api'
@@ -40,21 +40,16 @@ function formatNumber(num: number): string {
 
 export function Post({
   cast,
-  tokenAddress,
 }: {
   cast: Cast
-  tokenAddress: string
 }) {
   const { variant } = useCreatePost()
   const { address } = useAccount()
-  const { data: balance } = useBalance(tokenAddress)
+  const { data: balance } = useBalance()
   const [reveal, setReveal] = useState(cast.reveal)
 
   const canDelete =
-    address &&
-    !!balance &&
-    balance >= BigInt(TOKEN_CONFIG[tokenAddress].deleteAmount) &&
-    cast.tweetId
+    address && !!balance && balance >= BigInt(DELETE_AMOUNT) && cast.tweetId
 
   const unableToPromoteRegex = [
     /.*clanker.*launch.*/i,
@@ -66,16 +61,16 @@ export function Post({
   const canPromote =
     address &&
     !!balance &&
-    balance >= BigInt(TOKEN_CONFIG[tokenAddress].promoteAmount) &&
+    balance >= BigInt(PROMOTE_AMOUNT) &&
     !cast.tweetId &&
     variant === 'anoncast' &&
     !unableToPromoteRegex.some((regex) => cast.text.match(regex))
 
   const canLaunch =
-    cast.author.fid !== TOKEN_CONFIG[tokenAddress].launchFid &&
+    cast.author.fid !== LAUNCH_FID &&
     address &&
     !!balance &&
-    balance >= BigInt(TOKEN_CONFIG[tokenAddress].launchAmount) &&
+    balance >= BigInt(LAUNCH_AMOUNT) &&
     !cast.launchHash &&
     ((variant === 'anonfun' &&
       cast.hash !== '0x5c790f70ffe770c68248775af6f2c1fcfb29de58') ||
@@ -258,15 +253,9 @@ export function Post({
                   Reply
                 </p>
               )}
-              {canReveal && (
-                <RevealButton
-                  cast={cast}
-                  onReveal={setReveal}
-                  tokenAddress={tokenAddress}
-                />
-              )}
-              {canPromote && <PromoteButton cast={cast} tokenAddress={tokenAddress} />}
-              {canLaunch && <LaunchButton cast={cast} tokenAddress={tokenAddress} />}
+              {canReveal && <RevealButton cast={cast} onReveal={setReveal} />}
+              {canPromote && <PromoteButton cast={cast} />}
+              {canLaunch && <LaunchButton cast={cast} />}
               {cast.launchHash && (
                 <a
                   href={`https://warpcast.com/~/conversations/${cast.launchHash}`}
@@ -277,7 +266,7 @@ export function Post({
                   Launched
                 </a>
               )}
-              {canDelete && <DeleteButton cast={cast} tokenAddress={tokenAddress} />}
+              {canDelete && <DeleteButton cast={cast} />}
             </div>
           </div>
         </div>
@@ -310,9 +299,9 @@ function timeAgo(timestamp: string): string {
   return 'just now'
 }
 
-function DeleteButton({ cast, tokenAddress }: { cast: Cast; tokenAddress: string }) {
+function DeleteButton({ cast }: { cast: Cast }) {
   const { toast } = useToast()
-  const { deletePost, deleteState } = useDeletePost(tokenAddress)
+  const { deletePost, deleteState } = useDeletePost()
   const [open, setOpen] = useState(false)
 
   const handleDelete = async () => {
@@ -364,9 +353,9 @@ function DeleteButton({ cast, tokenAddress }: { cast: Cast; tokenAddress: string
   )
 }
 
-function PromoteButton({ cast, tokenAddress }: { cast: Cast; tokenAddress: string }) {
+function PromoteButton({ cast }: { cast: Cast }) {
   const { toast } = useToast()
-  const { promotePost, promoteState } = usePromotePost(tokenAddress)
+  const { promotePost, promoteState } = usePromotePost()
   const [open, setOpen] = useState(false)
   const [asReply, setAsReply] = useState(false)
 
@@ -434,9 +423,9 @@ function PromoteButton({ cast, tokenAddress }: { cast: Cast; tokenAddress: strin
   )
 }
 
-function LaunchButton({ cast, tokenAddress }: { cast: Cast; tokenAddress: string }) {
+function LaunchButton({ cast }: { cast: Cast }) {
   const { toast } = useToast()
-  const { launchPost, launchState } = useLaunchPost(tokenAddress)
+  const { launchPost, launchState } = useLaunchPost()
   const [open, setOpen] = useState(false)
 
   const handleLaunch = async () => {
@@ -487,8 +476,7 @@ function LaunchButton({ cast, tokenAddress }: { cast: Cast; tokenAddress: string
 function RevealButton({
   cast,
   onReveal,
-  tokenAddress,
-}: { cast: Cast; onReveal: (reveal: Reveal) => void; tokenAddress: string }) {
+}: { cast: Cast; onReveal: (reveal: Reveal) => void }) {
   const [open, setOpen] = useState(false)
   const { toast } = useToast()
   const [value, setValue] = useState('')
@@ -514,7 +502,7 @@ function RevealButton({
         const signature = await signMessageAsync({
           message,
         })
-        await api.revealPost(cast.hash, message, value, signature, address, tokenAddress)
+        await api.revealPost(cast.hash, message, value, signature, address)
         onReveal({
           ...cast.reveal,
           revealPhrase: value,

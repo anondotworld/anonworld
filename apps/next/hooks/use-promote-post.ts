@@ -1,5 +1,4 @@
-import { api } from '@/lib/api'
-import { generateProof, ProofType } from '@anon/utils/src/proofs/generate'
+import { sdk } from '@/lib/utils'
 import { useState } from 'react'
 import { hashMessage } from 'viem'
 import { useAccount, useSignMessage } from 'wagmi'
@@ -13,77 +12,41 @@ type PromoteState =
       error: string
     }
 
-export const usePromotePost = (tokenAddress: string) => {
+export const usePromotePost = () => {
   const [promoteState, setPromoteState] = useState<PromoteState>({ status: 'idle' })
   const { address } = useAccount()
   const { signMessageAsync } = useSignMessage()
 
-  const getSignature = async ({
-    address,
-    timestamp,
-  }: {
-    address: string
-    timestamp: number
-  }) => {
-    try {
-      const message = `${address}:${timestamp}`
-      const signature = await signMessageAsync({
-        message,
-      })
-      return { signature, message }
-    } catch {
-      return
-    }
-  }
-
-  const promotePost = async (hash: string, asReply?: boolean) => {
+  const promotePost = async (hash: string, reply?: boolean) => {
     if (!address) return
 
     setPromoteState({ status: 'signature' })
     try {
-      const timestamp = Math.floor(Date.now() / 1000)
-      const signatureData = await getSignature({
-        address,
-        timestamp,
+      const data = {
+        hash,
+        reply,
+      }
+      const message = JSON.stringify(data)
+      const signature = await signMessageAsync({
+        message,
       })
-      if (!signatureData) {
+      if (!signature) {
         setPromoteState({ status: 'error', error: 'Failed to get signature' })
         return
       }
 
       setPromoteState({ status: 'generating' })
 
-      const proof = await generateProof({
-        tokenAddress,
-        userAddress: address,
-        proofType: ProofType.PROMOTE_POST,
-        signature: {
-          timestamp,
-          signature: signatureData.signature,
-          messageHash: hashMessage(signatureData.message),
-        },
-        input: {
-          hash,
-        },
+      const response = await sdk.performAction({
+        address,
+        signature,
+        messageHash: hashMessage(message),
+        data,
+        actionId: '083ca1d2-b661-4465-b025-3dd8a18532f6',
       })
-      if (!proof) {
-        setPromoteState({ status: 'error', error: 'Not allowed to delete' })
-        return
-      }
 
-      if (process.env.NEXT_PUBLIC_DISABLE_QUEUE) {
-        await api.promotePost(
-          Array.from(proof.proof),
-          proof.publicInputs.map((input) => Array.from(input)),
-          { asReply }
-        )
-      } else {
-        await api.submitAction(
-          ProofType.PROMOTE_POST,
-          Array.from(proof.proof),
-          proof.publicInputs.map((input) => Array.from(input)),
-          { asReply }
-        )
+      if (!response.data?.success) {
+        throw new Error('Failed to promote')
       }
 
       setPromoteState({ status: 'idle' })

@@ -1,0 +1,12 @@
+{
+  "name": "@anonworld/sdk",
+  "version": "0.0.1",
+  "private": true,
+  "types": "./src",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@anonworld/zk": "*",
+    "@zk-kit/lean-imt": "^2.2.2",
+    "viem": "^2.21.53"
+  }
+}

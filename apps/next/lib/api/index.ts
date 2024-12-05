@@ -1,92 +1,39 @@
-import type { ProofType, Tree } from '@anon/utils/src/proofs/generate'
 import type {
   Cast,
   Channel,
   GetCastsResponse,
-  PostCastResponse,
   ValidateFrameResponse,
   UploadImageResponse,
 } from '../types'
+import { TOKEN_ADDRESS } from '../utils'
 import { ApiClient } from './client'
 import type { Identity } from '@anon/api/src/services/types'
 
 const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || '')
 
 export const api = {
-  getNewPosts: async (tokenAddress: string) => {
+  getNewPosts: async () => {
     const response = await apiClient.request<GetCastsResponse>(
-      `/feed/${tokenAddress}/new`
+      `/feed/${TOKEN_ADDRESS}/new`
     )
     return response.data
   },
-  getTrendingPosts: async (tokenAddress: string) => {
+  getTrendingPosts: async () => {
     const response = await apiClient.request<GetCastsResponse>(
-      `/feed/${tokenAddress}/trending`
+      `/feed/${TOKEN_ADDRESS}/trending`
     )
     return response.data
   },
-  getNewLaunches: async (tokenAddress: string) => {
+  getNewLaunches: async () => {
     const response = await apiClient.request<GetCastsResponse>(
-      `/feed/${tokenAddress}/launches/new`
+      `/feed/${TOKEN_ADDRESS}/launches/new`
     )
     return response.data
   },
-  getPromotedLaunches: async (tokenAddress: string) => {
+  getPromotedLaunches: async () => {
     const response = await apiClient.request<GetCastsResponse>(
-      `/feed/${tokenAddress}/launches/promoted`
+      `/feed/${TOKEN_ADDRESS}/launches/promoted`
     )
-    return response.data
-  },
-  getMerkleTree: async (tokenAddress: string, proofType: ProofType) => {
-    const response = await apiClient.request<Tree>(`/merkle-tree`, {
-      method: 'POST',
-      body: JSON.stringify({ tokenAddress, proofType }),
-    })
-    return response.data
-  },
-  submitAction: async (
-    type: ProofType,
-    proof: number[],
-    publicInputs: number[][],
-    args: { asReply?: boolean }
-  ) => {
-    await apiClient.request(`/posts/submit`, {
-      method: 'POST',
-      body: JSON.stringify({ type, proof, publicInputs, args }),
-    })
-  },
-  createPost: async (proof: number[], publicInputs: number[][]) => {
-    const response = await apiClient.request<PostCastResponse>(`/posts/create`, {
-      method: 'POST',
-      body: JSON.stringify({ proof, publicInputs }),
-    })
-    return response.data
-  },
-  deletePost: async (proof: number[], publicInputs: number[][]) => {
-    const response = await apiClient.request<{ success: boolean }>(`/posts/delete`, {
-      method: 'POST',
-      body: JSON.stringify({ proof, publicInputs }),
-    })
-    return response.data
-  },
-  promotePost: async (
-    proof: number[],
-    publicInputs: number[][],
-    args: { asReply?: boolean; asLaunch?: boolean }
-  ) => {
-    const response = await apiClient.request<
-      { success: false } | { success: true; tweetId: string }
-    >(`/posts/promote`, {
-      method: 'POST',
-      body: JSON.stringify({ proof, publicInputs, args }),
-    })
-    return response.data
-  },
-  launchPost: async (proof: number[], publicInputs: number[][]) => {
-    const response = await apiClient.request<PostCastResponse>(`/posts/launch`, {
-      method: 'POST',
-      body: JSON.stringify({ proof, publicInputs }),
-    })
     return response.data
   },
   getCast: async (identifier: string) => {
@@ -122,8 +69,7 @@ export const api = {
     message: string,
     revealPhrase: string,
     signature: string,
-    address: string,
-    tokenAddress: string
+    address: string
   ) => {
     const response = await apiClient.request<{ success: boolean }>(`/posts/reveal`, {
       method: 'POST',
@@ -133,7 +79,7 @@ export const api = {
         revealPhrase,
         signature,
         address,
-        tokenAddress,
+        tokenAddress: TOKEN_ADDRESS,
       }),
     })
     return response.data

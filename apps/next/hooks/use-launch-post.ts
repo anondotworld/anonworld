@@ -1,5 +1,4 @@
-import { api } from '@/lib/api'
-import { generateProof, ProofType } from '@anon/utils/src/proofs/generate'
+import { sdk } from '@/lib/utils'
 import { useState } from 'react'
 import { hashMessage } from 'viem'
 import { useAccount, useSignMessage } from 'wagmi'
@@ -13,76 +12,40 @@ type LaunchState =
       error: string
     }
 
-export const useLaunchPost = (tokenAddress: string) => {
+export const useLaunchPost = () => {
   const [launchState, setLaunchState] = useState<LaunchState>({ status: 'idle' })
   const { address } = useAccount()
   const { signMessageAsync } = useSignMessage()
 
-  const getSignature = async ({
-    address,
-    timestamp,
-  }: {
-    address: string
-    timestamp: number
-  }) => {
-    try {
-      const message = `${address}:${timestamp}`
-      const signature = await signMessageAsync({
-        message,
-      })
-      return { signature, message }
-    } catch {
-      return
-    }
-  }
-
-  const launchPost = async (hash: string, asReply?: boolean) => {
+  const launchPost = async (hash: string) => {
     if (!address) return
 
     setLaunchState({ status: 'signature' })
     try {
-      const timestamp = Math.floor(Date.now() / 1000)
-      const signatureData = await getSignature({
-        address,
-        timestamp,
+      const data = {
+        hash,
+      }
+      const message = JSON.stringify(data)
+      const signature = await signMessageAsync({
+        message,
       })
-      if (!signatureData) {
+      if (!signature) {
         setLaunchState({ status: 'error', error: 'Failed to get signature' })
         return
       }
 
       setLaunchState({ status: 'generating' })
 
-      const proof = await generateProof({
-        tokenAddress,
-        userAddress: address,
-        proofType: ProofType.LAUNCH_POST,
-        signature: {
-          timestamp,
-          signature: signatureData.signature,
-          messageHash: hashMessage(signatureData.message),
-        },
-        input: {
-          hash,
-        },
+      const response = await sdk.performAction({
+        address,
+        signature,
+        messageHash: hashMessage(message),
+        data,
+        actionId: '083ca1d2-b661-4465-b025-3dd8a18532f6',
       })
-      if (!proof) {
-        setLaunchState({ status: 'error', error: 'Not allowed to launch' })
-        return
-      }
 
-      if (process.env.NEXT_PUBLIC_DISABLE_QUEUE) {
-        await api.launchPost(
-          Array.from(proof.proof),
-          proof.publicInputs.map((i) => Array.from(i))
-        )
-      } else {
-        await api.submitAction(
-          ProofType.LAUNCH_POST,
-          Array.from(proof.proof),
-          proof.publicInputs.map((i) => Array.from(i)),
-          {}
-        )
+      if (!response.data?.success) {
+        throw new Error('Failed to launch')
       }
 
       setLaunchState({ status: 'idle' })

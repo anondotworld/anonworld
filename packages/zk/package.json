@@ -1,0 +1,15 @@
+{
+  "name": "@anonworld/zk",
+  "version": "0.0.1",
+  "private": true,
+  "types": "./src",
+  "main": "src/index.ts",
+  "scripts": {
+    "build-circuits": "cd circuits/permissioned-action && ./build.sh && cd ../..",
+    "test-proofs": "bun run scripts/test-proofs.ts"
+  },
+  "dependencies": {
+    "@aztec/bb.js": "^0.61.0",
+    "@noir-lang/noir_js": "^0.38.0"
+  }
+}

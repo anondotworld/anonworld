@@ -1,11 +1,13 @@
+'use client'
+
 import { useToast } from '@/hooks/use-toast'
-import { api } from '@/lib/api'
 import { Cast, Channel } from '@/lib/types'
-import { generateProof, ProofType } from '@anon/utils/src/proofs/generate'
+import { sdk } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
 import { useAccount, useSignMessage } from 'wagmi'
+import { ToastAction } from '../ui/toast'
 
 type State =
   | {
@@ -43,11 +45,9 @@ interface CreatePostContextProps {
 const CreatePostContext = createContext<CreatePostContextProps | undefined>(undefined)
 
 export const CreatePostProvider = ({
-  tokenAddress,
   initialVariant,
   children,
 }: {
-  tokenAddress: string
   children: ReactNode
   initialVariant?: 'anoncast' | 'anonfun'
 }) => {
@@ -84,15 +84,15 @@ export const CreatePostProvider = ({
     setState({ status: 'signature' })
     try {
       const embeds = [image, embed].filter((e) => e !== null) as string[]
-      const input = {
-        text,
+      const data = {
+        text: text ?? undefined,
         embeds,
-        quote: quote?.hash ?? null,
-        channel: channel?.id ?? null,
-        parent: parent?.hash ?? null,
+        quote: quote?.hash,
+        channel: channel?.id,
+        parent: parent?.hash,
       }
 
-      const message = JSON.stringify(input)
+      const message = JSON.stringify(data)
       const signature = await signMessageAsync({
         message,
       })
@@ -102,49 +102,42 @@ export const CreatePostProvider = ({
       }
 
       const messageHash = hashMessage(message)
-      const revealHash = revealPhrase ? hashMessage(message + revealPhrase) : null
-
-      const timestamp = Math.floor(Date.now() / 1000)
+      const revealHash = revealPhrase ? hashMessage(message + revealPhrase) : undefined
 
       setState({ status: 'generating' })
 
-      const proof = await generateProof({
-        tokenAddress,
-        userAddress: address,
-        proofType: ProofType.CREATE_POST,
-        signature: {
-          timestamp,
-          signature,
-          messageHash,
-        },
-        input: {
-          ...input,
+      const response = await sdk.performAction({
+        address,
+        signature,
+        messageHash,
+        data: {
+          ...data,
           revealHash,
         },
+        actionId: 'e6138573-7b2f-43ab-b248-252cdf5eaeee',
       })
-      if (!proof) {
-        setState({ status: 'error', error: 'Not allowed to post' })
-        return
-      }
 
-      if (process.env.NEXT_PUBLIC_DISABLE_QUEUE) {
-        await api.createPost(
-          Array.from(proof.proof),
-          proof.publicInputs.map((input) => Array.from(input))
-        )
-      } else {
-        await api.submitAction(
-          ProofType.CREATE_POST,
-          Array.from(proof.proof),
-          proof.publicInputs.map((input) => Array.from(input)),
-          {}
-        )
+      if (!response.data?.success) {
+        throw new Error('Failed to post')
       }
 
       resetState()
       setConfetti(true)
       toast({
-        title: 'Post will be created in 1-2 minutes',
+        title: 'Post created',
+        action: (
+          <ToastAction
+            altText="View post"
+            onClick={() => {
+              window.open(
+                `https://warpcast.com/~/conversations/${response.data.hash}`,
+                '_blank'
+              )
+            }}
+          >
+            View on Warpcast
+          </ToastAction>
+        ),
       })
     } catch (e) {
       setState({ status: 'error', error: 'Failed to post' })

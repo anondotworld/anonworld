@@ -8,14 +8,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
-    "start": "bun run src/index.ts"
+    "start": "bun run src/index.ts",
+    "update-trending": "bun run scripts/update-trending.ts"
   },
   "dependencies": {
-    "@anon/circuits": "*",
     "@anon/db": "*",
-    "@anon/utils": "*",
-    "@noir-lang/backend_barretenberg": "^0.17.0",
-    "@noir-lang/noir_js": "^0.17.0",
     "@elysiajs/cors": "^1.1.1",
     "elysia": "^1.1.25",
     "ioredis": "^5.4.1",
