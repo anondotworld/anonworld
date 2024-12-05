@@ -2,13 +2,12 @@
 
 import { useToast } from '@/hooks/use-toast'
 import { Cast, Channel } from '@/lib/types'
-import { sdk } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
 import { useAccount, useSignMessage } from 'wagmi'
 import { ToastAction } from '../ui/toast'
-
+import { AnonWorldSDK } from '@anonworld/sdk'
 type State =
   | {
       status: 'idle' | 'signature' | 'generating' | 'done'
@@ -51,6 +50,9 @@ export const CreatePostProvider = ({
   children: ReactNode
   initialVariant?: 'anoncast' | 'anonfun'
 }) => {
+  const sdk = new AnonWorldSDK(
+    process.env.NEXT_PUBLIC_ANONWORLD_API_URL || 'http://localhost:3001'
+  )
   const [text, setText] = useState<string | null>(null)
   const [image, setImage] = useState<string | null>(null)
   const [embed, setEmbed] = useState<string | null>(null)

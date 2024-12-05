@@ -1,4 +1,4 @@
-import { sdk } from '@/lib/utils'
+import { AnonWorldSDK } from '@anonworld/sdk'
 import { useState } from 'react'
 import { hashMessage } from 'viem'
 import { useAccount, useSignMessage } from 'wagmi'
@@ -13,6 +13,9 @@ type LaunchState =
     }
 
 export const useLaunchPost = () => {
+  const sdk = new AnonWorldSDK(
+    process.env.NEXT_PUBLIC_ANONWORLD_API_URL || 'http://localhost:3001'
+  )
   const [launchState, setLaunchState] = useState<LaunchState>({ status: 'idle' })
   const { address } = useAccount()
   const { signMessageAsync } = useSignMessage()

@@ -19,7 +19,7 @@
     "ioredis": "^5.4.1",
     "logestic": "^1.2.4",
     "twitter-api-v2": "^1.18.2",
-    "viem": "^2.21.48"
+    "viem": "^2.21.53"
   },
   "devDependencies": {
     "bun-types": "latest"

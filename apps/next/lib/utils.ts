@@ -1,10 +1,5 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { AnonWorldSDK } from '@anonworld/sdk'
-
-export const sdk = new AnonWorldSDK(
-  process.env.NEXT_PUBLIC_ANONWORLD_API_URL || 'http://localhost:3001'
-)
 
 export const TICKER = 'ANON'
 export const TOKEN_ADDRESS = '0x0db510e79909666d6dec7f5e49370838c16d950f'
