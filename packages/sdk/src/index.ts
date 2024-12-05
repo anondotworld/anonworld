@@ -33,8 +33,8 @@ type PerformActionArgs = {
 
 export class AnonWorldSDK {
   private readonly api: Api
-  private permissionedAction: ProofManager
-  private hasher: (a: string, b: string) => string
+  private permissionedAction!: ProofManager
+  private hasher!: (a: string, b: string) => string
 
   constructor(apiUrl: string) {
     this.api = new Api(apiUrl)
