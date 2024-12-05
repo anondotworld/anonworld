@@ -19,7 +19,13 @@ import { useCreatePost } from '../create-post/context'
 import { useAccount, useSignMessage } from 'wagmi'
 import { Checkbox } from '../ui/checkbox'
 import { useBalance } from '@/hooks/use-balance'
-import { DELETE_AMOUNT, PROMOTE_AMOUNT, LAUNCH_AMOUNT, LAUNCH_FID } from '@/lib/utils'
+import {
+  DELETE_AMOUNT,
+  PROMOTE_AMOUNT,
+  LAUNCH_AMOUNT,
+  LAUNCH_FID,
+  BEST_OF_FID,
+} from '@/lib/utils'
 import { usePromotePost } from '@/hooks/use-promote-post'
 import { useDeletePost } from '@/hooks/use-delete-post'
 import { api } from '@/lib/api'
@@ -28,6 +34,7 @@ import { hashMessage } from 'viem'
 import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
 import { useLaunchPost } from '@/hooks/use-launch-post'
+import { ToastAction } from '../ui/toast'
 
 function formatNumber(num: number): string {
   if (num < 1000) return num.toString()
@@ -49,7 +56,10 @@ export function Post({
   const [reveal, setReveal] = useState(cast.reveal)
 
   const canDelete =
-    address && !!balance && balance >= BigInt(DELETE_AMOUNT) && cast.tweetId
+    address &&
+    !!balance &&
+    balance >= BigInt(DELETE_AMOUNT) &&
+    (cast.tweetId || cast.author.fid === BEST_OF_FID)
 
   const unableToPromoteRegex = [
     /.*clanker.*launch.*/i,
@@ -307,7 +317,7 @@ function DeleteButton({ cast }: { cast: Cast }) {
   const handleDelete = async () => {
     await deletePost(cast.hash)
     toast({
-      title: 'Post will be deleted in 1-2 minutes',
+      title: 'Post deleted',
     })
     setOpen(false)
   }
@@ -360,10 +370,22 @@ function PromoteButton({ cast }: { cast: Cast }) {
   const [asReply, setAsReply] = useState(false)
 
   const handlePromote = async () => {
-    await promotePost(cast.hash, asReply)
-    toast({
-      title: 'Post will be promoted in 1-2 minutes',
-    })
+    const response = await promotePost(cast.hash, asReply)
+    if (response) {
+      toast({
+        title: 'Post promoted',
+        action: (
+          <ToastAction
+            altText="View post"
+            onClick={() => {
+              window.open(`https://x.com/i/status/${response.tweetId}`, '_blank')
+            }}
+          >
+            View on X
+          </ToastAction>
+        ),
+      })
+    }
     setOpen(false)
   }
 
@@ -429,10 +451,25 @@ function LaunchButton({ cast }: { cast: Cast }) {
   const [open, setOpen] = useState(false)
 
   const handleLaunch = async () => {
-    await launchPost(cast.hash)
-    toast({
-      title: 'Post will be launched in 1-2 minutes',
-    })
+    const response = await launchPost(cast.hash)
+    if (response) {
+      toast({
+        title: 'Post promoted',
+        action: (
+          <ToastAction
+            altText="View post"
+            onClick={() => {
+              window.open(
+                `https://warpcast.com/~/conversations/${response.hash}`,
+                '_blank'
+              )
+            }}
+          >
+            View on Warpcast
+          </ToastAction>
+        ),
+      })
+    }
     setOpen(false)
   }
 

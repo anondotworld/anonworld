@@ -44,7 +44,7 @@ export const useLaunchPost = () => {
         signature,
         messageHash: hashMessage(message),
         data,
-        actionId: '083ca1d2-b661-4465-b025-3dd8a18532f6',
+        actionId: 'ab637e2e-2ab1-4708-90a9-942b2505fe15',
       })
 
       if (!response.data?.success) {
@@ -52,6 +52,7 @@ export const useLaunchPost = () => {
       }
 
       setLaunchState({ status: 'idle' })
+      return response.data
     } catch (e) {
       setLaunchState({ status: 'error', error: 'Failed to launch' })
       console.error(e)

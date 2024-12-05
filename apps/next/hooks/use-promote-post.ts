@@ -53,6 +53,7 @@ export const usePromotePost = () => {
       }
 
       setPromoteState({ status: 'idle' })
+      return response.data
     } catch (e) {
       setPromoteState({ status: 'error', error: 'Failed to promote' })
       console.error(e)
