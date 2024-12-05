@@ -2,11 +2,7 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "strictNullChecks": true,
-    "noUncheckedIndexedAccess": true,
-    "paths": {
-      "@nook/ui/*": ["./packages/ui/*"],
-      "@nook/expo/*": ["./apps/expo/*"]
-    }
+    "noUncheckedIndexedAccess": true
   },
   "extends": "./tsconfig.base",
   "exclude": [

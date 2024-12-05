@@ -1,6 +1,4 @@
-import { buildHashFunction } from '@anonworld/zk'
-import { LeanIMT } from '@zk-kit/lean-imt'
-import { pad, recoverPublicKey } from 'viem'
+import { recoverPublicKey } from 'viem'
 
 export async function getPublicKey(signature: `0x${string}`, messageHash: `0x${string}`) {
   const pubKey = await recoverPublicKey({

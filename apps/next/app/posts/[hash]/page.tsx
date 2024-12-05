@@ -1,5 +1,3 @@
-'use client'
-
 import { CreatePostProvider } from '@/components/create-post/context'
 import { Post } from '@/components/post'
 import { api } from '@/lib/api'

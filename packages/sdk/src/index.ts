@@ -1,4 +1,4 @@
-import { buildHashFunction, permissionedAction, ProofData } from '@anonworld/zk'
+import { buildHashFunction, permissionedAction } from '@anonworld/zk'
 import { toArray } from './utils'
 import { Api } from './api'
 import { getPublicKey } from './utils'
@@ -39,10 +39,10 @@ export class AnonWorldSDK {
   }
 
   async performAction(args: PerformActionArgs) {
-    const { root, index, siblings } = await this.getMerkleTreeInputs(
-      args.actionId,
-      args.address
-    )
+    const tree = await this.getMerkleTree(args.actionId)
+    const paddedAddress = pad(args.address).toLowerCase()
+    const leafIndex = tree.leaves.indexOf(paddedAddress)
+    const { root, index, siblings } = tree.generateProof(leafIndex)
     const { pubKeyX, pubKeyY } = await getPublicKey(args.signature, args.messageHash)
 
     const input = {
@@ -63,13 +63,10 @@ export class AnonWorldSDK {
     })
   }
 
-  private async getMerkleTreeInputs(actionId: string, address: `0x${string}`) {
+  async getMerkleTree(actionId: string) {
     const response = await this.api.getMerkleTree(actionId)
     if (response.error) throw new Error(response.error.message)
     const hasher = await buildHashFunction()
-    const tree = LeanIMT.import(hasher, JSON.stringify(response.data), (value) => value)
-    const paddedAddress = pad(address).toLowerCase()
-    const leafIndex = tree.leaves.indexOf(paddedAddress)
-    return tree.generateProof(leafIndex)
+    return LeanIMT.import(hasher, JSON.stringify(response.data), (value) => value)
   }
 }

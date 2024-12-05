@@ -3,7 +3,7 @@ import { twMerge } from 'tailwind-merge'
 import { AnonWorldSDK } from '@anonworld/sdk'
 
 export const sdk = new AnonWorldSDK(
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+  process.env.NEXT_PUBLIC_ANONWORLD_API_URL || 'http://localhost:3001'
 )
 
 export const TICKER = 'ANON'
