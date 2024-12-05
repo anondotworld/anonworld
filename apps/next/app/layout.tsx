@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'anoncast',
     description: 'Post anonymously to Farcaster.',
-    images: ['/anon.webp'],
+    images: ['/anon.png'],
   },
 }
 
