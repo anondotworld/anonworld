@@ -1,7 +1,9 @@
-import { AnonWorldSDK } from '@anonworld/sdk'
 import { useState } from 'react'
 import { hashMessage } from 'viem'
 import { useAccount, useSignMessage } from 'wagmi'
+import { useToast } from './use-toast'
+import { ToastAction } from '@/components/ui/toast'
+import { sdk } from '@/lib/utils'
 
 type LaunchState =
   | {
@@ -13,9 +15,7 @@ type LaunchState =
     }
 
 export const useLaunchPost = () => {
-  const sdk = new AnonWorldSDK(
-    process.env.NEXT_PUBLIC_ANONWORLD_API_URL || 'http://localhost:3001'
-  )
+  const { toast } = useToast()
   const [launchState, setLaunchState] = useState<LaunchState>({ status: 'idle' })
   const { address } = useAccount()
   const { signMessageAsync } = useSignMessage()
@@ -52,15 +52,36 @@ export const useLaunchPost = () => {
       }
 
       setLaunchState({ status: 'idle' })
-      return response.data
+      toast({
+        title: 'Post launched',
+        action: (
+          <ToastAction
+            altText="View post"
+            onClick={() => {
+              window.open(
+                `https://warpcast.com/~/conversations/${response.data.hash}`,
+                '_blank'
+              )
+            }}
+          >
+            View on Warpcast
+          </ToastAction>
+        ),
+      })
     } catch (e) {
       setLaunchState({ status: 'error', error: 'Failed to launch' })
       console.error(e)
+      toast({
+        variant: 'destructive',
+        title: 'Failed to launch',
+        description: 'Please try again.',
+      })
     }
   }
 
   return {
     launchPost,
     launchState,
+    setLaunchState,
   }
 }

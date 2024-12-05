@@ -19,13 +19,7 @@ import { useCreatePost } from '../create-post/context'
 import { useAccount, useSignMessage } from 'wagmi'
 import { Checkbox } from '../ui/checkbox'
 import { useBalance } from '@/hooks/use-balance'
-import {
-  DELETE_AMOUNT,
-  PROMOTE_AMOUNT,
-  LAUNCH_AMOUNT,
-  LAUNCH_FID,
-  BEST_OF_FID,
-} from '@/lib/utils'
+import { DELETE_AMOUNT, PROMOTE_AMOUNT, LAUNCH_AMOUNT, LAUNCH_FID } from '@/lib/utils'
 import { usePromotePost } from '@/hooks/use-promote-post'
 import { useDeletePost } from '@/hooks/use-delete-post'
 import { api } from '@/lib/api'
@@ -34,8 +28,7 @@ import { hashMessage } from 'viem'
 import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
 import { useLaunchPost } from '@/hooks/use-launch-post'
-import { ToastAction } from '../ui/toast'
-import { AnonWorldSDK } from '@anonworld/sdk'
+import { sdk } from '@/lib/utils'
 
 function formatNumber(num: number): string {
   if (num < 1000) return num.toString()
@@ -60,7 +53,7 @@ export function Post({
     address &&
     !!balance &&
     balance >= BigInt(DELETE_AMOUNT) &&
-    (cast.tweetId || cast.author.fid === BEST_OF_FID)
+    (cast.tweetId || cast.promotedHash)
 
   const unableToPromoteRegex = [
     /.*clanker.*launch.*/i,
@@ -124,7 +117,7 @@ export function Post({
     <div className="relative [overflow-wrap:anywhere] bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden">
       <div className="flex flex-row gap-4  p-4 sm:p-6  ">
         <div className="flex flex-col gap-2 w-full">
-          <div className="flex flex-col gap-4 sm:flex-row justify-between">
+          <div className="flex flex-row gap-4 justify-between">
             <div className="flex flex-row items-center">
               <div className="flex flex-row items-center gap-2 ">
                 <div className="text-sm font-medium text-zinc-400">
@@ -311,20 +304,23 @@ function timeAgo(timestamp: string): string {
 }
 
 function DeleteButton({ cast }: { cast: Cast }) {
-  const { toast } = useToast()
-  const { deletePost, deleteState } = useDeletePost()
+  const { deletePost, deleteState, setDeleteState } = useDeletePost()
   const [open, setOpen] = useState(false)
 
   const handleDelete = async () => {
     await deletePost(cast.hash)
-    toast({
-      title: 'Post deleted',
-    })
     setOpen(false)
   }
 
+  const handleOpenChange = (open: boolean) => {
+    setOpen(open)
+    if (!open) {
+      setDeleteState({ status: 'idle' })
+    }
+  }
+
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
         <p className="text-sm text-red-500 underline decoration-dotted font-semibold cursor-pointer hover:text-red-400">
           Delete
@@ -365,29 +361,20 @@ function DeleteButton({ cast }: { cast: Cast }) {
 }
 
 function PromoteButton({ cast }: { cast: Cast }) {
-  const { toast } = useToast()
-  const { promotePost, promoteState } = usePromotePost()
+  const { promotePost, promoteState, setPromoteState } = usePromotePost()
   const [open, setOpen] = useState(false)
   const [asReply, setAsReply] = useState(false)
 
   const handlePromote = async () => {
-    const response = await promotePost(cast.hash, asReply)
-    if (response) {
-      toast({
-        title: 'Post promoted',
-        action: (
-          <ToastAction
-            altText="View post"
-            onClick={() => {
-              window.open(`https://x.com/i/status/${response.tweetId}`, '_blank')
-            }}
-          >
-            View on X
-          </ToastAction>
-        ),
-      })
-    }
+    await promotePost(cast.hash, asReply)
     setOpen(false)
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    setOpen(open)
+    if (!open) {
+      setPromoteState({ status: 'idle' })
+    }
   }
 
   const twitterEmbed = cast.embeds?.find(
@@ -395,7 +382,7 @@ function PromoteButton({ cast }: { cast: Cast }) {
   )
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
         <p className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400">
           Promote
@@ -447,35 +434,23 @@ function PromoteButton({ cast }: { cast: Cast }) {
 }
 
 function LaunchButton({ cast }: { cast: Cast }) {
-  const { toast } = useToast()
-  const { launchPost, launchState } = useLaunchPost()
+  const { launchPost, launchState, setLaunchState } = useLaunchPost()
   const [open, setOpen] = useState(false)
 
   const handleLaunch = async () => {
-    const response = await launchPost(cast.hash)
-    if (response) {
-      toast({
-        title: 'Post promoted',
-        action: (
-          <ToastAction
-            altText="View post"
-            onClick={() => {
-              window.open(
-                `https://warpcast.com/~/conversations/${response.hash}`,
-                '_blank'
-              )
-            }}
-          >
-            View on Warpcast
-          </ToastAction>
-        ),
-      })
-    }
+    await launchPost(cast.hash)
     setOpen(false)
   }
 
+  const handleOpenChange = (open: boolean) => {
+    setOpen(open)
+    if (!open) {
+      setLaunchState({ status: 'idle' })
+    }
+  }
+
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
         <p className="text-sm text-green-500 underline decoration-dotted font-semibold cursor-pointer hover:text-green-400">
           Launch
@@ -515,7 +490,6 @@ function RevealButton({
   cast,
   onReveal,
 }: { cast: Cast; onReveal: (reveal: Reveal) => void }) {
-  const sdk = new AnonWorldSDK(process.env.NEXT_PUBLIC_ANONWORLD_API_URL!)
   const [open, setOpen] = useState(false)
   const { toast } = useToast()
   const [value, setValue] = useState('')

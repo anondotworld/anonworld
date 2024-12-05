@@ -47,8 +47,12 @@ const app = createElysia()
   .get(
     '/identity',
     async ({ query }) => {
-      const users = await neynar.getBulkUsers([query.address.toLowerCase()])
-      return users?.[query.address.toLowerCase()]?.[0]
+      try {
+        const users = await neynar.getBulkUsers([query.address.toLowerCase()])
+        return users?.[query.address.toLowerCase()]?.[0]
+      } catch (e) {
+        return null
+      }
     },
     {
       query: t.Object({

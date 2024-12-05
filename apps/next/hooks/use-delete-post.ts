@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { hashMessage } from 'viem'
 import { useAccount, useSignMessage } from 'wagmi'
-import { AnonWorldSDK } from '@anonworld/sdk'
+import { useToast } from './use-toast'
+import { sdk } from '@/lib/utils'
 
 type DeleteState =
   | {
@@ -13,9 +14,7 @@ type DeleteState =
     }
 
 export const useDeletePost = () => {
-  const sdk = new AnonWorldSDK(
-    process.env.NEXT_PUBLIC_ANONWORLD_API_URL || 'http://localhost:3001'
-  )
+  const { toast } = useToast()
   const [deleteState, setDeleteState] = useState<DeleteState>({ status: 'idle' })
   const { address } = useAccount()
   const { signMessageAsync } = useSignMessage()
@@ -52,14 +51,23 @@ export const useDeletePost = () => {
       }
 
       setDeleteState({ status: 'idle' })
+      toast({
+        title: 'Post deleted',
+      })
     } catch (e) {
       setDeleteState({ status: 'error', error: 'Failed to delete' })
       console.error(e)
+      toast({
+        variant: 'destructive',
+        title: 'Failed to delete',
+        description: 'Please try again.',
+      })
     }
   }
 
   return {
     deletePost,
     deleteState,
+    setDeleteState,
   }
 }

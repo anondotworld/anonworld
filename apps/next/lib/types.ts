@@ -408,6 +408,7 @@ export type Cast = {
   reveal?: Reveal
   tweetId?: string
   launchHash?: string
+  promotedHash?: string
 }
 
 export interface Reveal {

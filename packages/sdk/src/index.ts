@@ -1,4 +1,4 @@
-import { buildHashFunction, permissionedAction, ProofData } from '@anonworld/zk'
+import type { buildHashFunction, ProofManager } from '@anonworld/zk'
 import { toArray } from './utils'
 import { Api } from './api'
 import { getPublicKey } from './utils'
@@ -33,12 +33,23 @@ type PerformActionArgs = {
 
 export class AnonWorldSDK {
   private readonly api: Api
+  private permissionedAction: ProofManager
+  private hasher: (a: string, b: string) => string
 
   constructor(apiUrl: string) {
     this.api = new Api(apiUrl)
   }
 
+  async instantiate() {
+    if (this.permissionedAction) return
+    const { buildHashFunction, permissionedAction } = await import('@anonworld/zk')
+    this.hasher = await buildHashFunction()
+    this.permissionedAction = permissionedAction
+  }
+
   async performAction(args: PerformActionArgs) {
+    await this.instantiate()
+
     const tree = await this.getMerkleTree(args.actionId)
     const paddedAddress = pad(args.address).toLowerCase()
     const leafIndex = tree.leaves.indexOf(paddedAddress)
@@ -55,7 +66,7 @@ export class AnonWorldSDK {
       path: siblings,
     }
 
-    const proof = await permissionedAction.generate(input)
+    const proof = await this.permissionedAction.generate(input)
     return await this.api.submitAction({
       proof,
       actionId: args.actionId,
@@ -64,10 +75,11 @@ export class AnonWorldSDK {
   }
 
   async getMerkleTree(actionId: string) {
+    await this.instantiate()
+
     const response = await this.api.getMerkleTree(actionId)
     if (response.error) throw new Error(response.error.message)
-    const hasher = await buildHashFunction()
-    return LeanIMT.import(hasher, JSON.stringify(response.data), (value) => value)
+    return LeanIMT.import(this.hasher, JSON.stringify(response.data), (value) => value)
   }
 
   async revealPost(args: {

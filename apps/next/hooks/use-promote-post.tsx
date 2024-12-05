@@ -1,7 +1,9 @@
-import { AnonWorldSDK } from '@anonworld/sdk'
 import { useState } from 'react'
 import { hashMessage } from 'viem'
 import { useAccount, useSignMessage } from 'wagmi'
+import { useToast } from './use-toast'
+import { ToastAction } from '@/components/ui/toast'
+import { sdk } from '@/lib/utils'
 
 type PromoteState =
   | {
@@ -13,9 +15,7 @@ type PromoteState =
     }
 
 export const usePromotePost = () => {
-  const sdk = new AnonWorldSDK(
-    process.env.NEXT_PUBLIC_ANONWORLD_API_URL || 'http://localhost:3001'
-  )
+  const { toast } = useToast()
   const [promoteState, setPromoteState] = useState<PromoteState>({ status: 'idle' })
   const { address } = useAccount()
   const { signMessageAsync } = useSignMessage()
@@ -53,15 +53,33 @@ export const usePromotePost = () => {
       }
 
       setPromoteState({ status: 'idle' })
-      return response.data
+      toast({
+        title: 'Post promoted',
+        action: (
+          <ToastAction
+            altText="View post"
+            onClick={() => {
+              window.open(`https://x.com/i/status/${response.data.tweetId}`, '_blank')
+            }}
+          >
+            View on X
+          </ToastAction>
+        ),
+      })
     } catch (e) {
       setPromoteState({ status: 'error', error: 'Failed to promote' })
       console.error(e)
+      toast({
+        variant: 'destructive',
+        title: 'Failed to promote',
+        description: 'Please try again.',
+      })
     }
   }
 
   return {
     promotePost,
     promoteState,
+    setPromoteState,
   }
 }
