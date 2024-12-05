@@ -35,6 +35,7 @@ import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
 import { useLaunchPost } from '@/hooks/use-launch-post'
 import { ToastAction } from '../ui/toast'
+import { AnonWorldSDK } from '@anonworld/sdk'
 
 function formatNumber(num: number): string {
   if (num < 1000) return num.toString()
@@ -86,7 +87,7 @@ export function Post({
       cast.hash !== '0x5c790f70ffe770c68248775af6f2c1fcfb29de58') ||
       cast.text.match(/.*clanker.*launch.*/))
 
-  const canReveal = address && !!cast.reveal && !cast.reveal.revealedAt
+  const canReveal = address && !!cast.reveal?.revealHash && !cast.reveal?.phrase
 
   const { setParent, setQuote } = useCreatePost()
   const cleanText = (text: string) => {
@@ -166,7 +167,7 @@ export function Post({
               )}
             </div>
           </div>
-          {reveal?.revealedAt && <RevealBadge reveal={reveal} />}
+          {reveal?.phrase && <RevealBadge reveal={reveal} />}
           <div className="font-medium whitespace-pre-wrap">{sanitizedText}</div>
           {cast.embeds.map((embed) => {
             if (embed.metadata?.image) {
@@ -514,6 +515,7 @@ function RevealButton({
   cast,
   onReveal,
 }: { cast: Cast; onReveal: (reveal: Reveal) => void }) {
+  const sdk = new AnonWorldSDK(process.env.NEXT_PUBLIC_ANONWORLD_API_URL!)
   const [open, setOpen] = useState(false)
   const { toast } = useToast()
   const [value, setValue] = useState('')
@@ -526,7 +528,7 @@ function RevealButton({
     if (!cast.reveal || !address) return
     setIsRevealing(true)
     try {
-      const inputHash = hashMessage(JSON.stringify(cast.reveal.input) + value)
+      const inputHash = hashMessage(cast.reveal.input + value)
       if (inputHash !== cast.reveal.revealHash) {
         toast({
           title: 'Incorrect phrase',
@@ -539,10 +541,16 @@ function RevealButton({
         const signature = await signMessageAsync({
           message,
         })
-        await api.revealPost(cast.hash, message, value, signature, address)
+        await sdk.revealPost({
+          hash: cast.hash,
+          message,
+          phrase: value,
+          signature,
+          address,
+        })
         onReveal({
           ...cast.reveal,
-          revealPhrase: value,
+          phrase: value,
           signature,
           address,
           revealedAt: new Date().toISOString(),
@@ -597,7 +605,7 @@ function RevealButton({
 function RevealBadge({ reveal }: { reveal: Reveal }) {
   const { data } = useQuery({
     queryKey: ['identity', reveal.address],
-    queryFn: () => api.getIdentity(reveal.address),
+    queryFn: () => api.getIdentity(reveal.address!),
   })
 
   const formatAddress = (address: string) => {
@@ -616,7 +624,7 @@ function RevealBadge({ reveal }: { reveal: Reveal }) {
           <span>{`revealed as `}</span>
           <img src={data.pfp_url} className="w-4 h-4 rounded-full" alt="pfp" />
           <span>{data.username}</span>
-          <span>{` ${timeAgo(reveal.revealedAt)}`}</span>
+          <span>{` ${timeAgo(reveal.revealedAt!)}`}</span>
         </a>
       )}
       {!data?.username && (
@@ -626,7 +634,9 @@ function RevealBadge({ reveal }: { reveal: Reveal }) {
           rel="noreferrer"
         >
           <span className="text-sm font-semibold cursor-pointer hover:text-zinc-400 text-green-400 hover:text-green-200">
-            {`revealed as ${formatAddress(reveal.address)} ${timeAgo(reveal.revealedAt)}`}
+            {`revealed as ${formatAddress(reveal.address!)} ${timeAgo(
+              reveal.revealedAt!
+            )}`}
           </span>
         </a>
       )}

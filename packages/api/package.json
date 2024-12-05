@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@anon/db": "*",
+    "@anon/sdk": "*",
     "@elysiajs/cors": "^1.1.1",
     "@farcaster/hub-nodejs": "^0.12.7",
     "elysia": "^1.1.25",

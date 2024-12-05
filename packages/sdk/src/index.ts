@@ -1,4 +1,4 @@
-import { buildHashFunction, permissionedAction } from '@anonworld/zk'
+import { buildHashFunction, permissionedAction, ProofData } from '@anonworld/zk'
 import { toArray } from './utils'
 import { Api } from './api'
 import { getPublicKey } from './utils'
@@ -68,5 +68,19 @@ export class AnonWorldSDK {
     if (response.error) throw new Error(response.error.message)
     const hasher = await buildHashFunction()
     return LeanIMT.import(hasher, JSON.stringify(response.data), (value) => value)
+  }
+
+  async revealPost(args: {
+    hash: string
+    message: string
+    phrase: string
+    signature: string
+    address: string
+  }) {
+    return await this.api.revealPost(args)
+  }
+
+  async getBulkPostMetadata(hashes: string[]) {
+    return await this.api.getBulkPostMetadata(hashes)
   }
 }

@@ -85,4 +85,41 @@ export class Api {
   async getMerkleTree(id: string) {
     return await this.request<{ _nodes: string[][] }>(`/merkle-tree/${id}`)
   }
+
+  async revealPost(args: {
+    hash: string
+    message: string
+    phrase: string
+    signature: string
+    address: string
+  }) {
+    return await this.request<{ success: boolean; hash?: string }>('/posts/reveal', {
+      method: 'POST',
+      body: JSON.stringify(args),
+    })
+  }
+
+  async getBulkPostMetadata(hashes: string[]) {
+    return await this.request<{
+      data: {
+        hash: string
+        revealHash: string | null
+        revealMetadata: {
+          input: string
+          phrase?: string
+          signature?: string
+          address?: string
+          revealedAt?: string
+        } | null
+        relationships: {
+          target: string
+          targetAccount: string
+          targetId: string
+        }[]
+      }[]
+    }>('/posts/bulk-metadata', {
+      method: 'POST',
+      body: JSON.stringify({ hashes }),
+    })
+  }
 }

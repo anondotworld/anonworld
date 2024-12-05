@@ -4,40 +4,80 @@ import { t } from 'elysia'
 import { neynar } from '../services/neynar'
 import { Cast, GetCastsResponse } from '../services/types'
 import { getPostMappings, getPostReveals } from '@anon/db'
+import { AnonWorldSDK } from '@anonworld/sdk'
 
 const redis = new Redis(process.env.REDIS_URL as string)
+const sdk = new AnonWorldSDK(process.env.NEXT_PUBLIC_ANONWORLD_API_URL as string)
 
 export async function augmentCasts(casts: Cast[]) {
   const hashes = casts.map((cast) => cast.hash)
-  const [reveals, mappings] = await Promise.all([
+  const [reveals, mappings, metadata] = await Promise.all([
     getPostReveals(hashes),
     getPostMappings(hashes),
+    sdk.getBulkPostMetadata(hashes),
   ])
 
   return casts
     .map((cast) => {
-      const reveal = reveals.find(
-        (reveal) =>
-          reveal.revealHash &&
-          reveal.castHash === cast.hash &&
-          BigInt(reveal.revealHash) != BigInt(0)
-      )
-      if (!reveal) {
-        return cast
+      let revealHash = null
+      let revealMetadata = null
+      let tweetId = null
+      let launchHash = null
+
+      const castMetadata = metadata.data?.data.find((m) => m.hash === cast.hash)
+      if (castMetadata) {
+        revealHash = castMetadata.revealHash
+        revealMetadata = castMetadata.revealMetadata
+        tweetId = castMetadata.relationships.find((r) => r.target === 'twitter')?.targetId
+        launchHash = castMetadata.relationships.find(
+          (r) => r.target === 'farcaster' && r.targetAccount === '883713'
+        )?.targetId
       }
 
-      return {
-        ...cast,
-        reveal: {
-          ...reveal,
-          input: {
+      if (!revealHash || !revealMetadata) {
+        const reveal = reveals.find(
+          (reveal) =>
+            reveal.revealHash &&
+            reveal.castHash === cast.hash &&
+            BigInt(reveal.revealHash) != BigInt(0)
+        )
+        if (!revealHash && reveal?.revealHash) {
+          revealHash = reveal.revealHash
+        }
+        if (!revealMetadata && reveal?.revealPhrase) {
+          const data = {
             text: cast.text,
             embeds: cast.embeds.filter((embed) => embed.url).map((embed) => embed.url),
             quote: cast.embeds.find((e) => e.cast)?.cast?.hash ?? null,
             channel: cast.channel?.id ?? null,
             parent: cast.parent_hash ?? null,
-          },
+          }
+          revealMetadata = {
+            input: JSON.stringify(data),
+            phrase: reveal.revealPhrase,
+            signature: reveal.signature,
+            address: reveal.address,
+            revealedAt: reveal.revealedAt?.toISOString(),
+          }
+        }
+      }
+
+      if (!tweetId || !launchHash) {
+        const mapping = mappings.find((m) => m.castHash === cast.hash)
+        if (mapping) {
+          tweetId = mapping.tweetId
+          launchHash = mapping.launchHash
+        }
+      }
+
+      return {
+        ...cast,
+        reveal: {
+          revealHash,
+          ...revealMetadata,
         },
+        tweetId,
+        launchHash,
       }
     })
     .map((cast) => {

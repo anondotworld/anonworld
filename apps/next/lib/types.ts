@@ -412,17 +412,11 @@ export type Cast = {
 
 export interface Reveal {
   revealHash: string
-  revealPhrase: string
-  signature: string
-  address: string
-  revealedAt: string
-  input: {
-    text: string
-    embeds: Array<string>
-    quote: string | null
-    channel: string | null
-    parent: string | null
-  }
+  input: string
+  phrase?: string
+  signature?: string
+  address?: string
+  revealedAt?: string
 }
 
 export interface Channel {
