@@ -12,7 +12,6 @@
     "update-trending": "bun run scripts/update-trending.ts"
   },
   "dependencies": {
-    "@anon/db": "*",
     "@anonworld/sdk": "*",
     "@elysiajs/cors": "^1.1.1",
     "@farcaster/hub-nodejs": "^0.12.7",
