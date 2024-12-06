@@ -7,7 +7,6 @@
     "next:dev": "bun run --filter @anon/next dev",
     "api:dev": "bun run --filter @anon/api dev",
     "api:start": "bun run --filter @anon/api start",
-    "db:push": "bun run --filter @anon/db push",
     "zk:build": "bun run --filter @anonworld/zk build-circuits",
     "cron:update-trending": "bun run --filter @anon/api update-trending"
   }

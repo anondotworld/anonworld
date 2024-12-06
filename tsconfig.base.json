@@ -25,8 +25,7 @@
     "strictNullChecks": true,
     "target": "es2020",
     "types": ["node"],
-    "lib": ["dom", "esnext"],
-    "resolveJsonModule": true
+    "lib": ["dom", "esnext"]
   },
   "exclude": ["_"],
   "typeAcquisition": {

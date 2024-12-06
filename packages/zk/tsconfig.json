@@ -1,8 +1,10 @@
 {
-	"extends": "../../tsconfig.base",
-	"include": ["**/*.ts", "**/*.tsx"],
-	"compilerOptions": {
-		"composite": true
-	},
-	"references": []
+  "extends": "../../tsconfig.base",
+  "include": ["**/*.ts", "**/*.tsx"],
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "composite": true,
+    "module": "commonjs"
+  },
+  "references": []
 }
