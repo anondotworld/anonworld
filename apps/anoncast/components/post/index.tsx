@@ -12,22 +12,29 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/lib/hooks/use-toast'
 import { Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useCreatePost } from '../create-post/context'
 import { useAccount, useSignMessage } from 'wagmi'
 import { Checkbox } from '../ui/checkbox'
-import { useBalance } from '@/hooks/use-balance'
-import { DELETE_AMOUNT, PROMOTE_AMOUNT, LAUNCH_AMOUNT, LAUNCH_FID } from '@/lib/utils'
-import { usePromotePost } from '@/hooks/use-promote-post'
-import { useDeletePost } from '@/hooks/use-delete-post'
+import { useBalance } from '@/lib/hooks/use-balance'
+import {
+  DELETE_AMOUNT,
+  PROMOTE_AMOUNT,
+  LAUNCH_AMOUNT,
+  LAUNCH_FID,
+  DELETE_ACTION_ID,
+  PROMOTE_ACTION_ID,
+  LAUNCH_ACTION_ID,
+} from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { hashMessage } from 'viem'
 import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
-import { useLaunchPost } from '@/hooks/use-launch-post'
 import { sdk } from '@/lib/utils'
+import { usePerformAction } from '@/lib/hooks/use-perform-action'
+import { ToastAction } from '@radix-ui/react-toast'
 
 function formatNumber(num: number): string {
   if (num < 1000) return num.toString()
@@ -314,23 +321,32 @@ function timeAgo(timestamp: string): string {
 }
 
 function DeleteButton({ cast }: { cast: Cast }) {
-  const { deletePost, deleteState, setDeleteState } = useDeletePost()
   const [open, setOpen] = useState(false)
+  const { toast } = useToast()
+  const { performAction, status } = usePerformAction({
+    onSuccess: () => {
+      toast({
+        title: 'Post deleted',
+      })
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to delete',
+        description: error,
+      })
+    },
+  })
 
   const handleDelete = async () => {
-    await deletePost(cast.hash)
+    await performAction(DELETE_ACTION_ID, {
+      hash: cast.hash,
+    })
     setOpen(false)
   }
 
-  const handleOpenChange = (open: boolean) => {
-    setOpen(open)
-    if (!open) {
-      setDeleteState({ status: 'idle' })
-    }
-  }
-
   return (
-    <AlertDialog open={open} onOpenChange={handleOpenChange}>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <p className="text-sm text-red-500 underline decoration-dotted font-semibold cursor-pointer hover:text-red-400">
           Delete
@@ -348,17 +364,12 @@ function DeleteButton({ cast }: { cast: Cast }) {
           <Button
             variant="destructive"
             onClick={handleDelete}
-            disabled={deleteState.status !== 'idle'}
+            disabled={!['idle', 'success', 'error'].includes(status.status)}
           >
-            {deleteState.status === 'generating' ? (
+            {status.status === 'loading' ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Generating proof</p>
-              </div>
-            ) : deleteState.status === 'signature' ? (
-              <div className="flex flex-row items-center gap-2">
-                <Loader2 className="animate-spin" />
-                <p>Awaiting signature</p>
               </div>
             ) : (
               'Delete'
@@ -371,20 +382,40 @@ function DeleteButton({ cast }: { cast: Cast }) {
 }
 
 function PromoteButton({ cast }: { cast: Cast }) {
-  const { promotePost, promoteState, setPromoteState } = usePromotePost()
   const [open, setOpen] = useState(false)
   const [asReply, setAsReply] = useState(false)
+  const { toast } = useToast()
+  const { performAction, status } = usePerformAction({
+    onSuccess: (response) => {
+      toast({
+        title: 'Post promoted',
+        action: (
+          <ToastAction
+            altText="View post"
+            onClick={() => {
+              window.open(`https://x.com/i/status/${response.data?.tweetId}`, '_blank')
+            }}
+          >
+            View on X
+          </ToastAction>
+        ),
+      })
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to promote',
+        description: error,
+      })
+    },
+  })
 
   const handlePromote = async () => {
-    await promotePost(cast.hash, asReply)
+    await performAction(PROMOTE_ACTION_ID, {
+      hash: cast.hash,
+      reply: asReply,
+    })
     setOpen(false)
-  }
-
-  const handleOpenChange = (open: boolean) => {
-    setOpen(open)
-    if (!open) {
-      setPromoteState({ status: 'idle' })
-    }
   }
 
   const twitterEmbed = cast.embeds?.find(
@@ -392,7 +423,7 @@ function PromoteButton({ cast }: { cast: Cast }) {
   )
 
   return (
-    <AlertDialog open={open} onOpenChange={handleOpenChange}>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <p className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400">
           Promote
@@ -422,16 +453,14 @@ function PromoteButton({ cast }: { cast: Cast }) {
         )}
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <Button onClick={handlePromote} disabled={promoteState.status !== 'idle'}>
-            {promoteState.status === 'generating' ? (
+          <Button
+            onClick={handlePromote}
+            disabled={!['idle', 'success', 'error'].includes(status.status)}
+          >
+            {status.status === 'loading' ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Generating proof</p>
-              </div>
-            ) : promoteState.status === 'signature' ? (
-              <div className="flex flex-row items-center gap-2">
-                <Loader2 className="animate-spin" />
-                <p>Awaiting signature</p>
               </div>
             ) : (
               'Promote'
@@ -444,23 +473,45 @@ function PromoteButton({ cast }: { cast: Cast }) {
 }
 
 function LaunchButton({ cast }: { cast: Cast }) {
-  const { launchPost, launchState, setLaunchState } = useLaunchPost()
   const [open, setOpen] = useState(false)
+  const { toast } = useToast()
+  const { performAction, status } = usePerformAction({
+    onSuccess: (response) => {
+      toast({
+        title: 'Post launched',
+        action: (
+          <ToastAction
+            altText="View post"
+            onClick={() => {
+              window.open(
+                `https://warpcast.com/~/conversations/${response.data?.hash}`,
+                '_blank'
+              )
+            }}
+          >
+            View on Warpcast
+          </ToastAction>
+        ),
+      })
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to launch',
+        description: error,
+      })
+    },
+  })
 
   const handleLaunch = async () => {
-    await launchPost(cast.hash)
+    await performAction(LAUNCH_ACTION_ID, {
+      hash: cast.hash,
+    })
     setOpen(false)
   }
 
-  const handleOpenChange = (open: boolean) => {
-    setOpen(open)
-    if (!open) {
-      setLaunchState({ status: 'idle' })
-    }
-  }
-
   return (
-    <AlertDialog open={open} onOpenChange={handleOpenChange}>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <p className="text-sm text-green-500 underline decoration-dotted font-semibold cursor-pointer hover:text-green-400">
           Launch
@@ -475,16 +526,14 @@ function LaunchButton({ cast }: { cast: Cast }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <Button onClick={handleLaunch} disabled={launchState.status !== 'idle'}>
-            {launchState.status === 'generating' ? (
+          <Button
+            onClick={handleLaunch}
+            disabled={!['idle', 'success', 'error'].includes(status.status)}
+          >
+            {status.status === 'loading' ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Generating proof</p>
-              </div>
-            ) : launchState.status === 'signature' ? (
-              <div className="flex flex-row items-center gap-2">
-                <Loader2 className="animate-spin" />
-                <p>Awaiting signature</p>
               </div>
             ) : (
               'Launch'

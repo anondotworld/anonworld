@@ -2,7 +2,7 @@
 
 import { ConnectButton as RainbowConnectButton } from '@rainbow-me/rainbowkit'
 import { Button } from './ui/button'
-import { useBalance } from '@/hooks/use-balance'
+import { useBalance } from '@/lib/hooks/use-balance'
 import { formatEther } from 'viem'
 
 export const ConnectButton = () => {

@@ -1,4 +1,4 @@
-import { useBalance } from '@/hooks/use-balance'
+import { useBalance } from '@/lib/hooks/use-balance'
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
 import { CircleCheckIcon } from 'lucide-react'
 import { CircleXIcon } from 'lucide-react'

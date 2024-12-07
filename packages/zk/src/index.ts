@@ -87,14 +87,14 @@ export class ProofManager {
 
   async extractData(publicInputs: string[]) {
     const root = publicInputs[0]
-    const messageHash =
+    const dataHash =
       '0x' +
       publicInputs
         .slice(1)
         .map((hex) => Number.parseInt(hex, 16).toString(16).padStart(2, '0'))
         .join('')
 
-    return { root, messageHash }
+    return { root, dataHash }
   }
 }
 

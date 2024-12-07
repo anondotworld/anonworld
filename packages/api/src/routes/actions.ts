@@ -27,7 +27,7 @@ export const actionsRoutes = createElysia({ prefix: '/actions' }).post(
       throw new Error('Invalid proof')
     }
 
-    const { root, messageHash } = await permissionedAction.extractData(
+    const { root, dataHash } = await permissionedAction.extractData(
       body.proof.publicInputs
     )
 
@@ -35,8 +35,8 @@ export const actionsRoutes = createElysia({ prefix: '/actions' }).post(
       throw new Error('Invalid merkle tree root')
     }
 
-    const hash = hashMessage(JSON.stringify({ ...body.data, revealHash: undefined }))
-    if (hash !== messageHash) {
+    const hash = hashMessage(JSON.stringify(body.data))
+    if (hash !== dataHash) {
       throw new Error('Invalid message hash')
     }
 

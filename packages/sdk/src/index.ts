@@ -4,6 +4,8 @@ import { Api } from './api'
 import { getPublicKey } from './utils'
 import { LeanIMT } from '@zk-kit/lean-imt'
 import { pad } from 'viem'
+import { ApiResponse } from './types'
+import { hashMessage } from 'viem'
 
 type CreatePostData = {
   text?: string
@@ -23,13 +25,19 @@ type PromotePostData = {
   reply?: boolean
 }
 
-type PerformActionArgs = {
+export type PerformActionArgs = {
   address: `0x${string}`
   signature: `0x${string}`
   messageHash: `0x${string}`
   data: CreatePostData | DeletePostData | PromotePostData
   actionId: string
 }
+
+export type PerformActionResponse = ApiResponse<{
+  success: boolean
+  hash?: string
+  tweetId?: string
+}>
 
 export class AnonWorldSDK {
   private readonly api: Api
@@ -64,6 +72,7 @@ export class AnonWorldSDK {
       root,
       index,
       path: siblings,
+      data_hash: toArray(hashMessage(JSON.stringify(args.data))),
     }
 
     const proof = await this.permissionedAction.generate(input)

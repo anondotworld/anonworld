@@ -30,7 +30,7 @@ export function CreatePost({ variant }: { variant: 'post' | 'launch' }) {
     text,
     setText,
     createPost,
-    state,
+    status,
     quote,
     embed,
     setEmbed,
@@ -112,17 +112,12 @@ export function CreatePost({ variant }: { variant: 'post' | 'launch' }) {
           <Button
             onClick={createPost}
             className="font-bold text-md rounded-md hover:scale-105 transition-all duration-300"
-            disabled={!['idle', 'success', 'error'].includes(state.status)}
+            disabled={!['idle', 'success', 'error'].includes(status.status)}
           >
-            {state.status === 'generating' ? (
+            {status.status === 'loading' ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Generating proof</p>
-              </div>
-            ) : state.status === 'signature' ? (
-              <div className="flex flex-row items-center gap-2">
-                <Loader2 className="animate-spin" />
-                <p>Awaiting signature</p>
               </div>
             ) : (
               'Post anonymously'

@@ -1,22 +1,13 @@
 'use client'
 
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/lib/hooks/use-toast'
 import { Cast, Channel } from '@anonworld/sdk/types'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
-import { useAccount, useSignMessage } from 'wagmi'
 import { ToastAction } from '../ui/toast'
-import { sdk } from '@/lib/utils'
-
-type State =
-  | {
-      status: 'idle' | 'signature' | 'generating' | 'done'
-    }
-  | {
-      status: 'error'
-      error: string
-    }
+import { CREATE_ACTION_ID } from '@/lib/utils'
+import { PerformActionStatus, usePerformAction } from '@/lib/hooks/use-perform-action'
 
 interface CreatePostContextProps {
   text: string | null
@@ -33,7 +24,7 @@ interface CreatePostContextProps {
   setParent: (parent: Cast | null) => void
   createPost: () => Promise<void>
   embedCount: number
-  state: State
+  status: PerformActionStatus
   confetti: boolean
   setConfetti: (confetti: boolean) => void
   revealPhrase: string | null
@@ -58,70 +49,21 @@ export const CreatePostProvider = ({
   const [channel, setChannel] = useState<Channel | null>(null)
   const [parent, setParent] = useState<Cast | null>(null)
   const [revealPhrase, setRevealPhrase] = useState<string | null>(null)
-  const [state, setState] = useState<State>({ status: 'idle' })
   const [confetti, setConfetti] = useState(false)
   const { toast } = useToast()
-  const { address } = useAccount()
-  const { signMessageAsync } = useSignMessage()
   const [variant, setVariant] = useState<'anoncast' | 'anonfun'>(
     initialVariant || 'anoncast'
   )
   const router = useRouter()
-
-  const resetState = () => {
-    setState({ status: 'idle' })
-    setText(null)
-    setImage(null)
-    setEmbed(null)
-    setQuote(null)
-    setChannel(null)
-    setParent(null)
-    setRevealPhrase(null)
-  }
-
-  const createPost = async () => {
-    if (!address) return
-    setState({ status: 'signature' })
-    try {
-      const embeds = [image, embed].filter((e) => e !== null) as string[]
-      const data = {
-        text: text ?? undefined,
-        embeds,
-        quote: quote?.hash,
-        channel: channel?.id,
-        parent: parent?.hash,
-      }
-
-      const message = JSON.stringify(data)
-      const signature = await signMessageAsync({
-        message,
-      })
-      if (!signature) {
-        setState({ status: 'error', error: 'Failed to get signature' })
-        return
-      }
-
-      const messageHash = hashMessage(message)
-      const revealHash = revealPhrase ? hashMessage(message + revealPhrase) : undefined
-
-      setState({ status: 'generating' })
-
-      const response = await sdk.performAction({
-        address,
-        signature,
-        messageHash,
-        data: {
-          ...data,
-          revealHash,
-        },
-        actionId: 'e6138573-7b2f-43ab-b248-252cdf5eaeee',
-      })
-
-      if (!response.data?.success) {
-        throw new Error('Failed to post')
-      }
-
-      resetState()
+  const { performAction, status } = usePerformAction({
+    onSuccess: (response) => {
+      setText(null)
+      setImage(null)
+      setEmbed(null)
+      setQuote(null)
+      setChannel(null)
+      setParent(null)
+      setRevealPhrase(null)
       setConfetti(true)
       toast({
         title: 'Post created',
@@ -130,7 +72,7 @@ export const CreatePostProvider = ({
             altText="View post"
             onClick={() => {
               window.open(
-                `https://warpcast.com/~/conversations/${response.data.hash}`,
+                `https://warpcast.com/~/conversations/${response.data?.hash}`,
                 '_blank'
               )
             }}
@@ -139,15 +81,31 @@ export const CreatePostProvider = ({
           </ToastAction>
         ),
       })
-    } catch (e) {
-      setState({ status: 'error', error: 'Failed to post' })
-      console.error(e)
+    },
+    onError: (error) => {
       toast({
         variant: 'destructive',
         title: 'Failed to post',
-        description: 'Please try again.',
+        description: error,
       })
+    },
+  })
+
+  const createPost = async () => {
+    const data = {
+      text: text ?? undefined,
+      embeds: [image, embed].filter((e) => e !== null) as string[],
+      quote: quote?.hash,
+      channel: channel?.id,
+      parent: parent?.hash,
     }
+
+    await performAction(CREATE_ACTION_ID, {
+      ...data,
+      revealHash: revealPhrase
+        ? hashMessage(JSON.stringify(data) + revealPhrase)
+        : undefined,
+    })
   }
 
   const embedCount = [image, embed, quote].filter((e) => e !== null).length
@@ -174,7 +132,7 @@ export const CreatePostProvider = ({
         setParent,
         embedCount,
         createPost,
-        state,
+        status,
         confetti,
         setConfetti,
         revealPhrase,
