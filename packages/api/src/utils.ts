@@ -10,7 +10,7 @@ export const createElysia = (config?: ConstructorParameters<typeof Elysia>[0]) =
     .use(cors())
     .use(Logestic.preset('common'))
     .onError(({ server, error, path }) => {
-      console.log(path, error)
+      console.error(path, error)
       if (error.message.includes('Out of memory')) {
         server?.stop()
         process.exit(1)

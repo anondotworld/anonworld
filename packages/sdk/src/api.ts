@@ -93,6 +93,7 @@ export class Api {
           actionId,
           data,
         }),
+        maxRetries: 3,
       }
     )
   }
