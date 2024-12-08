@@ -9,8 +9,12 @@ export const createElysia = (config?: ConstructorParameters<typeof Elysia>[0]) =
   new Elysia(config)
     .use(cors())
     .use(Logestic.preset('common'))
-    .onError(({ code, error }) => {
-      console.error(error)
+    .onError(({ server, error, path }) => {
+      console.log(path, error)
+      if (error.message.includes('Out of memory')) {
+        server?.stop()
+        process.exit(1)
+      }
     })
 
 export const augmentCasts = async (casts: Cast[]) => {

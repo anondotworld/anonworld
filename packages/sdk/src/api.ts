@@ -37,9 +37,9 @@ export class Api {
 
   public async request<T>(
     endpoint: string,
-    config: RequestConfig = {}
+    config: RequestConfig & { maxRetries?: number } = {}
   ): Promise<ApiResponse<T>> {
-    const { headers = {}, isFormData = false, ...options } = config
+    const { headers = {}, maxRetries = 1, isFormData = false, ...options } = config
 
     const defaultHeaders: Record<string, string> = {
       Accept: 'application/json',
@@ -54,14 +54,22 @@ export class Api {
       ...headers,
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...options,
-      headers: finalHeaders,
-    })
+    let attempt = 1
+    while (true) {
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        ...options,
+        headers: finalHeaders,
+      })
 
-    const result = await this.handleResponse<T>(response)
+      if (!response.ok && attempt < maxRetries) {
+        attempt++
+        continue
+      }
 
-    return result
+      const result = await this.handleResponse<T>(response)
+
+      return result
+    }
   }
 
   async submitAction({
