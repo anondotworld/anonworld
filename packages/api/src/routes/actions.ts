@@ -1,6 +1,6 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import { permissionedAction } from '@anonworld/zk'
+import { merkleMembership } from '@anonworld/zk'
 import { redis } from '../services/redis'
 import { hashMessage } from 'viem'
 import {
@@ -19,7 +19,7 @@ import { TwitterConfig, TwitterService } from '../services/twitter'
 export const actionsRoutes = createElysia({ prefix: '/actions' }).post(
   '/submit',
   async ({ body }) => {
-    const verified = await permissionedAction.verify({
+    const verified = await merkleMembership.verify({
       proof: new Uint8Array(body.proof.proof),
       publicInputs: body.proof.publicInputs,
     })
@@ -27,18 +27,13 @@ export const actionsRoutes = createElysia({ prefix: '/actions' }).post(
       throw new Error('Invalid proof')
     }
 
-    const { root, dataHash } = await permissionedAction.extractData(
-      body.proof.publicInputs
-    )
+    const { root } = await merkleMembership.extractData(body.proof.publicInputs)
 
     if (!(await redis.isValidMerkleTreeRoot(body.actionId, root))) {
       throw new Error('Invalid merkle tree root')
     }
 
     const hash = hashMessage(JSON.stringify(body.data))
-    if (hash !== dataHash) {
-      throw new Error('Invalid message hash')
-    }
 
     if (await redis.actionOccurred(body.actionId, hash)) {
       throw new Error('Action already occurred')

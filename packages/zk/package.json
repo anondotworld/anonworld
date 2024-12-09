@@ -5,7 +5,8 @@
   "types": "./src",
   "main": "src/index.ts",
   "scripts": {
-    "build-circuits": "cd circuits/permissioned-action && ./build.sh && cd ../..",
+    "build:merkle-membership": "cd circuits/merkle-membership && ./build.sh && cd ../..",
+    "build-circuits": "bun run build:merkle-membership",
     "test-proofs": "bun run scripts/test-proofs.ts"
   },
   "dependencies": {

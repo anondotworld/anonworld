@@ -41,7 +41,7 @@ export type PerformActionResponse = ApiResponse<{
 
 export class AnonWorldSDK {
   private readonly api: Api
-  private permissionedAction!: ProofManager
+  private merkleMembership!: ProofManager
   private hasher!: (a: string, b: string) => string
 
   constructor(apiUrl?: string) {
@@ -49,10 +49,10 @@ export class AnonWorldSDK {
   }
 
   async instantiate() {
-    if (this.permissionedAction) return
-    const { buildHashFunction, permissionedAction } = await import('@anonworld/zk')
+    if (this.merkleMembership) return
+    const { buildHashFunction, merkleMembership } = await import('@anonworld/zk')
     this.hasher = await buildHashFunction()
-    this.permissionedAction = permissionedAction
+    this.merkleMembership = merkleMembership
   }
 
   async performAction(args: PerformActionArgs) {
@@ -72,10 +72,9 @@ export class AnonWorldSDK {
       root,
       index,
       path: siblings,
-      data_hash: toArray(hashMessage(JSON.stringify(args.data))),
     }
 
-    const proof = await this.permissionedAction.generate(input)
+    const proof = await this.merkleMembership.generate(input)
     return await this.api.submitAction({
       proof,
       actionId: args.actionId,

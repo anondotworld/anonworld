@@ -1,12 +1,12 @@
-import { permissionedAction } from '../src'
+import { merkleMembership } from '../src'
 import { INPUT_DATA } from './utils'
 
 async function main() {
   console.time('generateProof')
-  const proofData = await permissionedAction.generate(INPUT_DATA)
+  const proofData = await merkleMembership.generate(INPUT_DATA)
   console.timeEnd('generateProof')
   console.time('verifyProof')
-  const verified = await permissionedAction.verify(proofData)
+  const verified = await merkleMembership.verify(proofData)
   console.timeEnd('verifyProof')
   console.log({ verified })
 }

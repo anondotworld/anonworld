@@ -16,12 +16,8 @@ fn main(
     pub_key_y: [u8; 32],
     signature: [u8; 64],
     message_hash: [u8; 32],
-    // Data
-    data_hash: [u8; 32],
-) -> pub [u8; 32] {
+) {
     let address = ecrecover::ecrecover(pub_key_x, pub_key_y, signature, message_hash);
     let mt = MerkleTree::from(root, poseidon2_hasher);
     mt.membership(address, index, path);
-
-    (data_hash)
 }
