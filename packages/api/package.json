@@ -9,8 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
-    "update-merkle-tree": "bun run scripts/update-merkle-tree.ts",
-    "update-feeds": "bun run scripts/update-feeds.ts"
+    "updates": "bun run scripts/updates.ts"
   },
   "dependencies": {
     "@anonworld/db": "*",

@@ -11,7 +11,6 @@
     "zk:build": "bun run --filter @anonworld/zk build-circuits",
     "zk:test": "bun run --filter @anonworld/zk test-proofs",
     "db:push": "bun run --filter @anonworld/db push",
-    "update-merkle-tree": "bun run --filter @anonworld/api update-merkle-tree",
-    "update-feeds": "bun run --filter @anonworld/api update-feeds"
+    "updates": "bun run --filter @anonworld/api updates"
   }
 }
