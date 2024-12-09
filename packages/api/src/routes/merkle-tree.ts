@@ -17,7 +17,14 @@ export const merkleTreeRoutes = createElysia({ prefix: '/merkle-tree' }).get(
       return JSON.parse(cached)
     }
 
-    return await buildMerkleTree(params.actionId)
+    const action = await getAction(params.actionId)
+    const id = action.actions.id
+    const chainId = action.accounts.chain_id
+    const tokenAddress = action.accounts.token_address
+    const threshold = BigInt(action.actions.threshold)
+
+    const tree = await buildMerkleTree(chainId, tokenAddress, threshold)
+    return await cacheTree(id, tree)
   },
   {
     params: t.Object({
@@ -26,14 +33,12 @@ export const merkleTreeRoutes = createElysia({ prefix: '/merkle-tree' }).get(
   }
 )
 
-export const buildMerkleTree = async (actionId: string) => {
-  const action = await getAction(actionId)
-
-  const owners = await simplehash.getTokenOwners(
-    action.accounts.chain_id,
-    action.accounts.token_address,
-    BigInt(action.actions.threshold)
-  )
+export const buildMerkleTree = async (
+  chainId: number,
+  tokenAddress: string,
+  threshold: bigint
+) => {
+  const owners = await simplehash.getTokenOwners(chainId, tokenAddress, threshold)
 
   const leaves = owners.map((owner) => pad(owner)).slice(0, MAX_LEAVES)
   while (leaves.length < MAX_LEAVES) {
@@ -45,9 +50,11 @@ export const buildMerkleTree = async (actionId: string) => {
     hasher,
     leaves.sort((a, b) => a.localeCompare(b))
   )
+  return tree
+}
+
+export const cacheTree = async (id: string, tree: LeanIMT<string>) => {
   const exported = tree.export()
-
-  await redis.setMerkleTree(actionId, exported, tree.root)
-
+  await redis.setMerkleTree(id, exported, tree.root)
   return JSON.parse(exported)
 }

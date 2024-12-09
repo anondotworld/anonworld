@@ -166,7 +166,10 @@ export const deletePostRelationship = async (params: {
 }
 
 export const getAllActions = async () => {
-  return await db.select().from(actionsTable)
+  return await db
+    .select()
+    .from(actionsTable)
+    .innerJoin(accountsTable, eq(actionsTable.account_id, accountsTable.id))
 }
 
 export const getAllFarcasterAccounts = async () => {

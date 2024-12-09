@@ -1,6 +1,7 @@
 import { getAllActions, getAllFarcasterAccounts } from '@anonworld/db'
 import { buildFeeds } from '../src/routes/feeds'
-import { buildMerkleTree } from '../src/routes/merkle-tree'
+import { buildMerkleTree, cacheTree } from '../src/routes/merkle-tree'
+import { LeanIMT } from '@zk-kit/lean-imt'
 
 const update = async () => {
   const accounts = await getAllFarcasterAccounts()
@@ -9,10 +10,22 @@ const update = async () => {
     await buildFeeds(account.fid)
   }
 
+  const trees: Record<string, LeanIMT<string>> = {}
   const actions = await getAllActions()
   for (const action of actions) {
-    console.log(`[merkle] updating merkle tree for ${action.id}`)
-    await buildMerkleTree(action.id)
+    console.log(`[merkle] updating merkle tree for ${action.actions.id}`)
+
+    const id = action.actions.id
+    const chainId = action.accounts.chain_id
+    const tokenAddress = action.accounts.token_address
+    const threshold = BigInt(action.actions.threshold)
+
+    const key = `${chainId}:${tokenAddress}:${threshold.toString()}`
+    if (!trees[key]) {
+      trees[key] = await buildMerkleTree(chainId, tokenAddress, threshold)
+    }
+
+    await cacheTree(id, trees[key])
   }
 }
 
