@@ -14,6 +14,22 @@ export const metadata: Metadata = {
     description: 'Post anonymously to Farcaster.',
     images: ['/anon.png'],
   },
+  other: {
+    ['fc:frame']: JSON.stringify({
+      version: 'next',
+      imageUrl: '/banner.png',
+      button: {
+        title: 'Post anonymously',
+        action: {
+          type: 'launch_frame',
+          name: 'anoncast',
+          url: 'https://anoncast.org',
+          splashImageUrl: '/anon.png',
+          splashBackgroundColor: '#151515',
+        },
+      },
+    }),
+  },
 }
 
 export default function RootLayout({
