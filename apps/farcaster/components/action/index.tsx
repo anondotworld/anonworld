@@ -29,7 +29,7 @@ export default function ActionComponent({
   const DELETE_POST = BigInt(DELETE_AMOUNT) / BigInt(10 ** 18)
 
   // Default values for post variant
-  const defaultTitle = 'Post anonymously to Farcaster and X/Twitter'
+  const defaultTitle = 'Post anonymously to Farcaster'
   const defaultDescription =
     "Posts are made anonymous using zk proofs. Due to the complex calculations required, it could take up to a few minutes. Do not post porn, doxes, shills, or threats. This is not about censorship resistance - it's about great anonymous posts."
   const defaultRequirements = [
@@ -64,61 +64,12 @@ export default function ActionComponent({
           ))}
         </ul>
       </AlertDescription>
-      <div className="flex flex-row gap-2 justify-between ">
-        <div className="flex flex-row gap-4">
-          <a
-            href="https://x.com/anoncast_"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm decoration-dotted underline font-medium"
-          >
-            <span className="hidden sm:inline">X/Twitter</span>
-            <img src="/x.svg" alt="X/Twitter" className="w-4 h-4 sm:hidden invert" />
-          </a>
-
-          <a
-            href="https://warpcast.com/anoncast"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm decoration-dotted underline font-medium"
-          >
-            <span className="hidden sm:inline">Farcaster</span>
-            <img
-              src="/farcaster.svg"
-              alt="Farcaster"
-              className="w-4 h-4 sm:hidden invert"
-            />
-          </a>
+      {(!address || !siwe) && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded flex flex-row items-center justify-between gap-2">
+          <p className="font-bold">{'You are not fully signed in. Sign in to post.'}</p>
         </div>
-
-        <div className="flex flex-row gap-4 justify-end">
-          <a
-            href="https://dexscreener.com/base/0xc4ecaf115cbce3985748c58dccfc4722fef8247c"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm decoration-dotted underline font-medium"
-          >
-            DEX Screener
-          </a>
-          <a
-            href="https://app.uniswap.org/swap?outputCurrency=0x0Db510e79909666d6dEc7f5e49370838c16D950f&chain=base"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm decoration-dotted underline font-medium"
-          >
-            Uniswap
-          </a>
-          <a
-            href="https://github.com/Slokh/anoncast"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm decoration-dotted underline font-medium"
-          >
-            Github
-          </a>
-        </div>
-      </div>
-      {address && !isLoading ? (
+      )}
+      {address && siwe && !isLoading ? (
         FARCASTER_POST > BALANCE ? (
           <a
             href={`https://app.uniswap.org/swap?outputCurrency=${TOKEN_ADDRESS}&chain=base`}
@@ -127,9 +78,7 @@ export default function ActionComponent({
           >
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded flex flex-row items-center justify-between gap-2">
               <p className="font-bold">
-                {!siwe
-                  ? 'You are not fully signed in. Sign in to post.'
-                  : `Not enough tokens to post. Buy ${FARCASTER_POST - BALANCE} more.`}
+                {`Not enough tokens to post. Buy ${FARCASTER_POST - BALANCE} more.`}
               </p>
             </div>
           </a>

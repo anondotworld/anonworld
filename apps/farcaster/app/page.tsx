@@ -19,17 +19,20 @@ export default function Home() {
     }
   }, [isLoaded])
 
-  if (isLoaded && showLoaded) {
-    return <Content />
-  }
-
   return (
     <div className="flex flex-col items-center justify-center grow h-screen bg-[#151515]">
-      <img
-        src="/anon.png"
-        alt="ANON"
-        className="w-[88px] h-[88px] rounded-full mb-[88px]"
-      />
+      {(!isLoaded || !showLoaded) && (
+        <img
+          src="/anon.png"
+          alt="ANON"
+          className="w-[88px] h-[88px] rounded-full mb-[88px] transition-opacity duration-500 opacity-100"
+        />
+      )}
+      <div
+        className={`absolute inset-0 transition-opacity duration-1000 ${isLoaded && showLoaded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      >
+        {isLoaded && <Content />}
+      </div>
     </div>
   )
 }

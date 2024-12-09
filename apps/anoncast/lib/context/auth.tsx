@@ -7,8 +7,9 @@ import {
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit'
 import { createSiweMessage } from 'viem/siwe'
+import { hashMessage, recoverPublicKey, verifyMessage } from 'viem'
+import { publicKeyToAddress } from 'viem/accounts'
 import { useAccount } from 'wagmi'
-import { verifyMessage } from 'viem'
 
 const STORAGE_KEY = 'auth:v0'
 
@@ -29,6 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { address } = useAccount()
 
   const signIn = async (message: string, signature: `0x${string}`) => {
+    const pubKey = await recoverPublicKey({ hash: hashMessage(message), signature })
+    const address = publicKeyToAddress(pubKey)
     if (address) {
       const payload = { address, message, signature }
       if (await verifyMessage(payload)) {
@@ -87,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{ siwe }}>
       <RainbowKitAuthenticationProvider
         adapter={adapter}
-        status={siwe ? 'authenticated' : 'unauthenticated'}
+        status={siwe && address === siwe.address ? 'authenticated' : 'unauthenticated'}
       >
         <RainbowKitProvider>{children}</RainbowKitProvider>
       </RainbowKitAuthenticationProvider>

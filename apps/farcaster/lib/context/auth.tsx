@@ -47,29 +47,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isSDKLoaded])
 
-  const signIn = async () => {
+  const getExistingSiwe = () => {
+    if (!address) return
     const siwe = localStorage.getItem(STORAGE_KEY)
     if (siwe) {
       const payload = JSON.parse(siwe) as SiweResult
       if (payload.address === address) {
-        if (await verifyMessage(payload)) {
-          setSiwe(payload)
-          return
-        }
+        return payload
       }
     }
+  }
 
-    if (!isConnected) {
-      await connectAsync({ connector: config.connectors[0] })
+  const signIn = async () => {
+    const existingSiwe = getExistingSiwe()
+    if (existingSiwe) {
+      setSiwe(existingSiwe)
+      return
     }
 
-    if (!address) {
+    let currentAddress = address
+    if (!isConnected) {
+      const { accounts } = await connectAsync({ connector: config.connectors[0] })
+      currentAddress = accounts[0]
+    }
+
+    if (!currentAddress) {
       throw new Error('No address found')
     }
 
     const message = createSiweMessage({
       domain: window.location.host,
-      address: address as `0x${string}`,
+      address: currentAddress as `0x${string}`,
       statement: 'Sign in with Ethereum to the app.',
       uri: window.location.origin,
       version: '1',
@@ -78,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
 
     const signature = await signMessageAsync({ message })
-    const payload = { address, message, signature }
+    const payload = { address: currentAddress as `0x${string}`, message, signature }
     if (await verifyMessage(payload)) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
       setSiwe(payload)
@@ -96,8 +104,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    if (address) {
-      signIn()
+    const existingSiwe = getExistingSiwe()
+    if (existingSiwe) {
+      setSiwe(existingSiwe)
     }
   }, [address])
 
