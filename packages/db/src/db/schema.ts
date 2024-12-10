@@ -28,6 +28,9 @@ export const actionsTable = pgTable('actions', {
     .notNull(),
   type: varchar({ length: 255 }).notNull(),
   threshold: varchar({ length: 255 }).notNull(),
+  credential_id: varchar({ length: 255 })
+    .references(() => credentialsTable.id)
+    .notNull(),
   metadata: jsonb('metadata'),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
@@ -72,6 +75,16 @@ export const postRelationshipsTable = pgTable(
   })
 )
 
+export const postCredentialsTable = pgTable('post_credentials', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  post_hash: varchar({ length: 255 })
+    .references(() => postsTable.hash)
+    .notNull(),
+  credential_id: varchar({ length: 255 })
+    .references(() => credentialsTable.id)
+    .notNull(),
+})
+
 export const actionExecutionsTable = pgTable('action_executions', {
   id: uuid('id').defaultRandom().primaryKey(),
   account_id: uuid('account_id')
@@ -84,6 +97,23 @@ export const actionExecutionsTable = pgTable('action_executions', {
   status: varchar({ length: 255 }).notNull(),
   error: jsonb('error'),
   response: jsonb('response'),
+  created_at: timestamp().notNull().defaultNow(),
+  updated_at: timestamp().notNull().defaultNow(),
+})
+
+export const credentialsTable = pgTable('credentials', {
+  id: varchar({ length: 255 }).primaryKey(),
+  type: varchar({ length: 255 }).notNull(),
+  metadata: jsonb('metadata').notNull(),
+  created_at: timestamp().notNull().defaultNow(),
+  updated_at: timestamp().notNull().defaultNow(),
+})
+
+export const merkleRootsTable = pgTable('merkle_roots', {
+  root: varchar({ length: 255 }).primaryKey(),
+  credential_id: varchar({ length: 255 })
+    .references(() => credentialsTable.id)
+    .notNull(),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 })

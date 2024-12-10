@@ -58,7 +58,12 @@ export class AnonWorldSDK {
   async performAction(args: PerformActionArgs) {
     await this.instantiate()
 
-    const tree = await this.getMerkleTree(args.actionId)
+    const credentialId =
+      args.actionId === 'e6138573-7b2f-43ab-b248-252cdf5eaeee'
+        ? 'erc20-balance:8453:0x0db510e79909666d6dec7f5e49370838c16d950f:5000000000000000000000'
+        : 'erc20-balance:8453:0x0db510e79909666d6dec7f5e49370838c16d950f:2000000000000000000000000'
+
+    const tree = await this.getMerkleTreeForCredential(credentialId)
     const paddedAddress = pad(args.address).toLowerCase()
     const leafIndex = tree.leaves.indexOf(paddedAddress)
     const { root, index, siblings } = tree.generateProof(leafIndex)
@@ -76,16 +81,16 @@ export class AnonWorldSDK {
 
     const proof = await this.merkleMembership.generate(input)
     return await this.api.submitAction({
-      proof,
+      proofs: [proof],
       actionId: args.actionId,
       data: args.data,
     })
   }
 
-  async getMerkleTree(actionId: string) {
+  async getMerkleTreeForCredential(credentialId: string) {
     await this.instantiate()
 
-    const response = await this.api.getMerkleTree(actionId)
+    const response = await this.api.getMerkleTreeForCredential(credentialId)
     if (response.error) throw new Error(response.error.message)
     return LeanIMT.import(this.hasher, JSON.stringify(response.data), (value) => value)
   }

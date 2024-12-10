@@ -73,11 +73,11 @@ export class Api {
   }
 
   async submitAction({
-    proof,
+    proofs,
     actionId,
     data,
   }: {
-    proof: ProofData
+    proofs: ProofData[]
     actionId: string
     data: any
   }) {
@@ -86,20 +86,27 @@ export class Api {
       {
         method: 'POST',
         body: JSON.stringify({
-          proof: {
-            proof: Array.from(proof.proof),
-            publicInputs: proof.publicInputs,
-          },
           actionId,
           data,
+          proofs: proofs.map((proof) => ({
+            proof: Array.from(proof.proof),
+            publicInputs: proof.publicInputs,
+          })),
         }),
         maxRetries: 3,
       }
     )
   }
 
-  async getMerkleTree(id: string) {
-    return await this.request<{ _nodes: string[][] }>(`/merkle-tree/${id}`)
+  async getMerkleTreeForCredential(credentialId: string) {
+    return await this.request<{ _nodes: string[][] }>(`/merkle-tree/${credentialId}`)
+  }
+
+  async getMerkleTree(chainId: number, tokenAddress: string, minBalance: bigint) {
+    return await this.request<{ _nodes: string[][] }>(`/merkle-tree`, {
+      method: 'POST',
+      body: JSON.stringify({ chainId, tokenAddress, minBalance }),
+    })
   }
 
   async revealPost(args: {

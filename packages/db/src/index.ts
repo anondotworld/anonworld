@@ -5,10 +5,15 @@ import {
   accountsTable,
   actionExecutionsTable,
   actionsTable,
+  credentialsTable,
   farcasterAccountsTable,
+  merkleRootsTable,
+  postCredentialsTable,
   postRelationshipsTable,
   postsTable,
 } from './db/schema'
+
+export type Credential = typeof credentialsTable.$inferSelect
 
 export const db = drizzle(process.env.DATABASE_URL as string)
 
@@ -165,13 +170,36 @@ export const deletePostRelationship = async (params: {
     )
 }
 
-export const getAllActions = async () => {
-  return await db
-    .select()
-    .from(actionsTable)
-    .innerJoin(accountsTable, eq(actionsTable.account_id, accountsTable.id))
+export const getAllCredentials = async () => {
+  return await db.select().from(credentialsTable)
 }
 
 export const getAllFarcasterAccounts = async () => {
   return await db.select().from(farcasterAccountsTable)
+}
+
+export const getCredential = async (credentialId: string) => {
+  const [credential] = await db
+    .select()
+    .from(credentialsTable)
+    .where(eq(credentialsTable.id, credentialId))
+  return credential
+}
+
+export const createMerkleRoot = async (credentialId: string, root: string) => {
+  await db.insert(merkleRootsTable).values({ credential_id: credentialId, root })
+}
+
+export const createPostCredentials = async (hash: string, roots: string[]) => {
+  const credentials = await db
+    .select()
+    .from(merkleRootsTable)
+    .where(inArray(merkleRootsTable.root, roots))
+
+  await db.insert(postCredentialsTable).values(
+    credentials.map((credential) => ({
+      post_hash: hash,
+      credential_id: credential.credential_id,
+    }))
+  )
 }

@@ -77,7 +77,11 @@ class SimplehashService {
     }>(url)
   }
 
-  async getTokenOwners(chainId: number, tokenAddress: string, minimumBalance: bigint) {
+  async getTokenOwners({
+    chainId,
+    tokenAddress,
+    minBalance,
+  }: { chainId: number; tokenAddress: string; minBalance: bigint }) {
     const owners: `0x${string}`[] = []
 
     let cursor = ''
@@ -85,7 +89,7 @@ class SimplehashService {
       const data = await this.getTopWalletsForFungible(chainId, tokenAddress, cursor)
 
       for (const owner of data.owners) {
-        if (BigInt(owner.quantity_string) >= minimumBalance) {
+        if (BigInt(owner.quantity_string) >= minBalance) {
           owners.push(owner.owner_address.toLowerCase() as `0x${string}`)
         } else {
           return owners
