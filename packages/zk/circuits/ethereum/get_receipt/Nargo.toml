@@ -1,0 +1,7 @@
+[package]
+name = "get_receipt"
+type = "bin"
+compiler_version = ">=0.30.0"
+
+[dependencies]
+ethereum = { path = "../lib" }

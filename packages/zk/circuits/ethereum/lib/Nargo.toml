@@ -1,0 +1,8 @@
+[package]
+name = "ethereum"
+type = "lib"
+authors = ["Arkadiusz Konior, Marek Kirejczyk"]
+compiler_version = ">=0.30.0"
+
+[dependencies]
+u2b = { tag = "v0.3.4", git = "https://github.com/vlayer-xyz/noir-u2b" }

@@ -86,10 +86,36 @@ export class ProofManager {
     const backend = new UltraHonkBackend(this.circuit.circuit.bytecode)
     const noir = new Noir(this.circuit.circuit)
 
-    const { witness } = await noir.execute(input)
-
+    const { witness } = await noir.execute(input, foreignCallHandler)
     return await backend.generateProof(witness)
   }
 }
 
 export const merkleMembership = new ProofManager(CircuitType.MerkleMembership)
+export const credErc20Balance = new ProofManager(CircuitType.CredErc20Balance)
+
+const foreignCallHandler = async (method: string, params: any[]) => {
+  try {
+    const response = await fetch('http://localhost:5555', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method,
+        params,
+        id: Date.now(), // Simple unique ID
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+
+    const result = await response.json()
+    return result.result.values
+  } catch (e) {
+    return []
+  }
+}
