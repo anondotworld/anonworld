@@ -56,7 +56,7 @@ export const actionsRoutes = createElysia({ prefix: '/actions' })
   .post(
     '/execute',
     async ({ body }) => {
-      const results = []
+      const results: { success: boolean; error?: string }[] = []
       const nextActions: ActionRequest[] = []
       for (const action of body.actions) {
         try {
@@ -89,6 +89,13 @@ export const actionsRoutes = createElysia({ prefix: '/actions' })
         } catch (error) {
           results.push({ success: false, error: (error as Error).message })
         }
+      }
+
+      const outOfMemoryResult = results.find((result) =>
+        result.error?.toLowerCase().includes('out of memory')
+      )
+      if (outOfMemoryResult) {
+        throw new Error(outOfMemoryResult.error)
       }
 
       return { results }

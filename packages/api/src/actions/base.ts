@@ -52,17 +52,17 @@ export abstract class BaseAction<TMetadata = any, TData = any> {
   }
 
   async execute(skipMerkleValidation = false) {
-    if (!skipMerkleValidation) {
-      await this.validateRoots()
-    }
-
-    if (
-      await redis.actionOccurred(this.action.id, hashMessage(JSON.stringify(this.data)))
-    ) {
-      throw new Error('Action already occurred')
-    }
-
     try {
+      if (!skipMerkleValidation) {
+        await this.validateRoots()
+      }
+
+      if (
+        await redis.actionOccurred(this.action.id, hashMessage(JSON.stringify(this.data)))
+      ) {
+        throw new Error('Action already occurred')
+      }
+
       const response = await this.handle()
 
       await logActionExecution({
