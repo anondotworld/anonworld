@@ -9,7 +9,7 @@ pub struct RlpFragment {
     pub data_type: u32,
 }
 
-pub fn decode_rlp_list_fragments<let NODE_LEN: u32, let MAX_FIELDS: u32>(
+pub unconstrained fn decode_rlp_list_fragments<let NODE_LEN: u32, let MAX_FIELDS: u32>(
     rlp_header: RlpFragment,
     node: [u8; NODE_LEN],
 ) -> BoundedVec<RlpFragment, MAX_FIELDS> {
@@ -88,4 +88,40 @@ fn extract_payload_len(data: [u8], len: u32) -> u32 {
     }
 
     node_len
+}
+
+pub fn encode_rlp_string<let N: u32>(data: [u8; N]) -> [u8; N] {
+    let length = data.len();
+    let mut result = [0; N];
+
+    // Find first non-zero byte using for loop
+    let mut start_idx = 0;
+    for i in 0..N {
+        if (start_idx == 0) & (data[i] != 0) {
+            start_idx = i;
+        }
+    }
+
+    // If all zeros, return single zero byte
+    if (start_idx == 0) & (data[0] == 0) {
+        result[0] = 0x80;
+        result
+    }
+
+    let actual_length = length - start_idx;
+
+    if (actual_length == 1) & (data[start_idx] < 0x80) {
+        // Single byte < 0x80
+        result[0] = data[start_idx];
+    } else {
+        // 0-55 bytes string
+        result[0] = (0x80 + actual_length) as u8;
+        for i in 0..N {
+            if i < actual_length {
+                result[i + 1] = data[start_idx + i];
+            }
+        }
+    }
+
+    result
 }

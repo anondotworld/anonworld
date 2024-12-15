@@ -35,16 +35,15 @@ async function main() {
     message_hash: formatHexArray(messageHash),
     pub_key_x: formatHexArray(pubKeyX),
     pub_key_y: formatHexArray(pubKeyY),
-    balance_slot: formatHexArray(balanceSlot),
-    value: formatHexArray(toRlp(`0x${storageProof.value.toString(16)}`), {
-      pad: 'right',
-    }),
+    balance_slot: 0,
+    verified_balance: `0x${storageProof.value.toString(16)}`,
+    storage_value: `0x${storageProof.value.toString(16)}`,
     storage_root: formatHexArray(proof.storageHash),
-    nodes: formatArray(nodes, (node) =>
+    storage_nodes: formatArray(nodes, (node) =>
       formatHexArray(node, { length: 532, pad: 'right' })
     ),
-    leaf: formatHexArray(leaf, { length: 69, pad: 'right' }),
-    depth: storageProof.proof.length,
+    storage_leaf: formatHexArray(leaf, { length: 69, pad: 'right' }),
+    storage_depth: storageProof.proof.length,
   }
 
   console.time('generateProof')
