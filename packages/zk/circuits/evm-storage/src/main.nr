@@ -11,15 +11,15 @@ fn main(
     message_hash: [u8; 32],
     pub_key_x: [u8; 32],
     pub_key_y: [u8; 32],
-    // Balance Data
-    balance_slot: Field,
-    verified_balance: pub Field,
     // Storage Proof
-    storage_root: [u8; 32],
+    storage_root: pub [u8; 32],
     storage_nodes: [[u8; 532]; 7],
     storage_leaf: [u8; 69],
     storage_depth: u64,
     storage_value: Field,
+    // Balance Data
+    balance_slot: Field,
+    verified_balance: pub Field,
 ) {
     let balance_slot_bytes: [u8; 32] = balance_slot.to_be_bytes();
     let value_bytes: [u8; 32] = storage_value.to_be_bytes();
@@ -370,12 +370,12 @@ fn test_main() {
         message_hash,
         pub_key_x,
         pub_key_y,
-        balance_slot,
-        verified_balance,
         storage_root,
         storage_nodes,
         storage_leaf,
         storage_depth,
         storage_value,
+        balance_slot,
+        verified_balance,
     );
 }
