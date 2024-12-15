@@ -28,9 +28,9 @@ async function main() {
   console.time('generateProof')
   const proofData = await merkleMembership.generate({
     signature: formatHexArray(signature, { length: 64 }),
-    message_hash: formatHexArray(messageHash, { length: 32 }),
-    pub_key_x: formatHexArray(pubKeyX, { length: 32 }),
-    pub_key_y: formatHexArray(pubKeyY, { length: 32 }),
+    message_hash: formatHexArray(messageHash),
+    pub_key_x: formatHexArray(pubKeyX),
+    pub_key_y: formatHexArray(pubKeyY),
     root,
     index,
     path,
