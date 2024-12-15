@@ -1,4 +1,4 @@
-import { InputMap, type Noir } from '@noir-lang/noir_js'
+import { type Noir } from '@noir-lang/noir_js'
 import { UltraHonkBackend, BarretenbergVerifier, ProofData } from '@aztec/bb.js'
 import { BarretenbergSync, Fr } from '@aztec/bb.js'
 import { CircuitConfig, CircuitType, getCircuitConfig } from './utils'
@@ -75,7 +75,7 @@ export class ProofManager {
     return result
   }
 
-  async generate(input: InputMap) {
+  async generate(input: Record<string, any>) {
     await this.initCircuit()
     if (!this.circuit) {
       throw new Error('Circuit not initialized')
@@ -93,3 +93,4 @@ export class ProofManager {
 }
 
 export const merkleMembership = new ProofManager(CircuitType.MerkleMembership)
+export const evmStorage = new ProofManager(CircuitType.EVMStorage)

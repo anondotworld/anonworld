@@ -6,11 +6,15 @@
   "main": "src/index.ts",
   "scripts": {
     "build:merkle-membership": "cd circuits/merkle-membership && ./build.sh && cd ../..",
-    "build-circuits": "bun run build:merkle-membership",
-    "test-proofs": "bun run scripts/test-proofs.ts"
+    "build:evm-storage": "cd circuits/evm-storage && ./build.sh && cd ../..",
+    "build-circuits": "bun run build:merkle-membership && bun run build:evm-storage",
+    "test:evm-storage": "bun run scripts/test-evm-storage.ts",
+    "test:merkle-membership": "bun run scripts/test-merkle-membership.ts",
+    "test-circuits": "bun run test:evm-storage && bun run test:merkle-membership"
   },
   "dependencies": {
     "@aztec/bb.js": "^0.61.0",
-    "@noir-lang/noir_js": "^0.38.0"
+    "@noir-lang/noir_js": "^0.38.0",
+    "viem": "^2.21.55"
   }
 }

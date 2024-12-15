@@ -9,7 +9,7 @@
     "api:dev": "bun run --filter @anonworld/api dev",
     "api:start": "bun run --filter @anonworld/api start",
     "zk:build": "bun run --filter @anonworld/zk build-circuits",
-    "zk:test": "bun run --filter @anonworld/zk test-proofs",
+    "zk:test": "bun run --filter @anonworld/zk test-circuits",
     "db:push": "bun run --filter @anonworld/db push",
     "updates": "bun run --filter @anonworld/api updates"
   }
