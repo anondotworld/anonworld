@@ -6,11 +6,11 @@
   "main": "src/index.ts",
   "scripts": {
     "build:merkle-membership": "cd circuits/merkle-membership && ./build.sh && cd ../..",
-    "build:evm-storage": "cd circuits/evm-storage && ./build.sh && cd ../..",
-    "build-circuits": "bun run build:merkle-membership && bun run build:evm-storage",
-    "test:evm-storage": "bun run scripts/test-evm-storage.ts",
+    "build:erc20-balance": "cd circuits/erc20-balance && ./build.sh && cd ../..",
+    "build-circuits": "bun run build:merkle-membership && bun run build:erc20-balance",
+    "test:erc20-balance": "bun run scripts/test-erc20-balance.ts",
     "test:merkle-membership": "bun run scripts/test-merkle-membership.ts",
-    "test-circuits": "bun run test:evm-storage && bun run test:merkle-membership"
+    "test-circuits": "bun run test:erc20-balance && bun run test:merkle-membership"
   },
   "dependencies": {
     "@aztec/bb.js": "^0.61.0",

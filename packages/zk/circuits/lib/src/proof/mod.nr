@@ -1,5 +1,8 @@
 use crate::bytes::{byte_to_nibbles, bytes_as_nibbles};
-use crate::rlp::{decode_rlp_header, decode_rlp_list_fragments, RLP_HEADER_TYPE_LIST, RlpFragment};
+use crate::rlp::{
+    decode_rlp_header, decode_rlp_list_fragments, encode_rlp_string, RLP_HEADER_TYPE_LIST,
+    RlpFragment,
+};
 use dep::std::hash::keccak256;
 
 pub fn verify(
@@ -89,4 +92,20 @@ unconstrained fn get_node_hash(rlp_header: RlpFragment, node: [u8; 532]) -> [u8;
     let node_len = rlp_header.length + rlp_header.offset;
     let resolved_hash: [u8; 32] = keccak256(node, node_len);
     resolved_hash
+}
+
+pub fn get_storage_key<let N: u32>(values: [[u8; 32]; N]) -> [u8; 32] {
+    let mut input_slice = values[0].as_slice();
+    for i in 1..N {
+        input_slice = input_slice.append(values[i]);
+    }
+    let input: [u8; N * 32] = input_slice.as_array();
+    let key = keccak256(input, input.len());
+    key
+}
+
+pub fn get_storage_value(field: Field) -> [u8; 32] {
+    let value_bytes: [u8; 32] = field.to_be_bytes();
+    let value_rlp = encode_rlp_string(value_bytes);
+    value_rlp
 }

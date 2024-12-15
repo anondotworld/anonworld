@@ -1,5 +1,5 @@
 use dep::std::hash::poseidon2::Poseidon2::hash;
-use ecrecover;
+use lib::ecrecover;
 use merkle_tree::merkle::MerkleTree;
 
 fn poseidon2_hasher(leaves: [Field; 2]) -> Field {

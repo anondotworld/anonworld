@@ -2,8 +2,8 @@ import { CompiledCircuit } from '@noir-lang/noir_js'
 /// TODO: Make this dynamic
 import merkleMembershipCircuit from '../circuits/merkle-membership/target/0.1.0/main.json'
 import merkleMembershipVkey from '../circuits/merkle-membership/target/0.1.0/vkey.json'
-import evmStorageCircuit from '../circuits/evm-storage/target/0.1.0/main.json'
-import evmStorageVkey from '../circuits/evm-storage/target/0.1.0/vkey.json'
+import erc20BalanceCircuit from '../circuits/erc20-balance/target/0.1.0/main.json'
+import erc20BalanceVkey from '../circuits/erc20-balance/target/0.1.0/vkey.json'
 
 export type CircuitConfig = {
   circuitType: CircuitType
@@ -14,12 +14,12 @@ export type CircuitConfig = {
 
 export enum CircuitType {
   MerkleMembership = 'merkle-membership',
-  EVMStorage = 'evm-storage',
+  ERC20Balance = 'erc20-balance',
 }
 
 const CIRCUIT_VERSIONS = {
-  [CircuitType.MerkleMembership]: '0.1.0',
-  [CircuitType.EVMStorage]: '0.1.0',
+  [CircuitType.MerkleMembership]: '0.1.1',
+  [CircuitType.ERC20Balance]: '0.1.0',
 }
 
 export async function getCircuitConfig(circuitType: CircuitType): Promise<CircuitConfig> {
@@ -37,7 +37,7 @@ export async function getCircuitConfig(circuitType: CircuitType): Promise<Circui
   return {
     circuitType,
     version,
-    circuit: evmStorageCircuit as CompiledCircuit,
-    vkey: Uint8Array.from(evmStorageVkey),
+    circuit: erc20BalanceCircuit as CompiledCircuit,
+    vkey: Uint8Array.from(erc20BalanceVkey),
   }
 }

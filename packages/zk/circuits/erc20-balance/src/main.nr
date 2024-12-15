@@ -1,9 +1,4 @@
-use dep::std::hash::keccak256;
-use proof::verify;
-use rlp::encode_rlp_string;
-mod proof;
-mod rlp;
-mod bytes;
+use dep::lib::{ecrecover, proof};
 
 fn main(
     // Address Data
@@ -22,17 +17,15 @@ fn main(
     verified_balance: pub Field,
 ) {
     let balance_slot_bytes: [u8; 32] = balance_slot.to_be_bytes();
-    let value_bytes: [u8; 32] = storage_value.to_be_bytes();
     let address: [u8; 32] =
         ecrecover::ecrecover(pub_key_x, pub_key_y, signature, message_hash).to_be_bytes();
-    let input: [u8; 64] = address.as_slice().append(balance_slot_bytes).as_array();
-    let key = keccak256(input, 64);
 
-    let value_rlp = encode_rlp_string(value_bytes);
+    let key = proof::get_storage_key([address, balance_slot_bytes]);
+    let value = proof::get_storage_value(storage_value);
 
-    verify(
+    proof::verify(
         key,
-        value_rlp,
+        value,
         storage_root,
         storage_nodes,
         storage_leaf,

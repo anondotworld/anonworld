@@ -1,5 +1,5 @@
 import { evmStorage } from '../src'
-import { concat, createPublicClient, http, keccak256, pad, toHex } from 'viem'
+import { bytesToHex, concat, createPublicClient, http, keccak256, pad, toHex } from 'viem'
 import { base } from 'viem/chains'
 import { formatArray, formatHexArray } from './utils'
 
@@ -9,7 +9,7 @@ const client = createPublicClient({
 })
 
 const chainId = 8453
-const blockNumber = BigInt(23724083)
+const blockNumber = BigInt(23724184)
 const signature =
   '0x2d37b16631b67cbe79e8b115cda1ee74dde8492beef9fac0746777c463e0c8cc5cfd2cea5f1e2e6d8899e4fe33ab709a449e262cc9fc56c3d63b789d99270954'
 const messageHash = '0x9d447d956f18f06efc4e1fa2b715e6a46fe680d3d35e1ebe90b9d56ad1eddca1'
@@ -63,11 +63,12 @@ async function main() {
   const verifiedBalance = BigInt(proof.publicInputs[32]).toString()
 
   console.log({
+    id: keccak256(bytesToHex(proof.proof)),
     chainId,
     blockNumber,
     tokenAddress,
-    verifiedBalance,
     storageHash,
+    verifiedBalance,
     verified,
     proof,
   })

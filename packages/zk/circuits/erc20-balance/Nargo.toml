@@ -6,4 +6,4 @@ compiler_version = ">=0.38.0"
 version = "0.1.0"
 
 [dependencies]
-ecrecover = { path = "../ecrecover-noir" }
+lib = { path = "../lib" }
