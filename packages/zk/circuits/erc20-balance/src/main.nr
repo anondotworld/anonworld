@@ -7,15 +7,19 @@ fn main(
     pub_key_x: [u8; 32],
     pub_key_y: [u8; 32],
     // Storage Proof
-    storage_root: pub [u8; 32],
+    storage_hash: [u8; 32],
     storage_nodes: [[u8; 532]; 7],
     storage_leaf: [u8; 69],
     storage_depth: u64,
     storage_value: Field,
-    // Balance Data
+    // Verification Data
+    chain_id: Field,
+    block_number: Field,
+    token_address: Field,
     balance_slot: Field,
-    verified_balance: pub Field,
-) {
+    // Balance Data
+    verified_balance: Field,
+) -> pub (Field, Field, Field, Field, Field, [u8; 32]) {
     let balance_slot_bytes: [u8; 32] = balance_slot.to_be_bytes();
     let address: [u8; 32] =
         ecrecover::ecrecover(pub_key_x, pub_key_y, signature, message_hash).to_be_bytes();
@@ -26,13 +30,15 @@ fn main(
     proof::verify(
         key,
         value,
-        storage_root,
+        storage_hash,
         storage_nodes,
         storage_leaf,
         storage_depth,
     );
 
     assert(!storage_value.lt(verified_balance), "Attempt to verify too high balance");
+
+    (verified_balance, chain_id, block_number, token_address, balance_slot, storage_hash)
 }
 
 #[test]
@@ -62,7 +68,7 @@ fn test_main() {
     let balance_slot = 0;
     let verified_balance = 0x27b7c8936148ec1a00001;
     let storage_value = 0x27b7c8936148ec1a00001;
-    let storage_root = [
+    let storage_hash = [
         0xfe, 0x24, 0x8f, 0x06, 0xea, 0xe1, 0xa1, 0x53, 0xfb, 0x78, 0x4d, 0x20, 0x48, 0x40, 0x71,
         0x89, 0x2f, 0xc0, 0xcd, 0xcd, 0x8c, 0x7b, 0x76, 0x4c, 0xc6, 0xb4, 0xcf, 0x33, 0xfd, 0x33,
         0xa5, 0x24,
@@ -363,11 +369,14 @@ fn test_main() {
         message_hash,
         pub_key_x,
         pub_key_y,
-        storage_root,
+        storage_hash,
         storage_nodes,
         storage_leaf,
         storage_depth,
         storage_value,
+        8453,
+        0,
+        0x0000000000000000000000000000000000000000,
         balance_slot,
         verified_balance,
     );

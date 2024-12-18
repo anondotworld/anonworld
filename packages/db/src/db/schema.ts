@@ -12,6 +12,7 @@ export const actionsTable = pgTable('actions', {
   id: uuid('id').defaultRandom().primaryKey(),
   type: varchar({ length: 255 }).notNull(),
   credential_id: varchar({ length: 255 }).references(() => credentialsTable.id),
+  credential_requirement: jsonb('credential_requirement'),
   metadata: jsonb('metadata'),
   trigger: varchar({ length: 255 }).notNull(),
   created_at: timestamp().notNull().defaultNow(),
@@ -69,9 +70,7 @@ export const postCredentialsTable = pgTable('post_credentials', {
   post_hash: varchar({ length: 255 })
     .references(() => postsTable.hash)
     .notNull(),
-  credential_id: varchar({ length: 255 })
-    .references(() => credentialsTable.id)
-    .notNull(),
+  credential_id: varchar({ length: 255 }),
 })
 
 export const actionExecutionsTable = pgTable('action_executions', {
@@ -91,6 +90,16 @@ export const credentialsTable = pgTable('credentials', {
   id: varchar({ length: 255 }).primaryKey(),
   type: varchar({ length: 255 }).notNull(),
   metadata: jsonb('metadata').notNull(),
+  created_at: timestamp().notNull().defaultNow(),
+  updated_at: timestamp().notNull().defaultNow(),
+})
+
+export const credentialInstancesTable = pgTable('credential_instances', {
+  id: varchar({ length: 255 }).primaryKey(),
+  credential_id: varchar({ length: 255 }).notNull(),
+  metadata: jsonb('metadata').notNull(),
+  proof: jsonb('proof').notNull(),
+  verified_at: timestamp().notNull(),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 })

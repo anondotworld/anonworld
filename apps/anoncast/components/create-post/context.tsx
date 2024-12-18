@@ -1,12 +1,12 @@
 'use client'
 
 import { useToast } from '@/lib/hooks/use-toast'
-import { Cast, Channel } from '@anonworld/react'
+import { Cast, Channel, Credential } from '@anonworld/react'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
 import { ToastAction } from '../ui/toast'
-import { POST_ACTION_ID } from '@/lib/utils'
+import { CREATE_POST_ACTION_ID } from '@/lib/utils'
 import { ExecuteActionsStatus, useExecuteActions } from '@anonworld/react'
 
 type Variant = 'anoncast' | 'anonfun' | 'anon'
@@ -33,6 +33,8 @@ interface CreatePostContextProps {
   setRevealPhrase: (revealPhrase: string | null) => void
   variant: Variant
   setVariant: (variant: Variant) => void
+  credential: Credential | null
+  setCredential: (credential: Credential | null) => void
 }
 
 const CreatePostContext = createContext<CreatePostContextProps | undefined>(undefined)
@@ -54,8 +56,9 @@ export const CreatePostProvider = ({
   const [confetti, setConfetti] = useState(false)
   const { toast } = useToast()
   const [variant, setVariant] = useState<Variant>(initialVariant || 'anoncast')
+  const [credential, setCredential] = useState<Credential | null>(null)
   const router = useRouter()
-  const { executeActions: performAction, status } = useExecuteActions({
+  const { executeActions, status } = useExecuteActions({
     onSuccess: (response) => {
       setText(null)
       setImage(null)
@@ -90,6 +93,15 @@ export const CreatePostProvider = ({
   })
 
   const createPost = async () => {
+    if (!credential) {
+      toast({
+        variant: 'destructive',
+        title: 'No credential selected',
+        description: 'Please select a credential to post.',
+      })
+      return
+    }
+
     const data = {
       text: text ?? undefined,
       embeds: embed ? [embed] : undefined,
@@ -99,15 +111,16 @@ export const CreatePostProvider = ({
       parent: parent?.hash,
     }
 
-    await performAction([
+    await executeActions([
       {
-        actionId: POST_ACTION_ID,
+        actionId: CREATE_POST_ACTION_ID,
         data: {
           ...data,
           revealHash: revealPhrase
             ? hashMessage(JSON.stringify(data) + revealPhrase)
             : undefined,
         },
+        credential,
       },
     ])
   }
@@ -143,6 +156,8 @@ export const CreatePostProvider = ({
         setRevealPhrase,
         variant,
         setVariant: handleSetVariant,
+        credential,
+        setCredential,
       }}
     >
       {children}

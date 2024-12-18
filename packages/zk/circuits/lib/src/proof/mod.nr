@@ -8,7 +8,7 @@ use dep::std::hash::keccak256;
 pub fn verify(
     key: [u8; 32],
     value: [u8; 32],
-    storage_root: [u8; 32],
+    storage_hash: [u8; 32],
     nodes: [[u8; 532]; 7],
     leaf: [u8; 69],
     depth: u64,
@@ -17,7 +17,7 @@ pub fn verify(
     let nibbles = bytes_as_nibbles(key);
 
     let mut key_index = 0;
-    let mut curr_hash = storage_root;
+    let mut curr_hash = storage_hash;
     for i in 0..7 {
         if i < depth - 1 {
             let node = nodes[i];

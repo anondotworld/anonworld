@@ -22,6 +22,7 @@ import { useQuery } from '@tanstack/react-query'
 import Confetti from 'confetti-react'
 import { Checkbox } from '../ui/checkbox'
 import { useSDK } from '@anonworld/react'
+import { CredentialsSelect } from '../credentials-select'
 
 const MAX_EMBEDS = 2
 
@@ -38,6 +39,7 @@ export function CreatePost({ variant }: { variant: 'post' | 'launch' }) {
     setQuote,
     confetti,
     setConfetti,
+    credential,
   } = useCreatePost()
 
   const length = new Blob([text ?? '']).size
@@ -86,6 +88,7 @@ export function CreatePost({ variant }: { variant: 'post' | 'launch' }) {
   return (
     <div className="flex flex-col gap-4">
       <RemoveableParent />
+      <Credential />
       <Textarea
         value={text ?? ''}
         onChange={handleSetText}
@@ -113,7 +116,9 @@ export function CreatePost({ variant }: { variant: 'post' | 'launch' }) {
           <Button
             onClick={createPost}
             className="font-bold text-md rounded-md hover:scale-105 transition-all duration-300"
-            disabled={!['idle', 'success', 'error'].includes(status.status)}
+            disabled={
+              !['idle', 'success', 'error'].includes(status.status) || !credential
+            }
           >
             {status.status === 'loading' ? (
               <div className="flex flex-row items-center gap-2">
@@ -689,6 +694,23 @@ function RevealPhrase() {
           />
         </div>
       )}
+    </div>
+  )
+}
+
+function Credential() {
+  const { credential, setCredential } = useCreatePost()
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col">
+        <span className="text-sm font-semibold">
+          Post Credential <span className="text-red-500">*</span>
+        </span>
+        <span className="text-sm text-zinc-400">
+          A post credential with a minimum of 5000 $ANON is required to post.
+        </span>
+      </div>
+      <CredentialsSelect selected={credential} onSelect={setCredential} />
     </div>
   )
 }

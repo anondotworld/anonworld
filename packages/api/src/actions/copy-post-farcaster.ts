@@ -1,5 +1,6 @@
 import {
   createPost,
+  createPostCredentials,
   createPostRelationship,
   getPost,
   getPostRelationship,
@@ -22,7 +23,7 @@ export class CopyPostFarcaster extends BaseAction<
 > {
   async isAbleToPromote(post: PostData) {
     const unableToPromoteRegex = [
-      // /.*@clanker.*(launch|deploy|make).*/i,
+      // /.*@clanker.*(launch|deploy|make).*/is,
       /.*dexscreener.com.*/i,
       /.*dextools.io.*/i,
       /.*0x[a-fA-F0-9]{40}.*/i,
@@ -84,6 +85,8 @@ export class CopyPostFarcaster extends BaseAction<
       target_account: this.action.metadata.fid.toString(),
       target_id: response.cast.hash,
     })
+
+    await createPostCredentials(response.cast.hash, this.credentials)
 
     return { success: true, hash: response.cast.hash }
   }

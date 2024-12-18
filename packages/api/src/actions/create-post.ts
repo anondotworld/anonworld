@@ -6,7 +6,7 @@ import {
 } from '@anonworld/db'
 import { neynar } from '../services/neynar'
 import { BaseAction } from './base'
-import { ActionRequest, ActionType } from './types'
+import { ActionRequest } from './types'
 
 const INVALID_REGEXES = [
   // biome-ignore lint/suspicious/noMisleadingCharacterClass: regex
@@ -66,7 +66,7 @@ export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
       reveal_hash: revealHash,
     })
 
-    await createPostCredentials(response.cast.hash, this.roots)
+    await createPostCredentials(response.cast.hash, this.credentials)
 
     this.hash = response.cast.hash
 
@@ -79,17 +79,39 @@ export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
   async next(): Promise<ActionRequest[]> {
     if (!this.hash) return []
 
-    const actions = await getActionsForTrigger(
-      this.action.id,
-      this.credentials.map((c) => c.id)
-    )
+    const actions = await getActionsForTrigger(this.action.id)
 
-    return actions.map((a) => ({
-      actionId: a.id,
-      data: {
-        hash: this.hash,
-      },
-      credentials: this.credentials,
-    }))
+    const nextActions: ActionRequest[] = []
+
+    for (const action of actions) {
+      const credentialRequirements = action.credential_requirement as {
+        minimumBalance: string
+      } | null
+
+      if (!action.credential_id || !credentialRequirements) continue
+
+      const credential = this.credentials.find(
+        (c) => c.credential_id === action.credential_id
+      )
+      if (!credential) continue
+
+      const credentialMetadata = credential.metadata as { balance: string }
+
+      if (
+        BigInt(credentialMetadata.balance) < BigInt(credentialRequirements.minimumBalance)
+      ) {
+        continue
+      }
+
+      nextActions.push({
+        actionId: action.id,
+        data: {
+          hash: this.hash,
+        },
+        credentials: this.credentials,
+      })
+    }
+
+    return nextActions
   }
 }

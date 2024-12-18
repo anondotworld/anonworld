@@ -1,12 +1,12 @@
+import { CredentialInstance } from '@anonworld/db'
+
 export type ActionRequest = {
   data: any
-  credentials: {
-    id: string
-    proof: {
-      proof: number[]
-      publicInputs: string[]
-    }
+  proofs?: {
+    proof: number[]
+    publicInputs: string[]
   }[]
+  credentials?: CredentialInstance[]
   actionId: string
 }
 

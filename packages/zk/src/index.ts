@@ -1,16 +1,18 @@
-import { type Noir } from '@noir-lang/noir_js'
-import { UltraHonkBackend, BarretenbergVerifier, ProofData } from '@aztec/bb.js'
 import { BarretenbergSync, Fr } from '@aztec/bb.js'
-import { CircuitConfig, CircuitType, getCircuitConfig } from './utils'
+import { BaseCircuit } from './base'
+import erc20BalanceCircuit from '../circuits/erc20-balance/target/0.1.0/main.json'
+import erc20BalanceVkey from '../circuits/erc20-balance/target/0.1.0/vkey.json'
+import merkleMembershipCircuit from '../circuits/merkle-membership/target/0.1.0/main.json'
+import merkleMembershipVkey from '../circuits/merkle-membership/target/0.1.0/vkey.json'
 export type { ProofData } from '@aztec/bb.js'
 
-type ProverModules = {
-  Noir: typeof Noir
-  UltraHonkBackend: typeof UltraHonkBackend
-}
-
-type VerifierModules = {
-  BarretenbergVerifier: typeof BarretenbergVerifier
+export type ERC20BalanceData = {
+  balance: string
+  chainId: string
+  blockNumber: string
+  tokenAddress: `0x${string}`
+  balanceSlot: string
+  storageHash: `0x${string}`
 }
 
 export const buildHashFunction = async () => {
@@ -19,78 +21,38 @@ export const buildHashFunction = async () => {
     bb.poseidon2Hash([Fr.fromString(a), Fr.fromString(b)]).toString()
 }
 
-export class ProofManager {
-  private proverPromise: Promise<ProverModules> | null = null
-  private verifierPromise: Promise<VerifierModules> | null = null
-  private circuitType: CircuitType
-  private circuit: CircuitConfig | null = null
-
-  constructor(circuitType: CircuitType) {
-    this.circuitType = circuitType
+export class ERC20Balance extends BaseCircuit {
+  constructor() {
+    super(erc20BalanceCircuit, erc20BalanceVkey)
   }
 
-  async initCircuit() {
-    if (!this.circuit) {
-      this.circuit = await getCircuitConfig(this.circuitType)
+  parseData(publicInputs: string[]): ERC20BalanceData {
+    const balance = BigInt(publicInputs[0]).toString()
+    const chainId = BigInt(publicInputs[1]).toString()
+    const blockNumber = BigInt(publicInputs[2]).toString()
+    const tokenAddress = `0x${publicInputs[3].slice(-40)}` as `0x${string}`
+    const balanceSlot = BigInt(publicInputs[4]).toString()
+    const storageHash = `0x${publicInputs
+      .slice(5, 5 + 32)
+      .map((b) => BigInt(b).toString(16).padStart(2, '0'))
+      .join('')}` as `0x${string}`
+
+    return {
+      balance,
+      chainId,
+      blockNumber,
+      tokenAddress,
+      balanceSlot,
+      storageHash,
     }
-  }
-
-  async initProver(): Promise<ProverModules> {
-    if (!this.proverPromise) {
-      this.proverPromise = (async () => {
-        const [{ Noir }, { UltraHonkBackend }] = await Promise.all([
-          import('@noir-lang/noir_js'),
-          import('@aztec/bb.js'),
-        ])
-        return {
-          Noir,
-          UltraHonkBackend,
-        }
-      })()
-    }
-    return this.proverPromise
-  }
-
-  async initVerifier(): Promise<VerifierModules> {
-    if (!this.verifierPromise) {
-      this.verifierPromise = (async () => {
-        const { BarretenbergVerifier } = await import('@aztec/bb.js')
-        return { BarretenbergVerifier }
-      })()
-    }
-    return this.verifierPromise
-  }
-
-  async verify(proofData: ProofData) {
-    await this.initCircuit()
-    if (!this.circuit) {
-      throw new Error('Circuit not initialized')
-    }
-
-    const { BarretenbergVerifier } = await this.initVerifier()
-
-    const verifier = new BarretenbergVerifier({ crsPath: process.env.TEMP_DIR })
-    const result = await verifier.verifyUltraHonkProof(proofData, this.circuit.vkey)
-
-    return result
-  }
-
-  async generate(input: Record<string, any>) {
-    await this.initCircuit()
-    if (!this.circuit) {
-      throw new Error('Circuit not initialized')
-    }
-
-    const { Noir, UltraHonkBackend } = await this.initProver()
-
-    const backend = new UltraHonkBackend(this.circuit.circuit.bytecode)
-    const noir = new Noir(this.circuit.circuit)
-
-    const { witness } = await noir.execute(input)
-
-    return await backend.generateProof(witness)
   }
 }
 
-export const merkleMembership = new ProofManager(CircuitType.MerkleMembership)
-export const evmStorage = new ProofManager(CircuitType.EVMStorage)
+export class MerkleMembership extends BaseCircuit {
+  constructor() {
+    super(merkleMembershipCircuit, merkleMembershipVkey)
+  }
+}
+
+export const erc20Balance = new ERC20Balance()
+export const merkleMembership = new MerkleMembership()

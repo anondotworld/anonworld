@@ -29,13 +29,15 @@ import {
   DELETE_FROM_TWITTER_ACTION_ID,
   COPY_TO_ANONCAST_ACTION_ID,
   COPY_TO_TWITTER_ACTION_ID,
+  TOKEN_ADDRESS,
 } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
-import { formatEther, hashMessage } from 'viem'
+import { formatEther, hashMessage, parseEther } from 'viem'
 import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
 import { useExecuteActions, useSDK } from '@anonworld/react'
 import { ToastAction } from '@radix-ui/react-toast'
+import { VerifyCredential } from '../credentials-select'
 
 function formatNumber(num: number): string {
   if (num < 1000) return num.toString()
@@ -55,6 +57,7 @@ export function Post({
   const { address } = useAccount()
   const { data: balance } = useBalance()
   const [reveal, setReveal] = useState(cast.reveal)
+  const { credentials } = useSDK()
 
   const twitterSibling = cast.siblings.find((sibling) => sibling.target === 'twitter')
   const twitterChild = cast.children.find((child) => child.target === 'twitter')
@@ -99,9 +102,13 @@ export function Post({
     balance >= BigInt(LAUNCH_AMOUNT) &&
     !launchChild &&
     variant === 'anonfun' &&
-    cast.text.match(/.*@clanker.*(launch|deploy|make).*/)
+    cast.text.match(/.*@clanker.*(launch|deploy|make).*/is)
 
   const canReveal = address && !!cast.reveal && !cast.reveal?.phrase
+
+  const has2M = credentials.credentials.some(
+    (c) => BigInt(c.metadata.balance) >= parseEther('2000000')
+  )
 
   const { setParent, setQuote } = useCreatePost()
   const cleanText = (text: string) => {
@@ -150,7 +157,7 @@ export function Post({
                     className="text-xs font-medium border text-zinc-400 px-2 py-1 rounded-xl flex flex-row items-center gap-1"
                   >
                     <Coins size={12} />
-                    {`${formatNumber(Number.parseFloat(formatEther(BigInt(c.metadata.minBalance))))}+ ${c.metadata.ticker}`}
+                    {`${formatNumber(Number.parseFloat(formatEther(BigInt(c.metadata.balance))))} ${c.metadata.tokenAddress === TOKEN_ADDRESS ? 'ANON' : c.metadata.tokenAddress}`}
                   </div>
                 ))}
                 {cast.parent_hash && (
@@ -288,8 +295,8 @@ export function Post({
                 </p>
               )}
               {canReveal && <RevealButton cast={cast} onReveal={setReveal} />}
-              {canPromote && <PromoteButton cast={cast} />}
-              {canLaunch && <LaunchButton cast={cast} />}
+              {canPromote && <PromoteButton cast={cast} isVerified={has2M} />}
+              {canLaunch && <LaunchButton cast={cast} isVerified={has2M} />}
               {(launchChild || cast.author.fid === LAUNCH_FID) && (
                 <a
                   href={`https://warpcast.com/~/conversations/${cast.hash}`}
@@ -300,7 +307,7 @@ export function Post({
                   Launched
                 </a>
               )}
-              {canDelete && <DeleteButton cast={cast} />}
+              {canDelete && <DeleteButton cast={cast} isVerified={has2M} />}
             </div>
           </div>
         </div>
@@ -333,8 +340,9 @@ function timeAgo(timestamp: string): string {
   return 'just now'
 }
 
-function DeleteButton({ cast }: { cast: Cast }) {
+function DeleteButton({ cast, isVerified }: { cast: Cast; isVerified: boolean }) {
   const [open, setOpen] = useState(false)
+  const [verifyOpen, setVerifyOpen] = useState(false)
   const { toast } = useToast()
   const { executeActions: performAction, status } = useExecuteActions({
     onSuccess: () => {
@@ -378,6 +386,28 @@ function DeleteButton({ cast }: { cast: Cast }) {
     setOpen(false)
   }
 
+  if (!isVerified) {
+    return (
+      <>
+        <p
+          className="text-sm text-red-500 underline decoration-dotted font-semibold cursor-pointer hover:text-red-400"
+          onClick={() => setVerifyOpen(true)}
+        >
+          Delete
+        </p>
+        <VerifyCredential
+          open={verifyOpen}
+          setOpen={setVerifyOpen}
+          onVerify={() => {
+            setVerifyOpen(false)
+            setOpen(true)
+          }}
+          minBalance={2000000}
+        />
+      </>
+    )
+  }
+
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
@@ -414,8 +444,9 @@ function DeleteButton({ cast }: { cast: Cast }) {
   )
 }
 
-function PromoteButton({ cast }: { cast: Cast }) {
+function PromoteButton({ cast, isVerified }: { cast: Cast; isVerified: boolean }) {
   const [open, setOpen] = useState(false)
+  const [verifyOpen, setVerifyOpen] = useState(false)
   const [asReply, setAsReply] = useState(false)
   const { toast } = useToast()
   const { executeActions: performAction, status } = useExecuteActions({
@@ -467,6 +498,28 @@ function PromoteButton({ cast }: { cast: Cast }) {
     (e) => e.url?.includes('x.com') || e.url?.includes('twitter.com')
   )
 
+  if (!isVerified) {
+    return (
+      <>
+        <p
+          className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
+          onClick={() => setVerifyOpen(true)}
+        >
+          Promote
+        </p>
+        <VerifyCredential
+          open={verifyOpen}
+          setOpen={setVerifyOpen}
+          onVerify={() => {
+            setVerifyOpen(false)
+            setOpen(true)
+          }}
+          minBalance={2000000}
+        />
+      </>
+    )
+  }
+
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
@@ -517,8 +570,9 @@ function PromoteButton({ cast }: { cast: Cast }) {
   )
 }
 
-function LaunchButton({ cast }: { cast: Cast }) {
+function LaunchButton({ cast, isVerified }: { cast: Cast; isVerified: boolean }) {
   const [open, setOpen] = useState(false)
+  const [verifyOpen, setVerifyOpen] = useState(false)
   const { toast } = useToast()
   const { executeActions: performAction, status } = useExecuteActions({
     onSuccess: (response) => {
@@ -556,6 +610,28 @@ function LaunchButton({ cast }: { cast: Cast }) {
       },
     ])
     setOpen(false)
+  }
+
+  if (!isVerified) {
+    return (
+      <>
+        <p
+          className="text-sm underline decoration-dotted font-semibold cursor-pointer hover:text-zinc-400"
+          onClick={() => setVerifyOpen(true)}
+        >
+          Launch
+        </p>
+        <VerifyCredential
+          open={verifyOpen}
+          setOpen={setVerifyOpen}
+          onVerify={() => {
+            setVerifyOpen(false)
+            setOpen(true)
+          }}
+          minBalance={2000000}
+        />
+      </>
+    )
   }
 
   return (

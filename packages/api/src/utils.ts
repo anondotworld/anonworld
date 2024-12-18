@@ -3,8 +3,8 @@ import { Elysia } from 'elysia'
 import { Logestic } from 'logestic'
 import { Cast } from './services/neynar/types'
 import {
-  getBulkCredentials,
   getPostChildren,
+  getPostCredentials,
   getPostParentAndSiblings,
 } from '@anonworld/db'
 import { getBulkPosts } from '@anonworld/db'
@@ -27,16 +27,14 @@ export const augmentCasts = async (casts: Cast[]) => {
     getBulkPosts(hashes),
     getPostChildren(hashes),
     getPostParentAndSiblings(hashes),
-    getBulkCredentials(hashes),
+    getPostCredentials(hashes),
   ])
 
   return casts.map((cast) => {
     const post = posts.find((p) => p.hash === cast.hash)
     const castChildren = children.filter((r) => r.post_hash === cast.hash)
     const castRelationships = relationships[cast.hash]
-    const castCredentials = credentials.filter(
-      (c) => c.post_credentials.post_hash === cast.hash
-    )
+    const castCredentials = credentials.find((c) => c.hash === cast.hash)
 
     return {
       ...cast,
@@ -60,7 +58,10 @@ export const augmentCasts = async (casts: Cast[]) => {
           targetId: s.target_id,
         })) ?? [],
       parent: castRelationships?.parent?.post_hash,
-      credentials: castCredentials.map((c) => c.credentials),
+      credentials: castCredentials?.credentials.map((c) => ({
+        ...c,
+        proof: undefined,
+      })),
     }
   })
 }

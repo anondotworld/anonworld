@@ -1,4 +1,4 @@
-import { evmStorage } from '../src'
+import { erc20Balance } from '../src'
 import { bytesToHex, concat, createPublicClient, http, keccak256, pad, toHex } from 'viem'
 import { base } from 'viem/chains'
 import { formatArray, formatHexArray } from './utils'
@@ -9,7 +9,6 @@ const client = createPublicClient({
 })
 
 const chainId = 8453
-const blockNumber = BigInt(23724184)
 const signature =
   '0x2d37b16631b67cbe79e8b115cda1ee74dde8492beef9fac0746777c463e0c8cc5cfd2cea5f1e2e6d8899e4fe33ab709a449e262cc9fc56c3d63b789d99270954'
 const messageHash = '0x9d447d956f18f06efc4e1fa2b715e6a46fe680d3d35e1ebe90b9d56ad1eddca1'
@@ -20,6 +19,7 @@ const tokenAddress = '0x0db510e79909666d6dec7f5e49370838c16d950f'
 const balanceSlot = pad(toHex(0))
 
 async function main() {
+  const blockNumber = await client.getBlockNumber()
   const storageKey = keccak256(concat([pad(address), balanceSlot]))
   const ethProof = await client.getProof({
     address: tokenAddress,
@@ -36,41 +36,39 @@ async function main() {
     message_hash: formatHexArray(messageHash),
     pub_key_x: formatHexArray(pubKeyX),
     pub_key_y: formatHexArray(pubKeyY),
-    balance_slot: 0,
-    verified_balance: `0x${BigInt(1_000_000).toString(16)}`,
-    storage_value: `0x${storageProof.value.toString(16)}`,
-    storage_root: formatHexArray(ethProof.storageHash),
+    storage_hash: formatHexArray(ethProof.storageHash),
     storage_nodes: formatArray(nodes, (node) =>
       formatHexArray(node, { length: 532, pad: 'right' })
     ),
     storage_leaf: formatHexArray(leaf, { length: 69, pad: 'right' }),
     storage_depth: storageProof.proof.length,
+    storage_value: `0x${storageProof.value.toString(16)}`,
+    chain_id: `0x${chainId.toString(16)}`,
+    block_number: `0x${blockNumber.toString(16)}`,
+    token_address: tokenAddress,
+    balance_slot: `0x${BigInt(0).toString(16)}`,
+    verified_balance: `0x${BigInt(1_000_000).toString(16)}`,
   }
 
+  console.log(input)
+
   console.time('generateProof')
-  const proof = await evmStorage.generate(input)
+  const proof = await erc20Balance.generate(input)
   console.timeEnd('generateProof')
 
   console.time('verifyProof')
-  const verified = await evmStorage.verify(proof)
+  const verified = await erc20Balance.verify(proof)
   console.timeEnd('verifyProof')
 
-  const storageHash = `0x${proof.publicInputs
-    .slice(0, 32)
-    .map((b) => BigInt(b).toString(16).padStart(2, '0'))
-    .join('')}`
+  const data = erc20Balance.parseData(proof.publicInputs)
 
-  const verifiedBalance = BigInt(proof.publicInputs[32]).toString()
+  const id = keccak256(bytesToHex(proof.proof))
 
   console.log({
-    id: keccak256(bytesToHex(proof.proof)),
-    chainId,
-    blockNumber,
-    tokenAddress,
-    storageHash,
-    verifiedBalance,
+    id,
     verified,
     proof,
+    data,
   })
 }
 

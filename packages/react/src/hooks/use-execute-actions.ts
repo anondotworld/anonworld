@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useSDK } from '../sdk'
 import { useAccount } from 'wagmi'
 import { PerformAction, PerformActionData } from '@anonworld/sdk/types'
+import { parseUnits } from 'viem'
+import { Credential } from './use-credentials'
 
 export type ExecuteActionsStatus =
   | {
@@ -30,7 +32,7 @@ export const useExecuteActions = ({
   const { address } = useAccount()
 
   const executeActions = async (
-    actions: { actionId: string; data: PerformActionData }[]
+    actions: { actionId: string; data: PerformActionData; credential?: Credential }[]
   ) => {
     try {
       if (!address) {
@@ -40,28 +42,43 @@ export const useExecuteActions = ({
       setStatus({ status: 'loading' })
 
       const formattedActions: PerformAction[] = []
-      for (const { actionId, data } of actions) {
+      for (const { actionId, data, credential } of actions) {
         const action = await sdk.getAction(actionId)
-
-        let credentialId = action.data?.credential_id
-        if (!credentialId) {
-          credentialId =
-            'erc20-balance:8453:0x0db510e79909666d6dec7f5e49370838c16d950f:5000000000000000000000'
+        if (!action.data) {
+          throw new Error('Action not found')
         }
 
-        let credential = credentials.get(credentialId)
-        if (!credential) {
-          credential = await credentials.add(credentialId)
+        let requiredCredentialId = action.data.credential_id
+        let requiredBalance = action.data.credential_requirement?.minimumBalance
+          ? BigInt(action.data.credential_requirement.minimumBalance)
+          : parseUnits('5000', 18)
+
+        let credentialToUse = credential
+        if (requiredCredentialId) {
+          credentialToUse = credentials.credentials.find(
+            (c) =>
+              c.credential_id === requiredCredentialId &&
+              BigInt(c.metadata.balance) >= requiredBalance
+          )
+          if (!credentialToUse) {
+            const [_, chainId, tokenAddress] = requiredCredentialId.split(':')
+            credentialToUse = await credentials.addERC20Balance({
+              chainId: Number(chainId),
+              tokenAddress: tokenAddress as `0x${string}`,
+              balanceSlot: 0,
+              verifiedBalance: requiredBalance,
+            })
+          }
         }
 
-        if (!credential) {
+        if (!credentialToUse) {
           continue
         }
 
         formattedActions.push({
           actionId,
           data,
-          credentials: [credential],
+          proofs: [credentialToUse.proof],
         })
       }
 

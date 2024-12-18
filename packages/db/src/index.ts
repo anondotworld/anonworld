@@ -1,19 +1,18 @@
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
+import { and, eq, inArray, isNull } from 'drizzle-orm'
 import {
   actionExecutionsTable,
   actionsTable,
-  credentialsTable,
+  credentialInstancesTable,
   farcasterAccountsTable,
-  merkleRootsTable,
   postCredentialsTable,
   postRelationshipsTable,
   postsTable,
   twitterAccountsTable,
 } from './db/schema'
 
-export type Credential = typeof credentialsTable.$inferSelect
+export type CredentialInstance = typeof credentialInstancesTable.$inferSelect
 export type Action<T = unknown> = typeof actionsTable.$inferSelect & {
   metadata: T
 }
@@ -42,16 +41,8 @@ export const getAction = async (actionId: string) => {
   return action
 }
 
-export const getActionsForTrigger = async (trigger: string, credentialIds: string[]) => {
-  return await db
-    .select()
-    .from(actionsTable)
-    .where(
-      and(
-        inArray(actionsTable.credential_id, credentialIds),
-        eq(actionsTable.trigger, trigger)
-      )
-    )
+export const getActionsForTrigger = async (trigger: string) => {
+  return await db.select().from(actionsTable).where(eq(actionsTable.trigger, trigger))
 }
 
 export const getSignerForFid = async (fid: number) => {
@@ -210,78 +201,44 @@ export const deletePostRelationship = async (target: string, targetId: string) =
     )
 }
 
-export const getAllCredentials = async () => {
-  return await db.select().from(credentialsTable)
-}
-
 export const getAllFarcasterAccounts = async () => {
   return await db.select().from(farcasterAccountsTable)
 }
 
-export const getCredential = async (credentialId: string) => {
-  const [credential] = await db
-    .select()
-    .from(credentialsTable)
-    .where(eq(credentialsTable.id, credentialId))
-  return credential
-}
-
-export const createMerkleRoot = async (
-  params: {
-    credentialId?: string
-    chainId: number
-    tokenAddress: string
-    minBalance: bigint
-  },
-  root: string
+export const createPostCredentials = async (
+  hash: string,
+  credentials: CredentialInstance[]
 ) => {
-  await db
-    .insert(merkleRootsTable)
-    .values({
-      chain_id: params.chainId,
-      token_address: params.tokenAddress,
-      min_balance: params.minBalance.toString(),
-      credential_id: params.credentialId,
-      root: root,
-    })
-    .onConflictDoNothing()
-}
-
-export const createPostCredentials = async (hash: string, roots: string[]) => {
-  const credentials = await db
-    .select()
-    .from(merkleRootsTable)
-    .where(
-      and(
-        inArray(merkleRootsTable.root, roots),
-        isNotNull(merkleRootsTable.credential_id)
-      )
-    )
-
   await db.insert(postCredentialsTable).values(
     credentials.map((credential) => ({
       post_hash: hash,
-      credential_id: credential.credential_id!,
+      credential_id: credential.id,
     }))
   )
 }
 
-export const getBulkCredentials = async (hashes: string[]) => {
-  return await db
+export const getPostCredentials = async (hashes: string[]) => {
+  const postCredentials = await db
     .select()
     .from(postCredentialsTable)
-    .innerJoin(
-      credentialsTable,
-      eq(postCredentialsTable.credential_id, credentialsTable.id)
-    )
     .where(inArray(postCredentialsTable.post_hash, hashes))
-}
 
-export const validateMerkleRoots = async (roots: string[]) => {
-  return await db
+  const credentialIds = postCredentials.map((p) => p.credential_id!).filter(Boolean)
+
+  const credentials = await db
     .select()
-    .from(merkleRootsTable)
-    .where(inArray(merkleRootsTable.root, roots))
+    .from(credentialInstancesTable)
+    .where(inArray(credentialInstancesTable.id, credentialIds))
+
+  return hashes.map((hash) => ({
+    hash,
+    credentials: postCredentials
+      .filter((p) => p.post_hash === hash)
+      .map((p) => p.credential_id!)
+      .filter(Boolean)
+      .map((id) => credentials.find((c) => c.id === id)!)
+      .filter(Boolean),
+  }))
 }
 
 export const getTwitterAccount = async (username: string) => {
@@ -290,4 +247,24 @@ export const getTwitterAccount = async (username: string) => {
     .from(twitterAccountsTable)
     .where(eq(twitterAccountsTable.username, username))
   return account
+}
+
+export const getCredentialInstance = async (id: string) => {
+  const [credential] = await db
+    .select()
+    .from(credentialInstancesTable)
+    .where(eq(credentialInstancesTable.id, id))
+    .limit(1)
+
+  return credential
+}
+
+export const createCredentialInstance = async (
+  params: Omit<typeof credentialInstancesTable.$inferInsert, 'created_at' | 'updated_at'>
+) => {
+  const [credential] = await db
+    .insert(credentialInstancesTable)
+    .values(params)
+    .returning()
+  return credential
 }

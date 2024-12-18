@@ -23,7 +23,7 @@ export class CopyPostTwitter extends BaseAction<
 > {
   async isAbleToPromote(post: PostData) {
     const unableToPromoteRegex = [
-      /.*@clanker.*(launch|deploy|make).*/,
+      /.*@clanker.*(launch|deploy|make).*/is,
       /.*dexscreener.com.*/i,
       /.*dextools.io.*/i,
       /.*0x[a-fA-F0-9]{40}.*/i,

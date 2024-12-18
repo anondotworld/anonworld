@@ -540,12 +540,10 @@ export type Relationship = {
 
 export type Credential = {
   id: string
-  type: string
+  credential_id: string
   metadata: {
-    ticker: string
-    chainId: number
     tokenAddress: string
-    minBalance: string
+    balance: string
   }
 }
 
@@ -584,12 +582,9 @@ export type PerformActionData =
   | CopyPostTwitterActionData
 
 export type PerformAction = {
-  credentials: {
-    id: string
-    proof: {
-      proof: number[]
-      publicInputs: string[]
-    }
+  proofs: {
+    proof: number[]
+    publicInputs: string[]
   }[]
   actionId: string
   data: PerformActionData
@@ -602,5 +597,8 @@ export type Action = {
   created_at: Date
   updated_at: Date
   credential_id: string | null
+  credential_requirement: {
+    minimumBalance: string
+  } | null
   trigger: string
 }

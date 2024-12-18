@@ -1,12 +1,15 @@
 'use client'
 
 import { useToast } from '@/lib/hooks/use-toast'
-import { Cast, Channel, ExecuteActionsStatus, useExecuteActions } from '@anonworld/react'
+import { Cast, Channel, Credential } from '@anonworld/react'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
-import { POST_ACTION_ID } from '@/lib/utils'
-import sdk from '@farcaster/frame-sdk'
+import { ToastAction } from '../ui/toast'
+import { CREATE_POST_ACTION_ID } from '@/lib/utils'
+import { ExecuteActionsStatus, useExecuteActions } from '@anonworld/react'
+
+type Variant = 'anoncast' | 'anonfun' | 'anon'
 
 interface CreatePostContextProps {
   text: string | null
@@ -28,8 +31,10 @@ interface CreatePostContextProps {
   setConfetti: (confetti: boolean) => void
   revealPhrase: string | null
   setRevealPhrase: (revealPhrase: string | null) => void
-  variant: 'anoncast' | 'anonfun'
-  setVariant: (variant: 'anoncast' | 'anonfun') => void
+  variant: Variant
+  setVariant: (variant: Variant) => void
+  credential: Credential | null
+  setCredential: (credential: Credential | null) => void
 }
 
 const CreatePostContext = createContext<CreatePostContextProps | undefined>(undefined)
@@ -39,7 +44,7 @@ export const CreatePostProvider = ({
   children,
 }: {
   children: ReactNode
-  initialVariant?: 'anoncast' | 'anonfun'
+  initialVariant?: Variant
 }) => {
   const [text, setText] = useState<string | null>(null)
   const [image, setImage] = useState<string | null>(null)
@@ -50,15 +55,33 @@ export const CreatePostProvider = ({
   const [revealPhrase, setRevealPhrase] = useState<string | null>(null)
   const [confetti, setConfetti] = useState(false)
   const { toast } = useToast()
-  const [variant, setVariant] = useState<'anoncast' | 'anonfun'>(
-    initialVariant || 'anoncast'
-  )
+  const [variant, setVariant] = useState<Variant>(initialVariant || 'anoncast')
+  const [credential, setCredential] = useState<Credential | null>(null)
   const router = useRouter()
-  const { executeActions: performAction, status } = useExecuteActions({
+  const { executeActions, status } = useExecuteActions({
     onSuccess: (response) => {
-      const hash = response.findLast((r) => r.hash)?.hash
-      sdk.actions.openUrl(`https://warpcast.com/~/conversations/${hash}`)
-      sdk.actions.close()
+      setText(null)
+      setImage(null)
+      setEmbed(null)
+      setQuote(null)
+      setChannel(null)
+      setParent(null)
+      setRevealPhrase(null)
+      setConfetti(true)
+      toast({
+        title: 'Post created',
+        action: (
+          <ToastAction
+            altText="View post"
+            onClick={() => {
+              const hash = response.findLast((r) => r.hash)?.hash
+              window.open(`https://warpcast.com/~/conversations/${hash}`, '_blank')
+            }}
+          >
+            View on Warpcast
+          </ToastAction>
+        ),
+      })
     },
     onError: (error) => {
       toast({
@@ -70,6 +93,15 @@ export const CreatePostProvider = ({
   })
 
   const createPost = async () => {
+    if (!credential) {
+      toast({
+        variant: 'destructive',
+        title: 'No credential selected',
+        description: 'Please select a credential to post.',
+      })
+      return
+    }
+
     const data = {
       text: text ?? undefined,
       embeds: embed ? [embed] : undefined,
@@ -79,24 +111,25 @@ export const CreatePostProvider = ({
       parent: parent?.hash,
     }
 
-    await performAction([
+    await executeActions([
       {
-        actionId: POST_ACTION_ID,
+        actionId: CREATE_POST_ACTION_ID,
         data: {
           ...data,
           revealHash: revealPhrase
             ? hashMessage(JSON.stringify(data) + revealPhrase)
             : undefined,
         },
+        credential,
       },
     ])
   }
 
   const embedCount = [image, embed, quote].filter((e) => e !== null).length
 
-  const handleSetVariant = (variant: 'anoncast' | 'anonfun') => {
+  const handleSetVariant = (variant: Variant) => {
     setVariant(variant)
-    router.push(variant === 'anoncast' ? '/' : '/anonfun')
+    router.push(`/${variant}`)
   }
 
   return (
@@ -123,6 +156,8 @@ export const CreatePostProvider = ({
         setRevealPhrase,
         variant,
         setVariant: handleSetVariant,
+        credential,
+        setCredential,
       }}
     >
       {children}
