@@ -77,7 +77,7 @@ export function CredentialsSelect({
               </SelectItem>
             ))}
           </SelectGroup>
-          <SelectSeparator />
+          {credentials.credentials.length > 0 && <SelectSeparator />}
           <SelectGroup>
             <SelectItem value="new" className="font-semibold">
               Add new credential...
@@ -163,7 +163,7 @@ export function VerifyCredential({
           <span className="text-sm whitespace-nowrap">Balance to verify</span>
           <Input
             className="w-32"
-            value={balance.toLocaleString()}
+            value={balance.toString()}
             onChange={(e) => {
               const value = Number(e.target.value)
               if (!Number.isNaN(value)) {

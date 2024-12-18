@@ -88,12 +88,16 @@ export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
         minimumBalance: string
       } | null
 
-      if (!action.credential_id || !credentialRequirements) continue
+      if (!action.credential_id || !credentialRequirements) {
+        continue
+      }
 
       const credential = this.credentials.find(
         (c) => c.credential_id === action.credential_id
       )
-      if (!credential) continue
+      if (!credential) {
+        continue
+      }
 
       const credentialMetadata = credential.metadata as { balance: string }
 

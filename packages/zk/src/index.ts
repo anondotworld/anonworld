@@ -1,9 +1,6 @@
-import { BarretenbergSync, Fr } from '@aztec/bb.js'
 import { BaseCircuit } from './base'
 import erc20BalanceCircuit from '../circuits/erc20-balance/target/0.1.0/main.json'
 import erc20BalanceVkey from '../circuits/erc20-balance/target/0.1.0/vkey.json'
-import merkleMembershipCircuit from '../circuits/merkle-membership/target/0.1.0/main.json'
-import merkleMembershipVkey from '../circuits/merkle-membership/target/0.1.0/vkey.json'
 export type { ProofData } from '@aztec/bb.js'
 
 export type ERC20BalanceData = {
@@ -13,12 +10,6 @@ export type ERC20BalanceData = {
   tokenAddress: `0x${string}`
   balanceSlot: string
   storageHash: `0x${string}`
-}
-
-export const buildHashFunction = async () => {
-  const bb = await BarretenbergSync.new()
-  return (a: string, b: string) =>
-    bb.poseidon2Hash([Fr.fromString(a), Fr.fromString(b)]).toString()
 }
 
 export class ERC20Balance extends BaseCircuit {
@@ -48,11 +39,4 @@ export class ERC20Balance extends BaseCircuit {
   }
 }
 
-export class MerkleMembership extends BaseCircuit {
-  constructor() {
-    super(merkleMembershipCircuit, merkleMembershipVkey)
-  }
-}
-
 export const erc20Balance = new ERC20Balance()
-export const merkleMembership = new MerkleMembership()

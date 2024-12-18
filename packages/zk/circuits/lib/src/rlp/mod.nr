@@ -41,7 +41,7 @@ pub unconstrained fn decode_rlp_list_fragments<let NODE_LEN: u32, let MAX_FIELDS
     rlp_list
 }
 
-pub fn decode_rlp_header<let NODE_LEN: u32>(node: [u8; NODE_LEN]) -> RlpFragment {
+pub unconstrained fn decode_rlp_header<let NODE_LEN: u32>(node: [u8; NODE_LEN]) -> RlpFragment {
     let (prefix, data) = node.as_slice().pop_front();
 
     if (prefix < 0x80) {

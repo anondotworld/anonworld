@@ -51,10 +51,7 @@ pub fn verify(
     let rlp_header = decode_rlp_header(leaf);
     assert(rlp_header.data_type == RLP_HEADER_TYPE_LIST, "Invalid data type");
 
-    let node_len = rlp_header.length + rlp_header.offset;
-    assert(node_len <= leaf.len(), "Invalid length");
-
-    let resolved_hash = keccak256(leaf, node_len);
+    let resolved_hash = get_node_hash(rlp_header, leaf);
     assert(resolved_hash == curr_hash, "Invalid hash");
 
     let rlp_list: BoundedVec<RlpFragment, 2> = decode_rlp_list_fragments(rlp_header, leaf);
@@ -88,7 +85,10 @@ pub fn verify(
     }
 }
 
-unconstrained fn get_node_hash(rlp_header: RlpFragment, node: [u8; 532]) -> [u8; 32] {
+unconstrained fn get_node_hash<let NODE_LEN: u32>(
+    rlp_header: RlpFragment,
+    node: [u8; NODE_LEN],
+) -> [u8; 32] {
     let node_len = rlp_header.length + rlp_header.offset;
     let resolved_hash: [u8; 32] = keccak256(node, node_len);
     resolved_hash

@@ -5,7 +5,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectSeparator,
   SelectTrigger,
   SelectValue,
@@ -20,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from './ui/alert-dialog'
-import { ReactNode, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from './ui/button'
 import { Loader2 } from 'lucide-react'
 import { Slider } from './ui/slider'
@@ -78,7 +77,7 @@ export function CredentialsSelect({
               </SelectItem>
             ))}
           </SelectGroup>
-          <SelectSeparator />
+          {credentials.credentials.length > 0 && <SelectSeparator />}
           <SelectGroup>
             <SelectItem value="new" className="font-semibold">
               Add new credential...
@@ -164,7 +163,7 @@ export function VerifyCredential({
           <span className="text-sm whitespace-nowrap">Balance to verify</span>
           <Input
             className="w-32"
-            value={balance.toLocaleString()}
+            value={balance.toString()}
             onChange={(e) => {
               const value = Number(e.target.value)
               if (!Number.isNaN(value)) {
