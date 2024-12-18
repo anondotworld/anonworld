@@ -545,6 +545,7 @@ export type Credential = {
     tokenAddress: string
     balance: string
   }
+  verified_at: string
 }
 
 export type CreatePostActionData = {

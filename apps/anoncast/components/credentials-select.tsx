@@ -137,13 +137,13 @@ export function VerifyCredential({
         <AlertDialogHeader>
           <AlertDialogTitle>Add $ANON credential</AlertDialogTitle>
           <AlertDialogDescription>
-            Credentials are used to add verified public tags to your posts. All posts on
-            anoncast require a credential with a minimum of 5,000 $ANON. Promotions /
-            deletions require a minimum of 2,000,000 $ANON.
+            Credentials anonymously verify your onchain balance and add trusted tags to
+            your posts. For now, we only support $ANON - 5K ANON to post, 2M ANON to
+            promote.
             <br />
             <br />
-            You can verify whatever balance you wish. Note, your anonymity will get weaker
-            as you verify higher balances.
+            Important: While you can verify any balance amount, please note that higher
+            balances may make it easier to identify you.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex flex-col gap-2 mt-4">
@@ -160,7 +160,7 @@ export function VerifyCredential({
           </div>
         </div>
         <div className="flex flex-row gap-2 items-center mt-2">
-          <span className="text-sm whitespace-nowrap">Balance to verify</span>
+          <span className="text-sm whitespace-nowrap">$ANON</span>
           <Input
             className="w-32"
             value={balance.toString()}
