@@ -2,7 +2,7 @@ import type { ERC20Balance } from '@anonworld/zk'
 import { formatArray, formatHexArray } from './utils'
 import { Api } from './api'
 import { getPublicKey } from './utils'
-import { GetProofReturnType, keccak256 } from 'viem'
+import { GetProofReturnType } from 'viem'
 
 export type VerifyERC20Balance = {
   address: `0x${string}`
@@ -60,19 +60,10 @@ export class AnonWorldSDK extends Api {
     }
 
     const proof = await this.erc20Balance.generate(input)
-    const metadata = this.erc20Balance.parseData(proof.publicInputs)
-    const credentialId = `ERC20_BALANCE:${metadata.chainId}:${metadata.tokenAddress}`
-    const proofHash = keccak256(proof.proof)
 
-    return {
-      id: proofHash,
-      credential_id: credentialId,
-      metadata,
-      proof: {
-        proof: Array.from(proof.proof),
-        publicInputs: proof.publicInputs,
-      },
-      verified_at: new Date(Number(args.blockTimestamp) * 1000).toISOString(),
-    }
+    return await this.createCredential({
+      proof: Array.from(proof.proof),
+      publicInputs: proof.publicInputs,
+    })
   }
 }

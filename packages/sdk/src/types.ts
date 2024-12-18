@@ -582,10 +582,7 @@ export type PerformActionData =
   | CopyPostTwitterActionData
 
 export type PerformAction = {
-  proofs: {
-    proof: number[]
-    publicInputs: string[]
-  }[]
+  credentials: string[]
   actionId: string
   data: PerformActionData
 }

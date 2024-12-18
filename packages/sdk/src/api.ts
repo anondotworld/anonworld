@@ -3,6 +3,7 @@ import {
   ApiResponse,
   Cast,
   Channel,
+  Credential,
   Identity,
   PerformAction,
   RequestConfig,
@@ -170,5 +171,18 @@ export class Api {
 
   async getAction(actionId: string) {
     return await this.request<Action>(`/actions/${actionId}`)
+  }
+
+  async createCredential({
+    proof,
+    publicInputs,
+  }: {
+    proof: number[]
+    publicInputs: string[]
+  }) {
+    return await this.request<Credential>('/credentials', {
+      method: 'POST',
+      body: JSON.stringify({ proof, publicInputs }),
+    })
   }
 }

@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { useSDK } from '../sdk'
 import { useAccount } from 'wagmi'
-import { PerformAction, PerformActionData } from '@anonworld/sdk/types'
+import { Credential, PerformAction, PerformActionData } from '@anonworld/sdk/types'
 import { parseUnits } from 'viem'
-import { Credential } from './use-credentials'
 
 export type ExecuteActionsStatus =
   | {
@@ -62,12 +61,16 @@ export const useExecuteActions = ({
           )
           if (!credentialToUse) {
             const [_, chainId, tokenAddress] = requiredCredentialId.split(':')
-            credentialToUse = await credentials.addERC20Balance({
+            const response = await credentials.addERC20Balance({
               chainId: Number(chainId),
               tokenAddress: tokenAddress as `0x${string}`,
               balanceSlot: 0,
               verifiedBalance: requiredBalance,
             })
+            if (!response?.data) {
+              throw new Error('Failed to add ERC20 balance')
+            }
+            credentialToUse = response.data
           }
         }
 
@@ -78,7 +81,7 @@ export const useExecuteActions = ({
         formattedActions.push({
           actionId,
           data,
-          proofs: [credentialToUse.proof],
+          credentials: [credentialToUse.id],
         })
       }
 

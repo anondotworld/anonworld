@@ -1,11 +1,6 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import {
-  createCredentialInstance,
-  CredentialInstance,
-  getAction,
-  getCredentialInstance,
-} from '@anonworld/db'
+import { getAction, getCredentials } from '@anonworld/db'
 import { CreatePost } from '../actions/create-post'
 import { CopyPostFarcaster } from '../actions/copy-post-farcaster'
 import { CopyPostTwitter } from '../actions/copy-post-twitter'
@@ -13,16 +8,7 @@ import { DeletePostTwitter } from '../actions/delete-post-twitter'
 import { DeletePostFarcaster } from '../actions/delete-post-farcaster'
 import { BaseAction } from '../actions/base'
 import { ActionRequest, ActionType } from '../actions/types'
-import { erc20Balance } from '@anonworld/zk'
-import {
-  createPublicClient,
-  keccak256,
-  http,
-  zeroAddress,
-  pad,
-  concat,
-  toHex,
-} from 'viem'
+import { createPublicClient, http } from 'viem'
 import { base } from 'viem/chains'
 
 const client = createPublicClient({
@@ -30,88 +16,39 @@ const client = createPublicClient({
   transport: http(),
 })
 
-async function getActionCredentials(
-  proofs: { proof: number[]; publicInputs: string[] }[]
-) {
-  const credentials: CredentialInstance[] = []
-
-  for (const proof of proofs) {
-    const verified = await erc20Balance.verify({
-      proof: new Uint8Array(proof.proof),
-      publicInputs: proof.publicInputs,
-    })
-    if (!verified) {
-      throw new Error('Invalid proof')
-    }
-    const metadata = erc20Balance.parseData(proof.publicInputs)
-    const credentialId = `ERC20_BALANCE:${metadata.chainId}:${metadata.tokenAddress}`
-    const id = keccak256(new Uint8Array(proof.proof))
-    let credential = await getCredentialInstance(id)
-    if (!credential) {
-      const block = await client.getBlock({ blockNumber: BigInt(metadata.blockNumber) })
-      const ethProof = await client.getProof({
-        address: metadata.tokenAddress,
-        storageKeys: [
-          keccak256(concat([pad(zeroAddress), pad(toHex(metadata.balanceSlot))])),
-        ],
-        blockNumber: BigInt(metadata.blockNumber),
-      })
-
-      if (ethProof.storageHash !== metadata.storageHash) {
-        continue
-      }
-
-      credential = await createCredentialInstance({
-        id,
-        credential_id: credentialId,
-        metadata,
-        proof,
-        verified_at: new Date(Number(block.timestamp) * 1000),
-      })
-    }
-    credentials.push(credential)
-  }
-
-  return credentials
-}
-
 async function getActionInstance(request: ActionRequest) {
   const action = await getAction(request.actionId)
 
   let actionInstance: BaseAction | undefined
 
-  const credentials: CredentialInstance[] = request.credentials || []
-
-  if (request.proofs) {
-    credentials.push(...(await getActionCredentials(request.proofs)))
-  }
-
   if (
     action.credential_id &&
-    !credentials.some((credential) => credential.credential_id === action.credential_id)
+    !request.credentials.some(
+      (credential) => credential.credential_id === action.credential_id
+    )
   ) {
     throw new Error('Missing required credential')
   }
 
   switch (action.type) {
     case ActionType.CREATE_POST: {
-      actionInstance = new CreatePost(action, request.data, credentials)
+      actionInstance = new CreatePost(action, request.data, request.credentials)
       break
     }
     case ActionType.COPY_POST_TWITTER: {
-      actionInstance = new CopyPostTwitter(action, request.data, credentials)
+      actionInstance = new CopyPostTwitter(action, request.data, request.credentials)
       break
     }
     case ActionType.COPY_POST_FARCASTER: {
-      actionInstance = new CopyPostFarcaster(action, request.data, credentials)
+      actionInstance = new CopyPostFarcaster(action, request.data, request.credentials)
       break
     }
     case ActionType.DELETE_POST_TWITTER: {
-      actionInstance = new DeletePostTwitter(action, request.data, credentials)
+      actionInstance = new DeletePostTwitter(action, request.data, request.credentials)
       break
     }
     case ActionType.DELETE_POST_FARCASTER: {
-      actionInstance = new DeletePostFarcaster(action, request.data, credentials)
+      actionInstance = new DeletePostFarcaster(action, request.data, request.credentials)
       break
     }
   }
@@ -137,9 +74,14 @@ export const actionsRoutes = createElysia({ prefix: '/actions' })
     async ({ body }) => {
       const results: { success: boolean; error?: string }[] = []
       const nextActions: ActionRequest[] = []
+
       for (const action of body.actions) {
         try {
-          const actionInstance = await getActionInstance(action)
+          const credentials = await getCredentials(action.credentials)
+          const actionInstance = await getActionInstance({
+            ...action,
+            credentials,
+          })
           if (!actionInstance) {
             throw new Error('Invalid action')
           }
@@ -185,12 +127,7 @@ export const actionsRoutes = createElysia({ prefix: '/actions' })
           t.Object({
             actionId: t.String(),
             data: t.Any(),
-            proofs: t.Array(
-              t.Object({
-                proof: t.Array(t.Number()),
-                publicInputs: t.Array(t.String()),
-              })
-            ),
+            credentials: t.Array(t.String()),
           })
         ),
       }),

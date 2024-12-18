@@ -268,3 +268,10 @@ export const createCredentialInstance = async (
     .returning()
   return credential
 }
+
+export const getCredentials = async (ids: string[]) => {
+  return await db
+    .select()
+    .from(credentialInstancesTable)
+    .where(inArray(credentialInstancesTable.id, ids))
+}

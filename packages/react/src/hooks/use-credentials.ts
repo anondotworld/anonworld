@@ -2,21 +2,10 @@ import { useEffect, useState } from 'react'
 import { useAccount, useConfig, useSignMessage } from 'wagmi'
 import { concat, hashMessage, keccak256, pad, toHex } from 'viem'
 import { AnonWorldSDK } from '@anonworld/sdk'
+import { Credential } from '@anonworld/sdk/types'
 import { getBlock, getProof } from 'wagmi/actions'
-import { ERC20BalanceData } from '@anonworld/zk'
 
 const LOCAL_STORAGE_KEY = 'anon:credentials:v1'
-
-export type Credential = {
-  id: string
-  credential_id: string
-  metadata: ERC20BalanceData
-  proof: {
-    proof: number[]
-    publicInputs: string[]
-  }
-  verified_at: string
-}
 
 export function useCredentials(sdk: AnonWorldSDK) {
   const [isInitializing, setIsInitializing] = useState(true)
@@ -85,7 +74,11 @@ export function useCredentials(sdk: AnonWorldSDK) {
         blockTimestamp: block.timestamp,
       })
 
-      setCredentials((prev) => [...prev, credential])
+      if (credential.error) {
+        throw new Error(credential.error.message)
+      }
+
+      setCredentials((prev) => [...prev, credential.data!])
 
       return credential
     } catch (e) {
