@@ -121,8 +121,8 @@ export function VerifyCredential({
       balanceSlot: 0,
       verifiedBalance: parseEther(balance.toString()),
     })
-    if (credential) {
-      onVerify(credential)
+    if (credential?.data) {
+      onVerify(credential.data)
       setIsVerifying(false)
       setOpen(false)
     } else {
