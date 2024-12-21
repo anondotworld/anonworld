@@ -1,6 +1,6 @@
 'use client'
 
-import { Cast, Reveal } from '@anonworld/react'
+import { Cast, Reveal } from '../../../../packages/react/src'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -33,7 +33,7 @@ import { useRouter } from 'next/navigation'
 import { formatEther, hashMessage, parseEther } from 'viem'
 import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
-import { useExecuteActions, useSDK } from '@anonworld/react'
+import { useExecuteActions, useSDK } from '../../../../packages/react/src'
 import { ToastAction } from '@radix-ui/react-toast'
 import { VerifyCredential } from '../credentials-select'
 
