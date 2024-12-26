@@ -4,6 +4,7 @@ import { Coins } from '@tamagui/lucide-icons'
 import { Badge } from '../../badge'
 import { useToken } from '../../../hooks'
 import { formatUnits } from 'viem/utils'
+import { Image } from '@anonworld/ui'
 
 export function CredentialBadge({ credential }: { credential: Credential }) {
   if (!credential.metadata?.balance) return null
@@ -23,5 +24,15 @@ function ERC20CredentialBadge({ credential }: { credential: Credential }) {
     formatUnits(BigInt(credential.metadata.balance), implementation?.decimals ?? 18)
   )
 
-  return <Badge icon={<Coins size={12} />}>{`${formatAmount(amount)} ${symbol}`}</Badge>
+  return (
+    <Badge
+      icon={
+        data?.attributes.icon.url ? (
+          <Image src={data.attributes.icon.url} w={16} h={16} />
+        ) : (
+          <Coins size={12} />
+        )
+      }
+    >{`${formatAmount(amount)} ${symbol}`}</Badge>
+  )
 }

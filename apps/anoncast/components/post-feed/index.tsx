@@ -1,6 +1,6 @@
 'use client'
 
-import { Cast, usePosts } from '../../../../packages/react/src'
+import { Cast, usePosts } from '@anonworld/react'
 import { useState } from 'react'
 import AnimatedTabs from './animated-tabs'
 import { Skeleton } from '../ui/skeleton'

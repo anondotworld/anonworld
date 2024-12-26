@@ -5,7 +5,7 @@ import '@rainbow-me/rainbowkit/styles.css'
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { base } from 'wagmi/chains'
 import { ThemeProvider } from 'next-themes'
-import { Provider } from '../../../packages/react/src'
+import { Provider } from '@anonworld/react'
 
 const config = getDefaultConfig({
   appName: 'anoncast',

@@ -9,7 +9,7 @@ import {
   GetBulkCastsResponse,
   GetConversationResponse,
 } from './types'
-import { getSignerForFid } from '@anonworld/db'
+import { getSignerForFid, PostDataV1 } from '@anonworld/db'
 
 class NeynarService {
   private readonly apiKey: string
@@ -113,15 +113,28 @@ class NeynarService {
     )
   }
 
-  async createCast(params: {
-    fid: number
-    text?: string
-    embeds?: string[]
-    images?: string[]
-    quote?: string
-    parent?: string
-    channel?: string
-  }) {
+  async getCastFromURL(castURL: string) {
+    const url = new URL(castURL)
+    const isFarcaster =
+      url.hostname === 'warpcast.com' &&
+      (url.pathname.match(/^\/[^/]+\/0x[a-f0-9]+$/) || // /<username>/0x<hash>
+        url.pathname.match(/^\/~\/conversations\/0x[a-f0-9]+$/)) // /~/conversations/0x<hash>
+    if (isFarcaster) {
+      const response = await this.getCast(castURL)
+      if (response.cast) {
+        return {
+          hash: response.cast.hash,
+          fid: response.cast.author.fid,
+        }
+      }
+    }
+  }
+
+  async createCast(
+    params: PostDataV1 & {
+      fid: number
+    }
+  ) {
     const signerUuid = await getSignerForFid(params.fid)
     if (!signerUuid) {
       throw new Error('No signer found for address')
@@ -130,40 +143,53 @@ class NeynarService {
     const embeds: Array<{
       url?: string
       castId?: { hash: string; fid: number }
-    }> =
-      params.embeds?.map((embed) => ({
-        url: embed,
-      })) ?? []
+    }> = []
 
-    for (const image of params.images ?? []) {
-      embeds.push({
+    let reply: { hash: string; fid: number } | undefined
+    if (params.reply) {
+      reply = await this.getCastFromURL(params.reply)
+      if (!reply) {
+        embeds.unshift({
+          url: params.reply,
+        })
+      }
+    }
+
+    for (const image of params.images) {
+      embeds.unshift({
         url: image,
       })
     }
 
-    if (params.quote) {
-      const quote = await this.getCast(params.quote)
-      embeds.push({
-        castId: {
-          hash: quote.cast.hash,
-          fid: quote.cast.author.fid,
-        },
-      })
-    }
+    let text = params.text ?? ''
+    for (const link of params.links) {
+      if (embeds.length >= 2) {
+        if (text.length > 0) {
+          text += `\n\n${link}`
+        } else {
+          text = link
+        }
+        continue
+      }
 
-    let parentAuthorFid = undefined
-    if (params.parent) {
-      const parent = await this.getCast(params.parent)
-      parentAuthorFid = parent.cast.author.fid
+      const maybeCast = await this.getCastFromURL(link)
+      if (maybeCast) {
+        embeds.unshift({
+          castId: maybeCast,
+        })
+      } else {
+        embeds.unshift({
+          url: link,
+        })
+      }
     }
 
     const body = {
       signer_uuid: signerUuid.signer_uuid,
-      parent: params.parent,
-      parent_author_fid: parentAuthorFid,
-      text: params.text,
+      parent: reply?.hash,
+      parent_author_fid: reply?.fid,
+      text,
       embeds: embeds.length > 0 ? embeds : undefined,
-      channel_id: params.channel,
     }
 
     return await this.makeRequest<CreateCastResponse>('/farcaster/cast', {

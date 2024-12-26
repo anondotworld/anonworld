@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { PostComposer, PostFeed, PostFeedSelector } from '@anonworld/react'
+import { NewPost, PostFeed, PostFeedSelector } from '@anonworld/react'
 import { View, XStack } from '@anonworld/ui'
 
 export default function Home() {
@@ -15,11 +15,15 @@ export default function Home() {
     }
   }
 
+  const handlePost = (hash: string) => {
+    router.push(`/posts/${hash}`)
+  }
+
   return (
     <View maxWidth={700} mx="auto" my="$3" gap="$3">
       <XStack ai="center" jc="space-between">
         <PostFeedSelector selected="New" onSelect={handleSelect} />
-        <PostComposer />
+        <NewPost onSuccess={handlePost} />
       </XStack>
       <PostFeed
         fid={899289}

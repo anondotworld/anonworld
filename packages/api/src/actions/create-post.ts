@@ -3,6 +3,7 @@ import {
   createPostCredentials,
   getActionsForTrigger,
   PostData,
+  PostDataV1,
 } from '@anonworld/db'
 import { neynar } from '../services/neynar'
 import { BaseAction } from './base'
@@ -27,16 +28,15 @@ export type CreatePostMetadata = {
   fid: number
 }
 
-export type CreatePostData = PostData & {
+export type CreatePostData = PostDataV1 & {
   revealHash?: string
-  roots: string[]
 }
 
 export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
   private hash: string | undefined
 
   async handle() {
-    const { text, embeds, quote, channel, parent, images, revealHash } = this.data
+    const { text, reply, links, images, revealHash } = this.data
 
     if (text && INVALID_REGEXES.some((regex) => text.match(regex))) {
       return {
@@ -48,11 +48,9 @@ export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
     const response = await neynar.createCast({
       fid: this.action.metadata.fid,
       text,
-      embeds,
+      reply,
+      links,
       images,
-      quote,
-      channel,
-      parent,
     })
 
     if (!response.success) {

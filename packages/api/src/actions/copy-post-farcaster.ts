@@ -5,7 +5,7 @@ import {
   getPost,
   getPostParent,
   getPostRelationship,
-  PostData,
+  PostDataV1,
 } from '@anonworld/db'
 import { neynar } from '../services/neynar'
 import { BaseAction } from './base'
@@ -22,7 +22,7 @@ export class CopyPostFarcaster extends BaseAction<
   CopyPostFarcasterMetadata,
   CopyPostFarcasterData
 > {
-  async isAbleToPromote(post: PostData) {
+  async isAbleToPromote(post: PostDataV1) {
     const unableToPromoteRegex = [
       // /.*@clanker.*(launch|deploy|make).*/is,
       /.*dexscreener.com.*/i,
@@ -36,9 +36,7 @@ export class CopyPostFarcaster extends BaseAction<
     }
 
     if (
-      post.embeds?.some((embed) =>
-        unableToPromoteRegex.some((regex) => embed.match(regex))
-      )
+      post.links?.some((link) => unableToPromoteRegex.some((regex) => link.match(regex)))
     ) {
       return false
     }

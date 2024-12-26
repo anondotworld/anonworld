@@ -1,22 +1,13 @@
 import { Plus, X } from '@tamagui/lucide-icons'
-import {
-  Adapt,
-  Button,
-  Dialog,
-  Label,
-  Sheet,
-  Text,
-  Unspaced,
-  View,
-  XStack,
-  YStack,
-} from '@anonworld/ui'
-import { CredentialTypeSelect } from './select'
-import { NewCredentialForm } from './form'
-import { useNewCredential } from './context'
+import { Adapt, Button, Dialog, Sheet, Text, View, XStack } from '@anonworld/ui'
+import { useNewPost } from './context'
+import { NewPostCredentials } from './credentials'
+import { NewPostImage, NewPostLink, NewPostReply } from './content'
+import { NewPostText } from './text'
+import { NewPostFooter } from './footer'
 
-export function NewCredentialDialog() {
-  const { isOpen, setIsOpen } = useNewCredential()
+export function NewPostDialog() {
+  const { isOpen, setIsOpen } = useNewPost()
   return (
     <Dialog modal open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger asChild>
@@ -31,7 +22,7 @@ export function NewCredentialDialog() {
           <XStack ai="center" gap="$2">
             <Plus size={16} strokeWidth={2.5} />
             <Text fos="$2" fow="600">
-              Add Credential
+              Create Post
             </Text>
           </XStack>
         </Button>
@@ -73,35 +64,45 @@ export function NewCredentialDialog() {
           ]}
           enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
           exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
-          gap="$2"
           w={600}
+          gap="$3"
         >
-          <Dialog.Title>Add Credential</Dialog.Title>
-          <YStack>
-            <Label fos="$1" fow="400" color="$color11" textTransform="uppercase">
-              Credential Type
-            </Label>
-            <CredentialTypeSelect />
-          </YStack>
-          <NewCredentialForm />
-          <Unspaced>
-            <Dialog.Close asChild>
-              <View
-                bg="$background"
-                p="$2"
-                br="$12"
-                hoverStyle={{ bg: '$color5' }}
-                cursor="pointer"
-                pos="absolute"
-                top="$3"
-                right="$3"
-              >
-                <X size={20} />
-              </View>
-            </Dialog.Close>
-          </Unspaced>
+          <Dialog.Title display="none">Create Post</Dialog.Title>
+          <NewPostCredentials />
+          <NewPostReply />
+          <NewPostText />
+          <NewPostLink />
+          <NewPostImage />
+          <NewPostFooter />
+          <NewPostError />
+          <Dialog.Close asChild>
+            <View
+              bg="$background"
+              p="$2"
+              br="$12"
+              hoverStyle={{ bg: '$color5' }}
+              cursor="pointer"
+              position="absolute"
+              top="$2"
+              right="$2"
+            >
+              <X size={20} />
+            </View>
+          </Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog>
+  )
+}
+
+function NewPostError() {
+  const { error } = useNewPost()
+  if (!error) return null
+  return (
+    <View theme="red" bg="$background" p="$3" br="$4" bc="$borderColor" bw="$0.5">
+      <Text fos="$2" fow="600" color="$red11">
+        {`Error: ${error.message}`}
+      </Text>
+    </View>
   )
 }

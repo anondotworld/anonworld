@@ -1,7 +1,7 @@
 'use client'
 import { CreatePostProvider } from '@/components/create-post/context'
 import { Post } from '@/components/post'
-import { useSDK } from '../../../../../packages/react/src'
+import { useSDK } from '@anonworld/react'
 import { useQuery } from '@tanstack/react-query'
 
 export default function Page({ params }: { params: { hash: string } }) {

@@ -11,7 +11,7 @@ export function CredentialActions({ credential }: { credential: Credential }) {
 
   return (
     <>
-      <Popover size="$5" allowFlip placement="bottom">
+      <Popover size="$5" placement="bottom">
         <Popover.Trigger
           onPress={(e) => {
             e.stopPropagation()

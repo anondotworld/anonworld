@@ -1,8 +1,8 @@
 import { Embed } from '@anonworld/sdk/types'
 import { timeAgo } from '../../../utils'
 import { Avatar, Image, Text, View, XStack, YStack } from '@anonworld/ui'
-import { useQuery } from '@tanstack/react-query'
 import { X } from '../../svg/x'
+import { useTwitterPost } from '../../../hooks/use-twitter-post'
 
 export function PostEmbed({ embed }: { embed: Embed }) {
   if (embed.cast) {
@@ -73,72 +73,7 @@ export function PostEmbed({ embed }: { embed: Embed }) {
 }
 
 function TwitterEmbed({ tweetId, username }: { tweetId: string; username: string }) {
-  const { data } = useQuery({
-    queryKey: ['twitter-embed', tweetId, username],
-    queryFn: async () => {
-      const url = `https://api.fxtwitter.com/${username}/status/${tweetId}`
-      const response = await fetch(url)
-      const data: {
-        code: number
-        message: string
-        tweet: {
-          url: string
-          id: string
-          text: string
-          author: {
-            id: string
-            name: string
-            screen_name: string
-            avatar_url: string
-            banner_url: string
-            description: string
-            location: string
-            url: string
-            followers: number
-            following: number
-            joined: string
-            likes: number
-            website: any
-            tweets: number
-            avatar_color: any
-          }
-          replies: number
-          retweets: number
-          likes: number
-          created_at: string
-          created_timestamp: number
-          possibly_sensitive: boolean
-          views: number
-          is_note_tweet: boolean
-          community_note: any
-          lang: string
-          replying_to: string
-          replying_to_status: string
-          media: {
-            all: Array<{
-              type: string
-              url: string
-              width: number
-              height: number
-              altText: string
-            }>
-            photos: Array<{
-              type: string
-              url: string
-              width: number
-              height: number
-              altText: string
-            }>
-          }
-          source: string
-          twitter_card: string
-          color: any
-          provider: string
-        }
-      } = await response.json()
-      return data.tweet
-    },
-  })
+  const { data } = useTwitterPost(`https://x.com/${username}/status/${tweetId}`)
 
   if (!data) return null
 

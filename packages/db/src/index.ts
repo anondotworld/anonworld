@@ -17,10 +17,10 @@ export type Action<T = unknown> = typeof actionsTable.$inferSelect & {
   metadata: T
 }
 export type Post = typeof postsTable.$inferSelect & {
-  data: PostData
+  data: PostDataV1
 }
 
-export type PostData = {
+export type PostDataV0 = {
   text?: string
   embeds?: string[]
   images?: string[]
@@ -28,6 +28,15 @@ export type PostData = {
   channel?: string
   parent?: string
 }
+
+export type PostDataV1 = {
+  text: string | null
+  reply: string | null
+  links: string[]
+  images: string[]
+}
+
+export type PostData = PostDataV0 | PostDataV1
 
 export const db = drizzle(process.env.DATABASE_URL as string)
 

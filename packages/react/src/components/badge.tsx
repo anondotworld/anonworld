@@ -5,7 +5,7 @@ export function Badge({
   icon,
   onPress,
 }: {
-  children: React.ReactNode
+  children?: React.ReactNode
   icon?: React.ReactNode
   onPress?: () => void
 }) {
@@ -16,7 +16,7 @@ export function Badge({
       bc="$borderColor"
       bw="$0.25"
       br="$12"
-      px="$2"
+      px={children ? '$2' : '$1.5'}
       py="$1.5"
       fd="row"
       ai="center"
@@ -26,7 +26,7 @@ export function Badge({
       hoverStyle={{ bg: '$color5' }}
     >
       {icon}
-      <Text fos="$1">{children}</Text>
+      {children && <Text fos="$1">{children}</Text>}
     </View>
   )
 }

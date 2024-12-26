@@ -6,7 +6,7 @@ import { NamedExoticComponent } from 'react'
 
 export function PostActions({ post }: { post: Cast }) {
   return (
-    <Popover size="$5" allowFlip placement="bottom">
+    <Popover size="$5" placement="bottom">
       <Popover.Trigger
         onPress={(e) => {
           e.stopPropagation()

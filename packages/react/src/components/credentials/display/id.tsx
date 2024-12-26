@@ -16,6 +16,8 @@ export function CredentialId({ credential }: { credential: Credential }) {
       ai="center"
       gap="$1.5"
       alignSelf="flex-start"
+      w="$7"
+      jc="center"
     >
       <Text fos="$1" color={color} fow="500">
         {id}

@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Credential, useSDK } from '../../../packages/react/src'
+import { Credential, useSDK } from '@anonworld/react'
 import {
   AlertDialog,
   AlertDialogCancel,

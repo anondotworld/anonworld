@@ -3,6 +3,7 @@ import { SDKProvider } from './sdk'
 import { QueryClient } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
+import { ToastProvider } from './toast'
 export { useSDK } from './sdk'
 
 const queryClient = new QueryClient()
@@ -17,7 +18,7 @@ export function Provider({
       <QueryClientProvider client={queryClient}>
         <SDKProvider apiUrl={process.env.NEXT_PUBLIC_API_URL}>
           <TamaguiProvider config={config} defaultTheme="dark" disableRootThemeClass>
-            {children}
+            <ToastProvider>{children}</ToastProvider>
           </TamaguiProvider>
         </SDKProvider>
       </QueryClientProvider>

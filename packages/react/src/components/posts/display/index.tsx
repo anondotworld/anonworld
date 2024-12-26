@@ -7,7 +7,6 @@ import { PostActions } from './actions'
 import { PostRelationships } from './relationships'
 import { PostEmbed } from './embeds'
 import { Badge } from '../../badge'
-import { CredentialId } from '../../credentials/display/id'
 
 export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
   let text = post.text
@@ -38,13 +37,13 @@ export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
       f={1}
     >
       <XStack gap="$2" ai="center">
-        {post.credentials?.map((credential) => (
-          <CredentialBadge key={credential.id} credential={credential} />
+        {post.credentials?.map((credential, index) => (
+          <CredentialBadge key={index} credential={credential} />
         ))}
       </XStack>
       <Text lineHeight={22}>{text}</Text>
-      {post.embeds?.map((embed) => (
-        <PostEmbed key={embed.url} embed={embed} />
+      {post.embeds?.map((embed, index) => (
+        <PostEmbed key={index} embed={embed} />
       ))}
       <XStack jc="space-between" ai="center">
         <XStack ai="center" gap="$2">

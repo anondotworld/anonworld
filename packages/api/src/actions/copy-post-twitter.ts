@@ -3,7 +3,7 @@ import {
   getPost,
   getPostParent,
   getPostRelationship,
-  PostData,
+  PostDataV1,
 } from '@anonworld/db'
 import { neynar } from '../services/neynar'
 import { twitter } from '../services/twitter'
@@ -15,14 +15,13 @@ export type CopyPostTwitterMetadata = {
 
 export type CopyPostTwitterData = {
   hash: string
-  reply?: boolean
 }
 
 export class CopyPostTwitter extends BaseAction<
   CopyPostTwitterMetadata,
   CopyPostTwitterData
 > {
-  async isAbleToPromote(post: PostData) {
+  async isAbleToPromote(post: PostDataV1) {
     const unableToPromoteRegex = [
       /.*@clanker.*(launch|deploy|make).*/is,
       /.*dexscreener.com.*/i,
@@ -37,9 +36,7 @@ export class CopyPostTwitter extends BaseAction<
     }
 
     if (
-      post.embeds?.some((embed) =>
-        unableToPromoteRegex.some((regex) => embed.match(regex))
-      )
+      post.links?.some((link) => unableToPromoteRegex.some((regex) => link.match(regex)))
     ) {
       return false
     }
@@ -47,30 +44,44 @@ export class CopyPostTwitter extends BaseAction<
     return true
   }
 
-  async postToTweet(post: PostData) {
+  extractTweetId(input: string) {
+    const url = new URL(input)
+    const isTwitter =
+      (url.hostname === 'x.com' || url.hostname === 'twitter.com') &&
+      url.pathname.match(/^\/[^/]+\/status\/\d+$/) // /<username>/status/<tweet_id>
+    if (isTwitter) {
+      return url.pathname.split('/').pop()
+    }
+  }
+
+  async postToTweet(post: PostDataV1) {
     let text = post.text ?? ''
     let quoteTweetId: string | undefined
     let replyToTweetId: string | undefined
     const images: string[] = post.images ?? []
 
-    if (post.quote) {
-      images.push(`https://client.warpcast.com/v2/cast-image?castHash=${post.quote}`)
+    if (post.reply) {
+      replyToTweetId = this.extractTweetId(post.reply)
     }
 
-    for (const embed of post.embeds ?? []) {
-      if (embed.includes('x.com') || embed.includes('twitter.com')) {
-        const url = new URL(embed)
-        const tweetId = url.pathname.split('/').pop()
-        if (tweetId) {
-          if (this.data.reply) {
-            replyToTweetId = tweetId
-          } else {
-            quoteTweetId = tweetId
-          }
+    for (const link of post.links ?? []) {
+      const tweetId = this.extractTweetId(link)
+      if (tweetId) {
+        if (!quoteTweetId) {
+          quoteTweetId = tweetId
+          continue
         }
-      } else {
-        text += `\n\n${embed}`
       }
+
+      const farcasterCast = await neynar.getCastFromURL(link)
+      if (farcasterCast) {
+        images.push(
+          `https://client.warpcast.com/v2/cast-image?castHash=${farcasterCast.hash}`
+        )
+        continue
+      }
+
+      text += `\n\n${link}`
     }
 
     const mentions = post.text?.match(/@[\w-]+(?:\.eth)?/g)

@@ -80,6 +80,8 @@ function WalletField() {
           themeInverse
           bg="$background"
           br="$4"
+          bw="$0"
+          hoverStyle={{ opacity: 0.9 }}
           onPress={() => {
             if (address) {
               disconnect()

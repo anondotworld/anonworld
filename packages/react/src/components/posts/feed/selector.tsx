@@ -1,6 +1,5 @@
 import { Button, Popover, Text, View, XStack, YGroup } from '@anonworld/ui'
 import { ChevronDown } from '@tamagui/lucide-icons'
-import { NamedExoticComponent } from 'react'
 
 export function PostFeedSelector({
   selected,
@@ -11,7 +10,7 @@ export function PostFeedSelector({
 }) {
   return (
     <View ai="flex-end">
-      <Popover size="$5" allowFlip placement="bottom">
+      <Popover size="$5" placement="bottom">
         <Popover.Trigger
           onPress={(e) => {
             e.stopPropagation()

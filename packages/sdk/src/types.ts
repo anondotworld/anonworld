@@ -458,12 +458,10 @@ export type ConversationCast = Cast & {
 }
 
 export type CreatePostActionData = {
-  text?: string
-  embeds?: string[]
-  images?: string[]
-  quote?: string
-  channel?: string
-  parent?: string
+  text: string | null
+  reply: string | null
+  links: string[]
+  images: string[]
   revealHash?: string
 }
 
@@ -484,17 +482,17 @@ export type CopyPostTwitterActionData = {
   reply?: boolean
 }
 
-export type PerformActionData =
+export type ExecuteActionData =
   | CreatePostActionData
   | DeletePostFarcasterActionData
   | DeletePostTwitterActionData
   | CopyPostFarcasterActionData
   | CopyPostTwitterActionData
 
-export type PerformAction = {
+export type ExecuteAction = {
   credentials: string[]
   actionId: string
-  data: PerformActionData
+  data: ExecuteActionData
 }
 
 type BaseAction = {

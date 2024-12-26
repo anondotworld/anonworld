@@ -1,8 +1,6 @@
 'use client'
 
-import { CustomToast, ToastProvider, isWeb } from '@anonworld/ui'
-import { ToastViewport } from './ToastViewport'
-import { Provider } from '../../../../packages/react/src'
+import { Provider } from '@anonworld/react'
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { base } from 'wagmi/chains'
 import { ReactNode } from 'react'
@@ -20,17 +18,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider>
       <Provider wagmiConfig={config}>
-        <RainbowKitProvider>
-          <ToastProvider
-            swipeDirection="horizontal"
-            duration={6000}
-            native={isWeb ? [] : ['mobile']}
-          >
-            {children}
-            <CustomToast />
-            <ToastViewport />
-          </ToastProvider>
-        </RainbowKitProvider>
+        <RainbowKitProvider>{children}</RainbowKitProvider>
       </Provider>
     </ThemeProvider>
   )

@@ -1,103 +1,96 @@
-import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { useSDK } from '../providers/sdk'
-import { useAccount } from 'wagmi'
-import { Credential, PerformAction, PerformActionData } from '@anonworld/sdk/types'
-import { parseUnits } from 'viem'
+import { Credential, ExecuteAction } from '../types'
 
-export type ExecuteActionsStatus =
-  | {
-      status: 'idle' | 'loading' | 'success'
-    }
-  | {
-      status: 'error'
-      error: string
-    }
+type ExecuteActionsResponse = {
+  success: boolean
+  hash?: string
+  tweetId?: string
+}
 
-export const useExecuteActions = ({
+export function useExecuteActions({
+  credentials,
+  actions,
   onSuccess,
   onError,
 }: {
-  onSuccess?: (
-    response: {
-      success: boolean
-      hash?: string
-      tweetId?: string
-    }[]
-  ) => void
-  onError?: (error: string) => void
-} = {}) => {
-  const { sdk, credentials } = useSDK()
-  const [status, setStatus] = useState<ExecuteActionsStatus>({ status: 'idle' })
-  const { address } = useAccount()
+  credentials: Credential[]
+  actions: Omit<ExecuteAction, 'credentials'>[]
+  onSuccess: (response: ExecuteActionsResponse[]) => void
+  onError?: (error: Error) => void
+}) {
+  const { sdk } = useSDK()
 
-  const executeActions = async (
-    actions: { actionId: string; data: PerformActionData; credential?: Credential }[]
-  ) => {
-    try {
-      if (!address) {
-        throw new Error('Not connected')
-      }
-
-      setStatus({ status: 'loading' })
-
-      const formattedActions: PerformAction[] = []
-      for (const { actionId, data, credential } of actions) {
+  const formatActions = async (): Promise<ExecuteAction[]> => {
+    if (credentials.length === 0) return []
+    const formattedActions = await Promise.all(
+      actions.map(async ({ actionId, data }) => {
         const action = await sdk.getAction(actionId)
         if (!action.data) {
-          throw new Error('Action not found')
+          return null
         }
 
-        let requiredCredentialId = action.data.credential_id
-        let requiredBalance = action.data.credential_requirement?.minimumBalance
-          ? BigInt(action.data.credential_requirement.minimumBalance)
-          : parseUnits('5000', 18)
-
-        let credentialToUse = credential
-        if (requiredCredentialId) {
-          credentialToUse = credentials.credentials.find(
-            (c) =>
-              c.credential_id === requiredCredentialId &&
-              c.metadata?.balance &&
-              BigInt(c.metadata.balance) >= requiredBalance
-          )
-          if (!credentialToUse) {
-            const [_, chainId, tokenAddress] = requiredCredentialId.split(':')
-            credentialToUse = await credentials.addERC20Balance({
-              chainId: Number(chainId),
-              tokenAddress: tokenAddress as `0x${string}`,
-              verifiedBalance: requiredBalance,
-            })
+        const credentialId = action.data.credential_id
+        if (!credentialId) {
+          return {
+            actionId,
+            data,
+            credentials: credentials.map((c) => c.id),
           }
         }
 
-        if (!credentialToUse) {
-          continue
+        const credential = credentials.find((c) => c.credential_id === credentialId)
+        if (!credential) {
+          return null
         }
 
-        formattedActions.push({
+        const requirement = action.data.credential_requirement
+        if (!requirement) {
+          return {
+            actionId,
+            data,
+            credentials: [credential.id],
+          }
+        }
+
+        const credentialBalance = credential.metadata?.balance
+        if (!credentialBalance) {
+          return null
+        }
+
+        if (BigInt(credentialBalance) < BigInt(requirement.minimumBalance)) {
+          return null
+        }
+
+        return {
           actionId,
           data,
-          credentials: [credentialToUse.id],
-        })
+          credentials: [credential.id],
+        }
+      })
+    )
+
+    return formattedActions.filter((a) => a !== null)
+  }
+
+  return useMutation({
+    mutationFn: async () => {
+      const formattedActions = await formatActions()
+      if (formattedActions.length === 0) {
+        throw new Error('Missing required credential')
       }
-
       const response = await sdk.executeActions(formattedActions)
-
       if (!response.data?.results?.[0]?.success) {
         throw new Error('Failed to perform actions')
       }
-
-      setStatus({ status: 'success' })
-      onSuccess?.(response.data.results)
-    } catch (e) {
-      console.error(e)
-      setStatus({ status: 'error', error: 'Failed to perform action' })
-      onError?.('Failed to perform action')
-    }
-  }
-
-  return {
-    executeActions,
-    status,
-  }
+      return response.data?.results
+    },
+    onSuccess(data, variables, context) {
+      if (!data) return
+      onSuccess(data)
+    },
+    onError(error, variables, context) {
+      onError?.(error)
+    },
+  })
 }

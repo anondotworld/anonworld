@@ -13,7 +13,7 @@ export function PostActions({ post }: { post: Cast }) {
   const { data } = useActions()
   const actions = data?.sort((a, b) => a.type.localeCompare(b.type))
   return (
-    <Popover size="$5" allowFlip placement="bottom">
+    <Popover size="$5" placement="bottom">
       <Popover.Trigger
         onPress={(e) => {
           e.stopPropagation()

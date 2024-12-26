@@ -5,7 +5,7 @@ import {
   Channel,
   Credential,
   User,
-  PerformAction,
+  ExecuteAction,
   RequestConfig,
   UploadImageResponse,
   ConversationCast,
@@ -77,7 +77,7 @@ export class Api {
     }
   }
 
-  async executeActions(actions: PerformAction[]) {
+  async executeActions(actions: ExecuteAction[]) {
     return await this.request<{
       results: { success: boolean; hash?: string; tweetId?: string }[]
     }>('/actions/execute', {
