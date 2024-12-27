@@ -86,6 +86,8 @@ export const buildFeeds = async (fid: number) => {
 }
 
 export async function formatPosts(posts: Array<Post>) {
+  if (posts.length === 0) return []
+
   const [relationships, credentials] = await Promise.all([
     getPostRelationships(posts.map((p) => p.hash)),
     getPostCredentials(posts.map((p) => p.hash)),

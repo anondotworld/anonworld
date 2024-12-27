@@ -1,14 +1,12 @@
 import { ConversationCast, CredentialBadge } from '@anonworld/react'
-import { Avatar, Dialog, Separator, Text, View, XStack, YStack } from '@anonworld/ui'
-import { MessageCircle } from '@tamagui/lucide-icons'
+import { Avatar, Text, View, XStack, YStack } from '@anonworld/ui'
 import { formatAmount } from '../../../utils'
 import { PostEmbed } from '../display/embeds'
 import { timeAgo } from '../../../utils'
 import { Heart } from '@tamagui/lucide-icons'
 import { PostActions } from './actions'
-import { NewPostProvider } from '../new/context'
-import { NewPostDialog } from '../new/dialog'
 import { CredentialAvatar } from '../../credentials/display/id'
+import { ReplyButton } from './reply'
 
 export function PostConversation({
   conversation,
@@ -159,40 +157,5 @@ function Post({
         return <Post key={reply.hash} post={reply} arr={newArr} />
       })}
     </YStack>
-  )
-}
-
-function ReplyButton({ post }: { post: ConversationCast }) {
-  const handleSuccess = (hash: string) => {
-    window.location.reload()
-  }
-
-  return (
-    <NewPostProvider
-      onSuccess={handleSuccess}
-      initialReply={{
-        url: `https://warpcast.com/${post.author.username}/${post.hash.slice(0, 10)}`,
-        type: 'farcaster',
-      }}
-    >
-      <NewPostDialog>
-        <Dialog.Trigger asChild>
-          <XStack
-            py="$2"
-            px="$3"
-            br="$12"
-            hoverStyle={{ bg: '$color5' }}
-            gap="$2"
-            cursor="pointer"
-            ai="center"
-          >
-            <MessageCircle size={16} col="$color11" />
-            <Text fos="$2" col="$color11">
-              Reply
-            </Text>
-          </XStack>
-        </Dialog.Trigger>
-      </NewPostDialog>
-    </NewPostProvider>
   )
 }

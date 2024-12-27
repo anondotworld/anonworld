@@ -63,7 +63,7 @@ export function Header() {
               </Text>
             </View>
           </Link>
-          {/* <Link href="/accounts" style={{ textDecoration: 'none' }}>
+          <Link href="/accounts" style={{ textDecoration: 'none' }}>
             <View
               bg="$background"
               py="$2"
@@ -76,7 +76,7 @@ export function Header() {
                 Accounts
               </Text>
             </View>
-          </Link> */}
+          </Link>
         </View>
       </View>
       <View fd="row" gap="$3" ai="center">

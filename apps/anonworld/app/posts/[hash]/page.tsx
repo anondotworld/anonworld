@@ -1,7 +1,13 @@
 'use client'
 
-import { Post, PostConversation, usePost, usePostConversation } from '@anonworld/react'
-import { View } from '@anonworld/ui'
+import {
+  Post,
+  PostConversation,
+  ReplyBar,
+  usePost,
+  usePostConversation,
+} from '@anonworld/react'
+import { View, YStack } from '@anonworld/ui'
 
 export default function Home({ params }: { params: { hash: string } }) {
   const { data: post } = usePost({ hash: params.hash })
@@ -9,7 +15,10 @@ export default function Home({ params }: { params: { hash: string } }) {
 
   return (
     <View maxWidth={700} mx="auto" my="$4" gap="$6">
-      {post && <Post post={post} />}
+      <YStack gap="$3">
+        {post && <Post post={post} />}
+        {post && <ReplyBar post={post} />}
+      </YStack>
       {conversation && <PostConversation conversation={conversation} />}
     </View>
   )
