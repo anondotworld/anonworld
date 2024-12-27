@@ -1,41 +1,15 @@
-import { Plus, X } from '@tamagui/lucide-icons'
-import {
-  Adapt,
-  Button,
-  Dialog,
-  Label,
-  Sheet,
-  Text,
-  Unspaced,
-  View,
-  XStack,
-  YStack,
-} from '@anonworld/ui'
+import { X } from '@tamagui/lucide-icons'
+import { Adapt, Dialog, Label, Sheet, Unspaced, View, YStack } from '@anonworld/ui'
 import { CredentialTypeSelect } from './select'
 import { NewCredentialForm } from './form'
 import { useNewCredential } from './context'
+import { ReactNode } from 'react'
 
-export function NewCredentialDialog() {
+export function NewCredentialDialog({ children }: { children?: ReactNode }) {
   const { isOpen, setIsOpen } = useNewCredential()
   return (
     <Dialog modal open={isOpen} onOpenChange={setIsOpen}>
-      <Dialog.Trigger asChild>
-        <Button
-          size="$3"
-          themeInverse
-          bg="$background"
-          br="$12"
-          bw="$0"
-          hoverStyle={{ opacity: 0.9 }}
-        >
-          <XStack ai="center" gap="$2">
-            <Plus size={16} strokeWidth={2.5} />
-            <Text fos="$2" fow="600">
-              Add Credential
-            </Text>
-          </XStack>
-        </Button>
-      </Dialog.Trigger>
+      {children}
 
       <Adapt when="sm">
         <Sheet animation="quicker" zIndex={200000} modal dismissOnSnapToBottom>

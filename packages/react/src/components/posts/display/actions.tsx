@@ -10,47 +10,50 @@ import { NamedExoticComponent } from 'react'
 import { useFarcasterUser } from '../../../hooks/use-farcaster-user'
 import { useExecuteActions, useToken } from '../../../hooks'
 import { formatUnits } from 'viem/utils'
+import { NewCredentialProvider, useNewCredential } from '../../credentials/new/context'
+import { NewCredentialDialog } from '../../credentials/new/dialog'
 
 export function PostActions({ post }: { post: Cast }) {
   const { data } = useActions()
   const actions = data?.sort((a, b) => a.type.localeCompare(b.type))
 
   return (
-    <Popover size="$5" placement="bottom">
-      <Popover.Trigger
-        onPress={(e) => {
-          e.stopPropagation()
-        }}
-      >
-        <View p="$2" br="$12" hoverStyle={{ bg: '$color5' }} cursor="pointer">
-          <MoreHorizontal size={20} />
-        </View>
-      </Popover.Trigger>
-      <Popover.Content
-        enterStyle={{ y: -10, opacity: 0 }}
-        exitStyle={{ y: -10, opacity: 0 }}
-        elevate
-        animation={[
-          '100ms',
-          {
-            opacity: {
-              overshootClamping: true,
-            },
-          },
-        ]}
-        padding="$0"
-        cursor="pointer"
-        bordered
-        overflow="hidden"
-        userSelect="none"
-      >
-        <YGroup>
-          {actions?.map((action) => (
-            <PostAction key={action.id} post={post} action={action} />
-          ))}
-        </YGroup>
-      </Popover.Content>
-    </Popover>
+    <View onPress={(e) => e.stopPropagation()}>
+      <NewCredentialProvider>
+        <Popover size="$5" placement="bottom">
+          <Popover.Trigger>
+            <View p="$2" br="$12" hoverStyle={{ bg: '$color5' }} cursor="pointer">
+              <MoreHorizontal size={20} />
+            </View>
+          </Popover.Trigger>
+          <Popover.Content
+            enterStyle={{ y: -10, opacity: 0 }}
+            exitStyle={{ y: -10, opacity: 0 }}
+            elevate
+            animation={[
+              '100ms',
+              {
+                opacity: {
+                  overshootClamping: true,
+                },
+              },
+            ]}
+            padding="$0"
+            cursor="pointer"
+            bordered
+            overflow="hidden"
+            userSelect="none"
+          >
+            <YGroup>
+              {actions?.map((action) => (
+                <PostAction key={action.id} post={post} action={action} />
+              ))}
+            </YGroup>
+          </Popover.Content>
+        </Popover>
+        <NewCredentialDialog />
+      </NewCredentialProvider>
+    </View>
   )
 }
 
@@ -194,6 +197,7 @@ function BasePostAction({
   label: string
   destructive?: boolean
 }) {
+  const { setIsOpen } = useNewCredential()
   const { credentials } = useSDK()
   const credential = getUsableCredential(credentials.credentials, action)
   const { mutate } = useExecuteActions({
@@ -210,9 +214,10 @@ function BasePostAction({
     <YGroup.Item>
       <View
         onPress={(e) => {
-          e.stopPropagation()
           if (credential) {
             mutate()
+          } else {
+            setIsOpen(true)
           }
         }}
         fd="row"

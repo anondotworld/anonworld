@@ -1,26 +1,23 @@
-import { TamaguiProvider, type TamaguiProviderProps, config } from '@anonworld/ui'
-import { SDKProvider } from './sdk'
+import { TamaguiProvider, config } from '@anonworld/ui'
 import { QueryClient } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
 import { ToastProvider } from './toast'
-export { useSDK } from './sdk'
+import { ReactNode } from 'react'
+export { SDKProvider, useSDK } from './sdk'
 
 const queryClient = new QueryClient()
 
 export function Provider({
   children,
   wagmiConfig,
-  ...rest
-}: Omit<TamaguiProviderProps, 'config'> & { wagmiConfig: any }) {
+}: { children: ReactNode; wagmiConfig: any }) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <SDKProvider apiUrl={process.env.NEXT_PUBLIC_API_URL}>
-          <TamaguiProvider config={config} defaultTheme="dark" disableRootThemeClass>
-            <ToastProvider>{children}</ToastProvider>
-          </TamaguiProvider>
-        </SDKProvider>
+        <TamaguiProvider config={config} defaultTheme="dark" disableRootThemeClass>
+          <ToastProvider>{children}</ToastProvider>
+        </TamaguiProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )
