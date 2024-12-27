@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import {
   actionExecutionsTable,
   actionsTable,
@@ -74,7 +74,13 @@ export const getPosts = async (
   const posts = await db
     .select()
     .from(postsTable)
-    .where(and(isNull(postsTable.deleted_at), eq(postsTable.fid, fid)))
+    .where(
+      and(
+        isNull(postsTable.deleted_at),
+        eq(postsTable.fid, fid),
+        sql`data->>'reply' IS NULL`
+      )
+    )
     .orderBy(desc(postsTable.created_at))
     .limit(opts.limit)
     .offset(opts.offset)

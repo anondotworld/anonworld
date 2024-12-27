@@ -52,7 +52,8 @@ const getFormattedPosts = async (fid: number) => {
 
   if (posts.length === 0) return []
 
-  return await formatPosts(posts)
+  const result = await formatPosts(posts)
+  return result.filter((p) => !p.parent_hash)
 }
 
 const buildTrendingFeed = async (fid: number, posts: Array<Cast>) => {
@@ -73,7 +74,7 @@ const buildTrendingFeed = async (fid: number, posts: Array<Cast>) => {
   return feed
 }
 
-const buildNewFeed = async (fid: number, posts: Array<Post>) => {
+const buildNewFeed = async (fid: number, posts: Array<Cast>) => {
   await redis.setNewFeed(fid, JSON.stringify(posts))
   return posts
 }
@@ -85,7 +86,7 @@ export const buildFeeds = async (fid: number) => {
   await buildNewFeed(fid, posts)
 }
 
-export async function formatPosts(posts: Array<Post>) {
+export async function formatPosts(posts: Array<Post>): Promise<Array<Cast>> {
   if (posts.length === 0) return []
 
   const [relationships, credentials] = await Promise.all([
