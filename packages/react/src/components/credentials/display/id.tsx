@@ -10,13 +10,12 @@ export function CredentialId({ credential }: { credential: Credential }) {
       theme="surface3"
       bg={background}
       br="$12"
-      px="$2"
       py="$1.5"
       fd="row"
       ai="center"
       gap="$1.5"
       alignSelf="flex-start"
-      w="$7"
+      w="$8"
       jc="center"
     >
       <Text fos="$1" color={color} fow="500">

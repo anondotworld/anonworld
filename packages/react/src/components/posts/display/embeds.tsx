@@ -88,7 +88,9 @@ function TwitterEmbed({ tweetId, username }: { tweetId: string; username: string
           {timeAgo(data.created_at)}
         </Text>
       </XStack>
-      <Text lineHeight={22}>{data.text}</Text>
+      <Text lineHeight={22} numberOfLines={10}>
+        {data.text}
+      </Text>
       {data.media?.photos?.map((photo) => (
         <Image
           key={photo.url}

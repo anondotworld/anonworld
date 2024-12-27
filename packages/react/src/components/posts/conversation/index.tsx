@@ -20,8 +20,11 @@ export function PostConversation({
         <Post
           key={post.hash}
           post={post}
-          depth={0}
-          isLastChild={index === conversation.length - 1}
+          arr={
+            post.direct_replies && post.direct_replies.length > 0
+              ? ['continue']
+              : ['empty']
+          }
         />
       ))}
     </YStack>
@@ -30,12 +33,10 @@ export function PostConversation({
 
 function Post({
   post,
-  depth,
-  isLastChild,
+  arr,
 }: {
   post: ConversationCast
-  depth: number
-  isLastChild: boolean
+  arr: Array<'continue' | 'empty'>
 }) {
   let text = post.text
   if (post.embeds) {
@@ -49,16 +50,14 @@ function Post({
   return (
     <YStack>
       <XStack>
-        {Array.from({ length: depth }).map((_, index) => {
-          const isEndOfRow = index === depth - 1
-          const isContinuation = !isLastChild && index === depth - 1
+        {arr.slice(0, arr.length - 1).map((state, index) => {
           return (
             <View key={index} w={32} jc="flex-end" flexDirection="row">
-              {isContinuation && (
+              {state === 'continue' && (
                 <View
                   bc="$borderColor"
-                  brw="$0.75"
-                  w={14.5}
+                  brw="$0.5"
+                  w={16}
                   h="100%"
                   pos="absolute"
                   top="$0"
@@ -66,8 +65,8 @@ function Post({
                   right="$0"
                 />
               )}
-              {isEndOfRow && (
-                <View bblr="$6" bc="$borderColor" blw="$0.75" bbw="$0.75" h={24} w={19} />
+              {arr.length > 1 && index === arr.length - 2 && (
+                <View bblr="$6" bc="$borderColor" blw="$0.5" bbw="$0.5" h={24} w={17} />
               )}
             </View>
           )
@@ -97,15 +96,11 @@ function Post({
       </XStack>
       <XStack gap="$2.5">
         <XStack>
-          {Array.from({ length: depth + 1 }).map((_, index) => {
-            const isEndOfRow = index === depth
-            const isEndOfConversation =
-              !post.direct_replies || post.direct_replies.length === 0
-            const isContinuation = !isLastChild && index === depth - 1
+          {arr.map((state, index) => {
             return (
               <View key={index} w={32} ai="flex-end">
-                {((isEndOfRow && !isEndOfConversation) || isContinuation) && (
-                  <View bc="$borderColor" blw="$0.75" f={1} w={19} />
+                {state === 'continue' && (
+                  <View bc="$borderColor" blw="$0.5" f={1} w={17} />
                 )}
               </View>
             )
@@ -136,14 +131,18 @@ function Post({
           </XStack>
         </YStack>
       </XStack>
-      {post.direct_replies?.map((reply, index) => (
-        <Post
-          key={reply.hash}
-          post={reply}
-          depth={depth + 1}
-          isLastChild={index === post.direct_replies.length - 1}
-        />
-      ))}
+      {post.direct_replies?.map((reply, index) => {
+        const newArr = [...arr]
+        if (reply.direct_replies && reply.direct_replies.length > 0) {
+          newArr.push('continue')
+        } else {
+          newArr.push('empty')
+        }
+        if (index === post.direct_replies.length - 1) {
+          newArr[newArr.length - 2] = 'empty'
+        }
+        return <Post key={reply.hash} post={reply} arr={newArr} />
+      })}
     </YStack>
   )
 }

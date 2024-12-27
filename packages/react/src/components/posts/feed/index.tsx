@@ -1,5 +1,5 @@
 import { usePosts } from '../../../hooks/use-posts'
-import { YStack } from '@anonworld/ui'
+import { Spinner, YStack } from '@anonworld/ui'
 import { Post } from '../display'
 
 export function PostFeed({
@@ -15,6 +15,10 @@ export function PostFeed({
     fid,
     type,
   })
+
+  if (isLoading) {
+    return <Spinner color="$color12" />
+  }
 
   return (
     <YStack $gtXs={{ gap: '$4' }}>
