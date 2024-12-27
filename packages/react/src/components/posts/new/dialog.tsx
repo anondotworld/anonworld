@@ -6,28 +6,11 @@ import { NewPostImage, NewPostLink, NewPostReply } from './content'
 import { NewPostText } from './text'
 import { NewPostFooter } from './footer'
 
-export function NewPostDialog() {
+export function NewPostDialog({ children }: { children?: React.ReactNode }) {
   const { isOpen, setIsOpen } = useNewPost()
   return (
     <Dialog modal open={isOpen} onOpenChange={setIsOpen}>
-      <Dialog.Trigger asChild>
-        <Button
-          size="$3"
-          themeInverse
-          bg="$background"
-          br="$12"
-          bw="$0"
-          hoverStyle={{ opacity: 0.9 }}
-        >
-          <XStack ai="center" gap="$2">
-            <Plus size={16} strokeWidth={2.5} />
-            <Text fos="$2" fow="600">
-              Create Post
-            </Text>
-          </XStack>
-        </Button>
-      </Dialog.Trigger>
-
+      {children}
       <Adapt when="sm">
         <Sheet animation="quicker" zIndex={200000} modal dismissOnSnapToBottom>
           <Sheet.Frame padding="$4" gap="$2">

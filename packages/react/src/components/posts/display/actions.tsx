@@ -1,5 +1,13 @@
 import { MoreHorizontal, Trash } from '@tamagui/lucide-icons'
-import { Popover, Text, View, YGroup, YStack } from '@anonworld/ui'
+import {
+  Popover,
+  Spinner,
+  Text,
+  useToastController,
+  View,
+  YGroup,
+  YStack,
+} from '@anonworld/ui'
 import { useActions } from '../../../hooks/use-actions'
 import { Action, ActionType, Cast, CredentialRequirement } from '../../../types'
 import { useSDK } from '../../../providers/sdk'
@@ -60,64 +68,97 @@ export function PostActions({ post }: { post: Cast }) {
 function PostAction({ action, post }: { action: Action; post: Cast }) {
   switch (action.type) {
     case ActionType.COPY_POST_TWITTER: {
-      const hasRelationship = post.relationships.some(
-        (c) => c.targetAccount === action.metadata.twitter
-      )
-      if (hasRelationship) {
-        return null
-      }
-
-      const isValidEq =
-        !action.metadata.target.post.text.eq ||
-        action.metadata.target.post.text.eq.some((text) =>
-          post.text.toLowerCase().match(text)
-        )
-      const isValidNe =
-        !action.metadata.target.post.text.ne ||
-        !action.metadata.target.post.text.ne.some((text) =>
-          post.text.toLowerCase().match(text)
-        )
-
-      if (!isValidEq || !isValidNe) {
-        return null
-      }
-
-      return (
-        <BasePostAction
-          action={action}
-          data={{ hash: post.hash }}
-          Icon={X}
-          label={`Post to @${action.metadata.twitter}`}
-        />
-      )
+      return <CopyPostTwitter action={action} post={post} />
     }
     case ActionType.DELETE_POST_TWITTER: {
-      const hasRelationship = post.relationships.some(
-        (c) => c.targetAccount === action.metadata.twitter
-      )
-      if (!hasRelationship) {
-        return null
-      }
-
-      return (
-        <BasePostAction
-          action={action}
-          data={{ hash: post.hash }}
-          Icon={Trash}
-          label={`Delete from @${action.metadata.twitter}`}
-          destructive
-        />
-      )
+      return <DeletePostTwitter action={action} post={post} />
     }
-    case ActionType.COPY_POST_FARCASTER:
-    case ActionType.DELETE_POST_FARCASTER:
-      return <PostActionFarcaster fid={action.metadata.fid} action={action} post={post} />
+    case ActionType.COPY_POST_FARCASTER: {
+      return <CopyPostFarcaster fid={action.metadata.fid} action={action} post={post} />
+    }
+    case ActionType.DELETE_POST_FARCASTER: {
+      return <DeletePostFarcaster fid={action.metadata.fid} action={action} post={post} />
+    }
   }
 
   return null
 }
 
-function PostActionFarcaster({
+function DeletePostTwitter({
+  action,
+  post,
+}: {
+  action: Action
+  post: Cast
+}) {
+  if (action.type !== ActionType.DELETE_POST_TWITTER) {
+    return null
+  }
+
+  const hasRelationship = post.relationships.some(
+    (c) => c.targetAccount === action.metadata.twitter
+  )
+  if (!hasRelationship) {
+    return null
+  }
+
+  return (
+    <BasePostAction
+      action={action}
+      data={{ hash: post.hash }}
+      Icon={Trash}
+      label={`Delete from @${action.metadata.twitter}`}
+      destructive
+      successMessage={`Deleted from @${action.metadata.twitter}`}
+    />
+  )
+}
+
+function CopyPostTwitter({
+  action,
+  post,
+}: {
+  action: Action
+  post: Cast
+}) {
+  if (action.type !== ActionType.COPY_POST_TWITTER) {
+    return null
+  }
+
+  const hasRelationship = post.relationships.some(
+    (c) => c.targetAccount === action.metadata.twitter
+  )
+  if (hasRelationship) {
+    return null
+  }
+
+  const isValidEq =
+    !action.metadata.target.post.text.eq ||
+    action.metadata.target.post.text.eq.some((text) =>
+      post.text.toLowerCase().match(text)
+    )
+  const isValidNe =
+    !action.metadata.target.post.text.ne ||
+    !action.metadata.target.post.text.ne.some((text) =>
+      post.text.toLowerCase().match(text)
+    )
+
+  if (!isValidEq || !isValidNe) {
+    return null
+  }
+
+  return (
+    <BasePostAction
+      action={action}
+      data={{ hash: post.hash }}
+      Icon={X}
+      label={`Post to @${action.metadata.twitter}`}
+      successMessage={`Posted to @${action.metadata.twitter}`}
+    />
+  )
+}
+
+function DeletePostFarcaster({
   fid,
   action,
   post,
@@ -128,60 +169,75 @@ function PostActionFarcaster({
 }) {
   const { data } = useFarcasterUser(fid)
 
-  switch (action.type) {
-    case ActionType.COPY_POST_FARCASTER: {
-      const hasRelationship = post.relationships.some(
-        (c) => c.targetAccount === action.metadata.fid
-      )
-      if (hasRelationship) {
-        return null
-      }
-
-      const validateEq =
-        !action.metadata.target.post.text.eq ||
-        action.metadata.target.post.text.eq?.some((text) =>
-          post.text.toLowerCase().match(text)
-        )
-      const validateNe =
-        !action.metadata.target.post.text.ne ||
-        action.metadata.target.post.text.ne?.some(
-          (text) => !post.text.toLowerCase().match(text)
-        )
-
-      if (!validateEq || !validateNe) {
-        return null
-      }
-
-      return (
-        <BasePostAction
-          action={action}
-          data={{ hash: post.hash }}
-          Icon={Farcaster}
-          label={`Post to @${data?.username}`}
-        />
-      )
-    }
-    case ActionType.DELETE_POST_FARCASTER: {
-      const hasRelationship = post.relationships.some(
-        (c) => c.targetAccount === action.metadata.fid
-      )
-      if (!hasRelationship) {
-        return null
-      }
-
-      return (
-        <BasePostAction
-          action={action}
-          data={{ hash: post.hash }}
-          Icon={Trash}
-          label={`Delete from @${data?.username}`}
-          destructive
-        />
-      )
-    }
+  if (action.type !== ActionType.DELETE_POST_FARCASTER) {
+    return null
   }
 
-  return null
+  const hasRelationship = post.relationships.some(
+    (c) => c.targetAccount === action.metadata.fid
+  )
+  if (!hasRelationship) {
+    return null
+  }
+
+  return (
+    <BasePostAction
+      action={action}
+      data={{ hash: post.hash }}
+      Icon={Trash}
+      label={`Delete from @${data?.username}`}
+      destructive
+      successMessage={`Deleted from @${data?.username}`}
+    />
+  )
+}
+
+function CopyPostFarcaster({
+  fid,
+  action,
+  post,
+}: {
+  fid: string
+  action: Action
+  post: Cast
+}) {
+  const { data } = useFarcasterUser(fid)
+
+  if (action.type !== ActionType.COPY_POST_FARCASTER) {
+    return null
+  }
+
+  const hasRelationship = post.relationships.some(
+    (c) => c.targetAccount === action.metadata.fid
+  )
+  if (hasRelationship) {
+    return null
+  }
+
+  const validateEq =
+    !action.metadata.target.post.text.eq ||
+    action.metadata.target.post.text.eq?.some((text) =>
+      post.text.toLowerCase().match(text)
+    )
+  const validateNe =
+    !action.metadata.target.post.text.ne ||
+    action.metadata.target.post.text.ne?.some(
+      (text) => !post.text.toLowerCase().match(text)
+    )
+
+  if (!validateEq || !validateNe) {
+    return null
+  }
+
+  return (
+    <BasePostAction
+      action={action}
+      data={{ hash: post.hash }}
+      Icon={Farcaster}
+      label={`Post to @${data?.username}`}
+      successMessage={`Posted to @${data?.username}`}
+    />
+  )
 }
 
 function BasePostAction({
@@ -190,17 +246,20 @@ function BasePostAction({
   Icon,
   label,
   destructive,
+  successMessage,
 }: {
   action: Action
   data: any
   Icon: NamedExoticComponent<any>
   label: string
   destructive?: boolean
+  successMessage: string
 }) {
   const { setIsOpen } = useNewCredential()
   const { credentials } = useSDK()
   const credential = getUsableCredential(credentials.credentials, action)
-  const { mutate } = useExecuteActions({
+  const toast = useToastController()
+  const { mutate, isPending } = useExecuteActions({
     credentials: credential ? [credential] : [],
     actions: [
       {
@@ -208,12 +267,18 @@ function BasePostAction({
         data,
       },
     ],
+    onSuccess: (data) => {
+      toast.show(successMessage, {
+        duration: 3000,
+      })
+    },
   })
 
   return (
     <YGroup.Item>
       <View
         onPress={(e) => {
+          if (isPending) return
           if (credential) {
             mutate()
           } else {
@@ -225,8 +290,10 @@ function BasePostAction({
         px="$3.5"
         py="$2.5"
         hoverStyle={{ bg: '$color5' }}
+        ai={!credential && action.credential_requirement ? 'flex-start' : 'center'}
       >
-        {Icon && (
+        {isPending && <Spinner color="$color12" />}
+        {Icon && !isPending && (
           <Icon
             size={16}
             color={destructive ? '$red9' : undefined}

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { Credential } from '../../../types'
 import { useExecuteActions } from '../../../hooks/use-execute-actions'
 import { useToastController } from '@anonworld/ui'
@@ -35,18 +35,26 @@ const NewPostContext = createContext<NewPostContextValue | null>(null)
 export function NewPostProvider({
   children,
   onSuccess,
+  initialReply,
 }: {
   children: React.ReactNode
   onSuccess: (hash: string) => void
+  initialReply?: Content
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [credentials, setCredentials] = useState<Credential[]>([])
-  const [reply, setReply] = useState<Content | null>(null)
+  const [reply, setReply] = useState<Content | null>(initialReply || null)
   const [text, setText] = useState<string | null>(null)
   const [link, setLink] = useState<Content | null>(null)
   const [image, setImage] = useState<Content | null>(null)
 
   const toast = useToastController()
+
+  useEffect(() => {
+    if (isOpen && initialReply) {
+      setReply(initialReply)
+    }
+  }, [isOpen, initialReply])
 
   const {
     mutate: post,

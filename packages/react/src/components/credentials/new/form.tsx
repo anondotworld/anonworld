@@ -287,7 +287,9 @@ function AddCredentialButton() {
   const [error, setError] = useState<string>()
 
   const handleAddCredential = async () => {
-    const impl = token?.attributes.fungible_info.implementations[0]
+    const impl = token?.attributes.fungible_info.implementations.find(
+      (impl) => impl.chain_id === token.relationships.chain.data.id
+    )
     if (!impl?.address) return
     const chainId = zerionToChainId[impl.chain_id]
     if (!chainId) return

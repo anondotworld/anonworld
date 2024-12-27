@@ -14,7 +14,7 @@ export default function Credentials() {
     <View maxWidth={700} mx="auto" my="$3" gap="$3">
       <XStack ai="center" jc="space-between">
         <Text fos="$2" fow="400" color="$color11">
-          {`${sortedCredentials.length} Credentials`}
+          {`${sortedCredentials.length} Credential${sortedCredentials.length === 1 ? '' : 's'}`}
         </Text>
         <NewCredential />
       </XStack>
