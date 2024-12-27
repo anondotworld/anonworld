@@ -1,7 +1,8 @@
 'use client'
 
+import { About } from '@anonworld/react'
 import { Image, Text, View } from '@anonworld/ui'
-import { HelpCircle, WalletMinimal } from '@tamagui/lucide-icons'
+import { WalletMinimal } from '@tamagui/lucide-icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -37,7 +38,7 @@ export function Header() {
       <View fd="row" gap="$8" ai="center">
         <Link href="/" style={{ textDecoration: 'none' }}>
           <View fd="row" gap="$2" ai="center">
-            <Image src="/logo.png" alt="anon.world" width={32} height={32} />
+            <Image src="/logo.svg" alt="anon.world" width={32} height={32} />
             <Text fow="600" fos="$3">
               ANON.WORLD
             </Text>
@@ -93,20 +94,7 @@ export function Header() {
             <WalletMinimal size={20} strokeWidth={2.5} />
           </View>
         </Link>
-        {/* <Link
-          href={pathname === Pathname.ABOUT ? Pathname.HOME : Pathname.ABOUT}
-          style={{ textDecoration: 'none' }}
-        >
-          <View
-            bg="$background"
-            p="$2"
-            br="$12"
-            themeInverse={pathname === Pathname.ABOUT}
-            hoverStyle={{ bg: '$color5' }}
-          >
-            <HelpCircle size={20} strokeWidth={2.5} />
-          </View>
-        </Link> */}
+        <About />
       </View>
     </View>
   )

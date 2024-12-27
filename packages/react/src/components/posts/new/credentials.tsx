@@ -1,7 +1,7 @@
 import { Image, Popover, ScrollView, Text, View, XStack } from '@anonworld/ui'
 import { Check, Plus } from '@tamagui/lucide-icons'
 import { useSDK } from '../../../providers'
-import { CredentialId } from '../../credentials/display/id'
+import { CredentialAvatar } from '../../credentials/display/id'
 import { Badge } from '../../badge'
 import { useToken } from '../../../hooks/use-token'
 import { Credential } from '../../../types'
@@ -81,7 +81,7 @@ function CredentialSelector() {
               btw="$0.5"
               onPress={() => handlePress(credential)}
             >
-              <CredentialId id={formatHexId(credential.id)} />
+              <CredentialAvatar id={formatHexId(credential.id)} size="$1" />
               <Badge>ERC20 Balance</Badge>
               <ERC20Credential credential={credential} />
               <View w={16}>

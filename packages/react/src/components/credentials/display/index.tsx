@@ -5,7 +5,7 @@ import { Badge } from '../../badge'
 import { CredentialActions } from './actions'
 import { useToken } from '../../../hooks'
 import { extractChain, formatUnits } from 'viem/utils'
-import { CredentialId } from './id'
+import { CredentialAvatar } from './id'
 
 export function CredentialDisplay({ credential }: { credential: Credential }) {
   return (
@@ -24,7 +24,7 @@ export function CredentialDisplay({ credential }: { credential: Credential }) {
       f={1}
     >
       <XStack ai="center" gap="$2">
-        <CredentialId id={formatHexId(credential.id)} />
+        <CredentialAvatar id={formatHexId(credential.id)} size="$1" />
         <Badge>ERC20 Balance</Badge>
         <Badge>{timeAgo(credential.verified_at)}</Badge>
       </XStack>
