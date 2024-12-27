@@ -16,7 +16,7 @@ export function useExecuteActions({
 }: {
   credentials: Credential[]
   actions: Omit<ExecuteAction, 'credentials'>[]
-  onSuccess: (response: ExecuteActionsResponse[]) => void
+  onSuccess?: (response: ExecuteActionsResponse[]) => void
   onError?: (error: Error) => void
 }) {
   const { sdk } = useSDK()
@@ -87,7 +87,7 @@ export function useExecuteActions({
     },
     onSuccess(data, variables, context) {
       if (!data) return
-      onSuccess(data)
+      onSuccess?.(data)
     },
     onError(error, variables, context) {
       onError?.(error)

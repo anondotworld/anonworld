@@ -500,10 +500,14 @@ type BaseAction = {
   created_at: Date
   updated_at: Date
   credential_id: string | null
-  credential_requirement: {
-    minimumBalance: string
-  } | null
+  credential_requirement: CredentialRequirement | null
   trigger: string
+}
+
+export type CredentialRequirement = {
+  chainId: number
+  tokenAddress: `0x${string}`
+  minimumBalance: string
 }
 
 export type ActionTargetPost = {

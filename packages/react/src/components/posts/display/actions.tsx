@@ -1,17 +1,20 @@
 import { MoreHorizontal, Trash } from '@tamagui/lucide-icons'
-import { Popover, Text, View, YGroup } from '@anonworld/ui'
+import { Popover, Text, View, YGroup, YStack } from '@anonworld/ui'
 import { useActions } from '../../../hooks/use-actions'
-import { Action, ActionType, Cast } from '../../../types'
+import { Action, ActionType, Cast, CredentialRequirement } from '../../../types'
 import { useSDK } from '../../../providers/sdk'
-import { getUsableCredential } from '../../../utils'
+import { formatAmount, getUsableCredential } from '../../../utils'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
 import { NamedExoticComponent } from 'react'
 import { useFarcasterUser } from '../../../hooks/use-farcaster-user'
+import { useExecuteActions, useToken } from '../../../hooks'
+import { formatUnits } from 'viem/utils'
 
 export function PostActions({ post }: { post: Cast }) {
   const { data } = useActions()
   const actions = data?.sort((a, b) => a.type.localeCompare(b.type))
+
   return (
     <Popover size="$5" placement="bottom">
       <Popover.Trigger
@@ -39,10 +42,11 @@ export function PostActions({ post }: { post: Cast }) {
         cursor="pointer"
         bordered
         overflow="hidden"
+        userSelect="none"
       >
         <YGroup>
           {actions?.map((action) => (
-            <ActionItem key={action.id} post={post} action={action} />
+            <PostAction key={action.id} post={post} action={action} />
           ))}
         </YGroup>
       </Popover.Content>
@@ -50,13 +54,7 @@ export function PostActions({ post }: { post: Cast }) {
   )
 }
 
-function ActionItem({ post, action }: { post: Cast; action: Action }) {
-  const { credentials } = useSDK()
-  const credential = getUsableCredential(credentials.credentials, action)
-  if (!credential) {
-    return null
-  }
-
+function PostAction({ action, post }: { action: Action; post: Cast }) {
   switch (action.type) {
     case ActionType.COPY_POST_TWITTER: {
       const hasRelationship = post.relationships.some(
@@ -82,10 +80,11 @@ function ActionItem({ post, action }: { post: Cast; action: Action }) {
       }
 
       return (
-        <ActionButton
-          label={`Post to @${action.metadata.twitter}`}
-          onPress={() => {}}
+        <BasePostAction
+          action={action}
+          data={{ hash: post.hash }}
           Icon={X}
+          label={`Post to @${action.metadata.twitter}`}
         />
       )
     }
@@ -96,15 +95,37 @@ function ActionItem({ post, action }: { post: Cast; action: Action }) {
       if (!hasRelationship) {
         return null
       }
+
       return (
-        <ActionButton
-          label={`Delete from @${action.metadata.twitter}`}
-          onPress={() => {}}
+        <BasePostAction
+          action={action}
+          data={{ hash: post.hash }}
           Icon={Trash}
+          label={`Delete from @${action.metadata.twitter}`}
           destructive
         />
       )
     }
+    case ActionType.COPY_POST_FARCASTER:
+    case ActionType.DELETE_POST_FARCASTER:
+      return <PostActionFarcaster fid={action.metadata.fid} action={action} post={post} />
+  }
+
+  return null
+}
+
+function PostActionFarcaster({
+  fid,
+  action,
+  post,
+}: {
+  fid: string
+  action: Action
+  post: Cast
+}) {
+  const { data } = useFarcasterUser(fid)
+
+  switch (action.type) {
     case ActionType.COPY_POST_FARCASTER: {
       const hasRelationship = post.relationships.some(
         (c) => c.targetAccount === action.metadata.fid
@@ -113,18 +134,29 @@ function ActionItem({ post, action }: { post: Cast; action: Action }) {
         return null
       }
 
-      const validateEq = action.metadata.target.post.text.eq?.some((text) =>
-        post.text.toLowerCase().match(text)
-      )
-      const validateNe = action.metadata.target.post.text.ne?.some(
-        (text) => !post.text.toLowerCase().match(text)
-      )
+      const validateEq =
+        !action.metadata.target.post.text.eq ||
+        action.metadata.target.post.text.eq?.some((text) =>
+          post.text.toLowerCase().match(text)
+        )
+      const validateNe =
+        !action.metadata.target.post.text.ne ||
+        action.metadata.target.post.text.ne?.some(
+          (text) => !post.text.toLowerCase().match(text)
+        )
 
       if (!validateEq || !validateNe) {
         return null
       }
 
-      return <PostToFarcaster fid={action.metadata.fid} />
+      return (
+        <BasePostAction
+          action={action}
+          data={{ hash: post.hash }}
+          Icon={Farcaster}
+          label={`Post to @${data?.username}`}
+        />
+      )
     }
     case ActionType.DELETE_POST_FARCASTER: {
       const hasRelationship = post.relationships.some(
@@ -133,63 +165,106 @@ function ActionItem({ post, action }: { post: Cast; action: Action }) {
       if (!hasRelationship) {
         return null
       }
-      return <DeleteFromFarcaster fid={action.metadata.fid} />
+
+      return (
+        <BasePostAction
+          action={action}
+          data={{ hash: post.hash }}
+          Icon={Trash}
+          label={`Delete from @${data?.username}`}
+          destructive
+        />
+      )
     }
   }
 
   return null
 }
 
-function PostToFarcaster({ fid }: { fid: string }) {
-  const { data } = useFarcasterUser(fid)
-  return (
-    <ActionButton
-      label={`Post to @${data?.username}`}
-      onPress={() => {}}
-      Icon={Farcaster}
-    />
-  )
-}
-
-function DeleteFromFarcaster({ fid }: { fid: string }) {
-  const { data } = useFarcasterUser(fid)
-  return (
-    <ActionButton
-      label={`Delete from @${data?.username}`}
-      onPress={() => {}}
-      Icon={Trash}
-      destructive
-    />
-  )
-}
-
-function ActionButton({
-  label,
-  onPress,
+function BasePostAction({
+  action,
+  data,
   Icon,
-  destructive = false,
+  label,
+  destructive,
 }: {
+  action: Action
+  data: any
+  Icon: NamedExoticComponent<any>
   label: string
-  onPress: () => void
-  Icon?: NamedExoticComponent<any>
   destructive?: boolean
 }) {
+  const { credentials } = useSDK()
+  const credential = getUsableCredential(credentials.credentials, action)
+  const { mutate } = useExecuteActions({
+    credentials: credential ? [credential] : [],
+    actions: [
+      {
+        actionId: action.id,
+        data,
+      },
+    ],
+  })
+
   return (
     <YGroup.Item>
       <View
-        onPress={onPress}
+        onPress={(e) => {
+          e.stopPropagation()
+          if (credential) {
+            mutate()
+          }
+        }}
         fd="row"
-        ai="center"
         gap="$2"
         px="$3.5"
         py="$2.5"
         hoverStyle={{ bg: '$color5' }}
       >
-        {Icon && <Icon size={16} color={destructive ? '$red9' : undefined} />}
-        <Text fos="$2" fow="400" color={destructive ? '$red9' : undefined}>
-          {label}
-        </Text>
+        {Icon && (
+          <Icon
+            size={16}
+            color={destructive ? '$red9' : undefined}
+            opacity={credential ? 1 : 0.5}
+          />
+        )}
+        <YStack ai="flex-start" gap="$1">
+          <Text
+            fos="$2"
+            fow="400"
+            color={destructive ? '$red9' : undefined}
+            opacity={credential ? 1 : 0.5}
+          >
+            {label}
+          </Text>
+          {!credential && action.credential_requirement && (
+            <ERC20Requirement req={action.credential_requirement} />
+          )}
+        </YStack>
       </View>
     </YGroup.Item>
+  )
+}
+
+function ERC20Requirement({
+  req,
+}: {
+  req: CredentialRequirement
+}) {
+  const { data } = useToken({
+    chainId: Number(req.chainId),
+    address: req.tokenAddress,
+  })
+
+  const symbol = data?.attributes.symbol
+  const implementation = data?.attributes.implementations[0]
+  const amount = Number.parseFloat(
+    formatUnits(BigInt(req.minimumBalance), implementation?.decimals ?? 18)
+  )
+
+  return (
+    <Text fos="$1" fow="500" color="$color10">
+      {`req: ${formatAmount(amount)} ${symbol}`}
+    </Text>
   )
 }
