@@ -87,6 +87,7 @@ export function toHslColors(str: string) {
   const hue = Math.abs(hash % 360)
   return {
     background: `hsl(${hue}, 70%, 85%)`,
+    secondary: `hsl(${hue}, 70%, 50%)`,
     color: `hsl(${hue}, 70%, 15%)`,
   }
 }

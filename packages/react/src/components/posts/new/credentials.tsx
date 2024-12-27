@@ -8,6 +8,7 @@ import { Credential } from '../../../types'
 import { formatUnits } from 'viem'
 import { useNewPost } from './context'
 import { CredentialBadge } from '../../credentials/badge'
+import { formatHexId } from '../../../utils'
 
 export function NewPostCredentials() {
   const { credentials, removeCredential } = useNewPost()
@@ -80,7 +81,7 @@ function CredentialSelector() {
               btw="$0.5"
               onPress={() => handlePress(credential)}
             >
-              <CredentialId credential={credential} />
+              <CredentialId id={formatHexId(credential.id)} />
               <Badge>ERC20 Balance</Badge>
               <ERC20Credential credential={credential} />
               <View w={16}>

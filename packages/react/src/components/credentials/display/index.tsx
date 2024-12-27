@@ -1,6 +1,6 @@
 import { Credential } from '../../../types'
 import { Image, Text, View, XStack, YStack } from '@anonworld/ui'
-import { chains, timeAgo } from '../../../utils'
+import { chains, formatHexId, timeAgo } from '../../../utils'
 import { Badge } from '../../badge'
 import { CredentialActions } from './actions'
 import { useToken } from '../../../hooks'
@@ -24,7 +24,7 @@ export function CredentialDisplay({ credential }: { credential: Credential }) {
       f={1}
     >
       <XStack ai="center" gap="$2">
-        <CredentialId credential={credential} />
+        <CredentialId id={formatHexId(credential.id)} />
         <Badge>ERC20 Balance</Badge>
         <Badge>{timeAgo(credential.verified_at)}</Badge>
       </XStack>

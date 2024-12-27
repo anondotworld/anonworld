@@ -307,6 +307,7 @@ export type Relationship = {
 
 export type Credential = {
   id: string
+  displayId: string
   credential_id: string
   proof: {
     proof: number[]

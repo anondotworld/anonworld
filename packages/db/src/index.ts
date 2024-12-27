@@ -107,11 +107,13 @@ export const getPost = async (hash: string): Promise<Post | null> => {
   return post as Post | null
 }
 
-export const getBulkPosts = async (hashes: string[]) => {
-  return await db
+export const getBulkPosts = async (hashes: string[]): Promise<Post[]> => {
+  const posts = await db
     .select()
     .from(postsTable)
     .where(and(inArray(postsTable.hash, hashes), isNull(postsTable.deleted_at)))
+
+  return posts as Post[]
 }
 
 export const getPostParent = async (hash: string) => {

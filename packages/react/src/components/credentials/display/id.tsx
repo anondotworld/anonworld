@@ -1,9 +1,8 @@
-import { formatHexId, toHslColors } from '../../../utils'
+import { toHslColors } from '../../../utils'
 import { Text, View } from '@anonworld/ui'
-import { Credential } from '../../../types'
+import { LinearGradient } from '@tamagui/linear-gradient'
 
-export function CredentialId({ credential }: { credential: Credential }) {
-  const id = formatHexId(credential.id)
+export function CredentialId({ id }: { id: string }) {
   const { background, color } = toHslColors(id)
   return (
     <View
@@ -22,5 +21,22 @@ export function CredentialId({ credential }: { credential: Credential }) {
         {id}
       </Text>
     </View>
+  )
+}
+
+export function CredentialAvatar({
+  id,
+  size = '$2.5',
+}: { id: string; size?: number | string }) {
+  const { background, secondary } = toHslColors(id)
+  return (
+    <LinearGradient
+      width={size}
+      height={size}
+      borderRadius="$12"
+      colors={[secondary, background]}
+      start={[1, 1]}
+      end={[0, 0]}
+    />
   )
 }

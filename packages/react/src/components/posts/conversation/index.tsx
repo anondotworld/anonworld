@@ -1,4 +1,4 @@
-import { ConversationCast } from '@anonworld/react'
+import { ConversationCast, CredentialBadge } from '@anonworld/react'
 import { Avatar, Dialog, Separator, Text, View, XStack, YStack } from '@anonworld/ui'
 import { MessageCircle } from '@tamagui/lucide-icons'
 import { formatAmount } from '../../../utils'
@@ -8,6 +8,7 @@ import { Heart } from '@tamagui/lucide-icons'
 import { PostActions } from './actions'
 import { NewPostProvider } from '../new/context'
 import { NewPostDialog } from '../new/dialog'
+import { CredentialAvatar } from '../../credentials/display/id'
 
 export function PostConversation({
   conversation,
@@ -72,23 +73,37 @@ function Post({
           )
         })}
         <XStack gap="$2.5" ai="center" pt="$2">
-          <View w={32} ai="center">
-            <Avatar size="$2.5" circular>
-              <Avatar.Image src={post.author.pfp_url} />
-              <Avatar.Fallback />
-            </Avatar>
-          </View>
-          <Text
-            fow="600"
-            fos="$2"
-            cursor="pointer"
-            onPress={() =>
-              window.open(`https://warpcast.com/${post.author.username}`, '_blank')
-            }
-            hoverStyle={{ textDecorationLine: 'underline' }}
-          >
-            {post.author.username}
-          </Text>
+          {post.credentials && (
+            <>
+              <View w={32} ai="center">
+                <CredentialAvatar id={post.credentials[0].displayId} />
+              </View>
+              {post.credentials.map((credential, index) => (
+                <CredentialBadge key={index} credential={credential} />
+              ))}
+            </>
+          )}
+          {(!post.credentials || post.credentials.length === 0) && (
+            <>
+              <View w={32} ai="center">
+                <Avatar size="$2.5" circular>
+                  <Avatar.Image src={post.author.pfp_url} />
+                  <Avatar.Fallback />
+                </Avatar>
+              </View>
+              <Text
+                fow="600"
+                fos="$2"
+                cursor="pointer"
+                onPress={() =>
+                  window.open(`https://warpcast.com/${post.author.username}`, '_blank')
+                }
+                hoverStyle={{ textDecorationLine: 'underline' }}
+              >
+                {post.author.username}
+              </Text>
+            </>
+          )}
           <Text fos="$2" fow="400" col="$color11">
             {timeAgo(post.timestamp)}
           </Text>

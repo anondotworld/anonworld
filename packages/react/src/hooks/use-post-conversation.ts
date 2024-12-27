@@ -6,7 +6,7 @@ export function usePostConversation({ hash }: { hash: string }) {
   return useQuery({
     queryKey: ['post-conversation', hash],
     queryFn: async () => {
-      const response = await sdk.getPostConversation(hash)
+      const response = await sdk.getPostConversations(hash)
       return response.data?.data ?? null
     },
   })

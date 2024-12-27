@@ -1,4 +1,4 @@
-import { createElysia, encodeJson } from '../utils'
+import { createElysia, encodeJson, formatHexId } from '../utils'
 import { t } from 'elysia'
 import { redis } from '../services/redis'
 import { neynar } from '../services/neynar'
@@ -126,6 +126,7 @@ export async function formatPosts(posts: Array<Post>) {
         : undefined,
       credentials: postCredentials.map((c) => ({
         ...c.credential_instances,
+        displayId: formatHexId(c.credential_instances.id),
         id: undefined,
         proof: undefined,
       })),

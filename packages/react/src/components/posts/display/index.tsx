@@ -16,6 +16,7 @@ import { PostRelationships } from './relationships'
 import { PostEmbed } from './embeds'
 import { Badge } from '../../badge'
 import { useFarcasterIdentity } from '../../../hooks/use-farcaster-identity'
+import { CredentialAvatar } from '../../credentials/display/id'
 
 export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
   let text = post.text
@@ -46,6 +47,9 @@ export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
       f={1}
     >
       <XStack gap="$2" ai="center">
+        {post.credentials && post.credentials.length > 0 && (
+          <CredentialAvatar id={post.credentials[0].displayId} size="$1" />
+        )}
         {post.credentials?.map((credential, index) => (
           <CredentialBadge key={index} credential={credential} />
         ))}

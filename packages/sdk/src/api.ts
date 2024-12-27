@@ -109,9 +109,9 @@ export class Api {
     return await this.request<Cast>(`/posts/${hash}`)
   }
 
-  async getPostConversation(hash: string) {
+  async getPostConversations(hash: string) {
     return await this.request<{ data: Array<ConversationCast> }>(
-      `/posts/${hash}/conversation`
+      `/posts/${hash}/conversations`
     )
   }
 
