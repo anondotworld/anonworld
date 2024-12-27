@@ -62,7 +62,7 @@ export function Header() {
               </Text>
             </View>
           </Link>
-          <Link href="/accounts" style={{ textDecoration: 'none' }}>
+          {/* <Link href="/accounts" style={{ textDecoration: 'none' }}>
             <View
               bg="$background"
               py="$2"
@@ -75,7 +75,7 @@ export function Header() {
                 Accounts
               </Text>
             </View>
-          </Link>
+          </Link> */}
         </View>
       </View>
       <View fd="row" gap="$3" ai="center">
@@ -93,7 +93,7 @@ export function Header() {
             <WalletMinimal size={20} strokeWidth={2.5} />
           </View>
         </Link>
-        <Link
+        {/* <Link
           href={pathname === Pathname.ABOUT ? Pathname.HOME : Pathname.ABOUT}
           style={{ textDecoration: 'none' }}
         >
@@ -106,7 +106,7 @@ export function Header() {
           >
             <HelpCircle size={20} strokeWidth={2.5} />
           </View>
-        </Link>
+        </Link> */}
       </View>
     </View>
   )
