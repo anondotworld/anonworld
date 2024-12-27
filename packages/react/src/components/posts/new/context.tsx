@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { Credential } from '../../../types'
 import { useExecuteActions } from '../../../hooks/use-execute-actions'
 import { useToastController } from '@anonworld/ui'
+import { hashMessage } from 'viem'
+import { encodeJson } from '../../../utils'
 
 const ACTION_ID = 'b6ec8ee8-f8bf-474f-8b28-f788f37e4066'
 
@@ -28,6 +30,8 @@ interface NewPostContextValue {
   post: () => void
   status: 'idle' | 'pending' | 'success' | 'error'
   error: Error | null
+  revealPhrase: string | null
+  setRevealPhrase: (revealPhrase: string | null) => void
 }
 
 const NewPostContext = createContext<NewPostContextValue | null>(null)
@@ -47,6 +51,7 @@ export function NewPostProvider({
   const [text, setText] = useState<string | null>(null)
   const [link, setLink] = useState<Content | null>(null)
   const [image, setImage] = useState<Content | null>(null)
+  const [revealPhrase, setRevealPhrase] = useState<string | null>(null)
 
   const toast = useToastController()
 
@@ -70,6 +75,16 @@ export function NewPostProvider({
           reply: reply?.url ?? null,
           links: link?.url ? [link.url] : [],
           images: image?.url ? [image.url] : [],
+          revealHash: revealPhrase
+            ? hashMessage(
+                encodeJson({
+                  text: text,
+                  reply: reply?.url ?? null,
+                  links: link?.url ? [link.url] : [],
+                  images: image?.url ? [image.url] : [],
+                }) + revealPhrase
+              )
+            : undefined,
         },
       },
     ],
@@ -195,6 +210,8 @@ export function NewPostProvider({
         post,
         status,
         error,
+        revealPhrase,
+        setRevealPhrase,
       }}
     >
       {children}

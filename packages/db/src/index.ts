@@ -124,7 +124,7 @@ export const getPostParent = async (hash: string) => {
 }
 
 export const revealPost = async (
-  hash: string,
+  revealHash: string,
   revealMetadata: {
     message: string
     phrase: string
@@ -135,7 +135,7 @@ export const revealPost = async (
   await db
     .update(postsTable)
     .set({ reveal_metadata: revealMetadata, updated_at: new Date() })
-    .where(eq(postsTable.hash, hash))
+    .where(eq(postsTable.reveal_hash, revealHash))
 }
 
 export const logActionExecution = async (

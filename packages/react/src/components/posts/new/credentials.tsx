@@ -1,13 +1,4 @@
-import {
-  Image,
-  Popover,
-  ScrollView,
-  Text,
-  View,
-  XStack,
-  YGroup,
-  YStack,
-} from '@anonworld/ui'
+import { Image, Popover, ScrollView, Text, View, XStack } from '@anonworld/ui'
 import { Check, Plus } from '@tamagui/lucide-icons'
 import { useSDK } from '../../../providers'
 import { CredentialId } from '../../credentials/display/id'
@@ -51,7 +42,7 @@ function CredentialSelector() {
     <Popover size="$5" placement="bottom">
       <Popover.Trigger>
         <Badge icon={<Plus size={16} />}>
-          {postCredentials.length === 0 && 'Add credential '}
+          {postCredentials.length === 0 && 'Select credential '}
         </Badge>
       </Popover.Trigger>
       <Popover.Content

@@ -1,12 +1,21 @@
-import { Cast } from '../../../types'
-import { formatAmount, timeAgo } from '../../../utils'
-import { Text, View, XStack, YStack } from '@anonworld/ui'
+import { Cast, Reveal } from '../../../types'
+import { formatAddress, formatAmount, timeAgo } from '../../../utils'
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from '@anonworld/ui'
 import { Heart, MessageSquare } from '@tamagui/lucide-icons'
 import { CredentialBadge } from '../../credentials/badge'
 import { PostActions } from './actions'
 import { PostRelationships } from './relationships'
 import { PostEmbed } from './embeds'
 import { Badge } from '../../badge'
+import { useFarcasterIdentity } from '../../../hooks/use-farcaster-identity'
 
 export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
   let text = post.text
@@ -54,6 +63,7 @@ export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
           <Badge icon={<MessageSquare size={12} />}>
             {formatAmount(post.aggregate?.replies ?? post.replies.count)}
           </Badge>
+          {post.reveal?.phrase && <RevealBadge reveal={post.reveal} />}
         </XStack>
         <PostRelationships post={post} />
       </XStack>
@@ -61,5 +71,21 @@ export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
         <PostActions post={post} />
       </View>
     </YStack>
+  )
+}
+
+function RevealBadge({ reveal }: { reveal: Reveal }) {
+  const { data } = useFarcasterIdentity(reveal.address!)
+  return (
+    <Badge
+      icon={
+        <Avatar size={16} circular>
+          <AvatarImage src={data?.pfp_url} width={16} height={16} />
+          <AvatarFallback />
+        </Avatar>
+      }
+    >
+      {data?.username ?? formatAddress(reveal.address!)}
+    </Badge>
   )
 }

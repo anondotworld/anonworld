@@ -1,6 +1,6 @@
-import { createElysia } from '../utils'
+import { createElysia, encodeJson } from '../utils'
 import { t } from 'elysia'
-import { verifyMessage } from 'viem'
+import { hashMessage, verifyMessage } from 'viem'
 import { neynar } from '../services/neynar'
 import { getPost, getPostRelationships, revealPost } from '@anonworld/db'
 import { formatPosts } from './feeds'
@@ -78,27 +78,22 @@ export const postsRoutes = createElysia({ prefix: '/posts' })
         console.error(error)
       }
 
-      await revealPost(body.hash, {
+      const inputHash = hashMessage(encodeJson(post.data) + body.phrase)
+      if (inputHash !== post.reveal_hash) {
+        return {
+          success: false,
+        }
+      }
+
+      await revealPost(post.reveal_hash, {
         message: body.message,
         phrase: body.phrase,
         signature: body.signature,
         address: body.address,
       })
 
-      const response = await neynar.createCast({
-        fid: post.fid,
-        text: `REVEALED: Posted by ${username ? `@${username}` : `${address}`}`,
-        embeds: [`https://anoncast.org/posts/${body.hash}`],
-        quote: body.hash,
-      })
-
-      if (!response.success) {
-        throw new Error('Failed to create cast')
-      }
-
       return {
         success: true,
-        hash: response.cast.hash,
       }
     },
     {

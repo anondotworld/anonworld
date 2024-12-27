@@ -1,10 +1,11 @@
-import { Plus, X } from '@tamagui/lucide-icons'
-import { Adapt, Button, Dialog, Sheet, Text, View, XStack } from '@anonworld/ui'
+import { X } from '@tamagui/lucide-icons'
+import { Adapt, Dialog, Sheet, Text, View } from '@anonworld/ui'
 import { useNewPost } from './context'
 import { NewPostCredentials } from './credentials'
 import { NewPostImage, NewPostLink, NewPostReply } from './content'
 import { NewPostText } from './text'
 import { NewPostFooter } from './footer'
+import { NewPostRevealPhrase } from './reveal'
 
 export function NewPostDialog({ children }: { children?: React.ReactNode }) {
   const { isOpen, setIsOpen } = useNewPost()
@@ -56,6 +57,7 @@ export function NewPostDialog({ children }: { children?: React.ReactNode }) {
           <NewPostText />
           <NewPostLink />
           <NewPostImage />
+          <NewPostRevealPhrase />
           <NewPostFooter />
           <NewPostError />
           <Dialog.Close asChild>

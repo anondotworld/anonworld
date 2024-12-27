@@ -1,4 +1,4 @@
-import { MoreHorizontal, Trash } from '@tamagui/lucide-icons'
+import { Eye, MoreHorizontal, Trash } from '@tamagui/lucide-icons'
 import {
   Popover,
   Spinner,
@@ -14,16 +14,18 @@ import { useSDK } from '../../../providers/sdk'
 import { formatAmount, getUsableCredential } from '../../../utils'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
-import { NamedExoticComponent } from 'react'
+import { NamedExoticComponent, useState } from 'react'
 import { useFarcasterUser } from '../../../hooks/use-farcaster-user'
 import { useExecuteActions, useToken } from '../../../hooks'
 import { formatUnits } from 'viem/utils'
 import { NewCredentialProvider, useNewCredential } from '../../credentials/new/context'
 import { NewCredentialDialog } from '../../credentials/new/dialog'
+import { PostReveal } from '../reveal'
 
 export function PostActions({ post }: { post: Cast }) {
   const { data } = useActions()
   const actions = data?.sort((a, b) => a.type.localeCompare(b.type))
+  const [postRevealOpen, setPostRevealOpen] = useState(false)
 
   return (
     <View onPress={(e) => e.stopPropagation()}>
@@ -56,9 +58,29 @@ export function PostActions({ post }: { post: Cast }) {
               {actions?.map((action) => (
                 <PostAction key={action.id} post={post} action={action} />
               ))}
+              {post.reveal && !post.reveal.phrase && (
+                <YGroup.Item>
+                  <View
+                    fd="row"
+                    gap="$2"
+                    px="$3.5"
+                    py="$2.5"
+                    hoverStyle={{ bg: '$color5' }}
+                    onPress={() => setPostRevealOpen(true)}
+                  >
+                    <Eye size={16} />
+                    <YStack ai="flex-start" gap="$1">
+                      <Text fos="$2" fow="400">
+                        Reveal Post
+                      </Text>
+                    </YStack>
+                  </View>
+                </YGroup.Item>
+              )}
             </YGroup>
           </Popover.Content>
         </Popover>
+        <PostReveal post={post} open={postRevealOpen} onOpenChange={setPostRevealOpen} />
         <NewCredentialDialog />
       </NewCredentialProvider>
     </View>

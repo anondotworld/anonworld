@@ -683,3 +683,11 @@ export interface Fungible {
     }
   }
 }
+
+export type RevealPostArgs = {
+  hash: string
+  message: string
+  phrase: string
+  signature: string
+  address: string
+}

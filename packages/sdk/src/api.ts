@@ -11,6 +11,7 @@ import {
   ConversationCast,
   FungiblePosition,
   Fungible,
+  RevealPostArgs,
 } from './types'
 
 export class Api {
@@ -89,13 +90,7 @@ export class Api {
     })
   }
 
-  async revealPost(args: {
-    hash: string
-    message: string
-    phrase: string
-    signature: string
-    address: string
-  }) {
+  async revealPost(args: RevealPostArgs) {
     return await this.request<{ success: boolean; hash?: string }>('/posts/reveal', {
       method: 'POST',
       body: JSON.stringify(args),

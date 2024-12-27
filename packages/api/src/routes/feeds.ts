@@ -1,4 +1,4 @@
-import { createElysia } from '../utils'
+import { createElysia, encodeJson } from '../utils'
 import { t } from 'elysia'
 import { redis } from '../services/redis'
 import { neynar } from '../services/neynar'
@@ -120,7 +120,7 @@ export async function formatPosts(posts: Array<Post>) {
         ? {
             ...(post.reveal_metadata || {}),
             revealHash: post.reveal_hash,
-            input: JSON.stringify(post.data),
+            input: encodeJson(post.data),
             revealedAt: post.updated_at.toISOString(),
           }
         : undefined,

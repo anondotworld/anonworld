@@ -1,6 +1,6 @@
 import { Button, Circle, Spinner, Text, View, XStack } from '@anonworld/ui'
 import { useNewPost } from './context'
-import { Image, Link, Reply } from '@tamagui/lucide-icons'
+import { Eye, Image, Link, Reply } from '@tamagui/lucide-icons'
 import { useEffect, useRef, useState } from 'react'
 import { useUploadImage } from '../../../hooks/use-upload-image'
 
@@ -13,6 +13,7 @@ export function NewPostFooter() {
         <EmbedImage />
         <EmbedLink />
         <EmbedReply />
+        <RevealPhrase />
       </XStack>
       <XStack gap="$3">
         <CircularProgress length={textLength} max={320} />
@@ -125,6 +126,29 @@ function EmbedReply() {
       onPress={() => setReply(reply ? null : '')}
     >
       <Reply size={16} color={reply ? '$color1' : '$color12'} />
+    </Button>
+  )
+}
+
+function RevealPhrase() {
+  const { revealPhrase, setRevealPhrase } = useNewPost()
+  return (
+    <Button
+      size="$3"
+      theme="surface1"
+      bg={revealPhrase !== null ? '$color12' : '$background'}
+      bw="$0.5"
+      bc="$borderColor"
+      w="$3"
+      h="$3"
+      p="$0"
+      hoverStyle={{
+        bg: revealPhrase !== null ? '$color12' : '$background',
+        opacity: 0.75,
+      }}
+      onPress={() => setRevealPhrase(revealPhrase !== null ? null : '')}
+    >
+      <Eye size={16} color={revealPhrase !== null ? '$color1' : '$color12'} />
     </Button>
   )
 }
