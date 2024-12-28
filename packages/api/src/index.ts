@@ -7,7 +7,7 @@ import { farcasterRoutes } from './routes/farcaster'
 import { credentialsRoutes } from './routes/credentials'
 import { walletRoutes } from './routes/wallet'
 import { tokenRoutes } from './routes/tokens'
-import { accountsRoutes } from './routes/accounts'
+import { communitiesRoutes } from './routes/communities'
 
 const app = createElysia()
   .use(actionsRoutes)
@@ -18,7 +18,7 @@ const app = createElysia()
   .use(credentialsRoutes)
   .use(walletRoutes)
   .use(tokenRoutes)
-  .use(accountsRoutes)
+  .use(communitiesRoutes)
 
 app.listen(3001)
 

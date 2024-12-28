@@ -10,7 +10,7 @@ enum Pathname {
   HOME = '/',
   NEW = '/new',
   POST = '/posts',
-  ACCOUNTS = '/accounts',
+  COMMUNITIES = '/communities',
   CREDENTIALS = '/credentials',
   ABOUT = '/about',
   NOT_FOUND = '/404',
@@ -63,17 +63,17 @@ export function Header() {
               </Text>
             </View>
           </Link>
-          <Link href="/accounts" style={{ textDecoration: 'none' }}>
+          <Link href="/communities" style={{ textDecoration: 'none' }}>
             <View
               bg="$background"
               py="$2"
               px="$3"
               br="$12"
-              themeInverse={pathname === Pathname.ACCOUNTS}
+              themeInverse={pathname === Pathname.COMMUNITIES}
               hoverStyle={{ bg: '$color5' }}
             >
               <Text fow="600" fos="$2">
-                Accounts
+                Communities
               </Text>
             </View>
           </Link>

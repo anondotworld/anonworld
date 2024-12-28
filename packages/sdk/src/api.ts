@@ -12,7 +12,7 @@ import {
   FungiblePosition,
   Fungible,
   RevealPostArgs,
-  Account,
+  Community,
 } from './types'
 
 export class Api {
@@ -184,7 +184,7 @@ export class Api {
     )
   }
 
-  async getAccounts() {
-    return await this.request<{ data: Account[] }>('/accounts')
+  async getCommunities() {
+    return await this.request<{ data: Community[] }>('/communities')
   }
 }

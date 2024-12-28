@@ -1,8 +1,8 @@
 import {
-  countPostsForAccount,
-  getAccounts,
+  countPostsForCommunity,
+  getCommunities,
   getAllFarcasterAccounts,
-  updateAccount,
+  updateCommunity,
 } from '@anonworld/db'
 import { buildFeeds } from '../src/routes/feeds'
 import { zerion } from '../src/services/zerion'
@@ -16,18 +16,18 @@ const updateFeeds = async () => {
   }
 }
 
-const updateAccounts = async () => {
-  const accounts = await getAccounts()
-  for (const account of accounts) {
-    console.log(`[account] updating account for ${account.id}`)
-    const token = await zerion.getFungible(account.chain_id, account.token_address)
+const updateCommunities = async () => {
+  const communities = await getCommunities()
+  for (const community of communities) {
+    console.log(`[community] updating community for ${community.id}`)
+    const token = await zerion.getFungible(community.chain_id, community.token_address)
     const simpleHashToken = await simplehash.getFungible(
-      account.chain_id,
-      account.token_address
+      community.chain_id,
+      community.token_address
     )
     if (!token) continue
-    const posts = await countPostsForAccount(account.fid)
-    await updateAccount(account.id, {
+    const posts = await countPostsForCommunity(community.fid)
+    await updateCommunity(community.id, {
       posts,
       price_usd: token.attributes.market_data.price.toFixed(8),
       market_cap: Math.round(token.attributes.market_data.market_cap),
@@ -41,7 +41,7 @@ const main = async () => {
   while (true) {
     try {
       await updateFeeds()
-      await updateAccounts()
+      await updateCommunities()
     } catch (error) {
       console.error('[error]', error)
     }

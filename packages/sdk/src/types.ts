@@ -693,7 +693,7 @@ export type RevealPostArgs = {
   address: string
 }
 
-export type Account = {
+export type Community = {
   id: string
   name: string
   description: string

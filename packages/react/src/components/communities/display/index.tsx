@@ -1,90 +1,84 @@
 import { Image, Text, XStack, YStack } from '@anonworld/ui'
-import { useCommunities } from '../../hooks/use-communities'
-import { Field } from '../field'
-import { formatAmount, timeAgo } from '../../utils'
-import { useFarcasterUser } from '../../hooks/use-farcaster-user'
-import { Badge } from '../badge'
-import { Farcaster } from '../svg/farcaster'
-import { X } from '../svg/x'
-import { Community, CredentialRequirement } from '../../types'
-import { useActions } from '../../hooks/use-actions'
-import { Action, ActionType } from '../../types'
+import { Field } from '../../field'
+import { formatAmount, timeAgo } from '../../../utils'
+import { useFarcasterUser } from '../../../hooks/use-farcaster-user'
+import { Badge } from '../../badge'
+import { Farcaster } from '../../svg/farcaster'
+import { X } from '../../svg/x'
+import { Community, CredentialRequirement } from '../../../types'
+import { useActions } from '../../../hooks/use-actions'
+import { Action, ActionType } from '../../../types'
 import { formatUnits } from 'viem'
-import { useToken } from '../../hooks/use-token'
+import { useToken } from '../../../hooks/use-token'
 import { MessageSquare } from '@tamagui/lucide-icons'
 
-export function Accounts() {
-  const { data } = useCommunities()
+export function CommunityDisplay({ community }: { community: Community }) {
   return (
-    <YStack gap="$4">
-      {data?.map((account) => (
-        <YStack
-          key={account.id}
-          theme="surface1"
-          themeShallow
-          bg="$background"
-          bc="$borderColor"
-          bbw="$0.5"
-          p="$3"
-          gap="$4"
-          $gtXs={{
-            br: '$4',
-            bw: '$0.5',
-          }}
-          f={1}
-        >
-          <XStack ai="center" jc="space-between">
-            <XStack ai="center" gap="$2">
-              <Image src={account.image_url} w="$4" h="$4" br="$12" />
-              <Field label={account.symbol} value={account.name} minWidth="$10" />
-            </XStack>
-            <XStack gap="$4" ai="center" px="$4">
-              <Field
-                label="Mkt Cap"
-                value={`$${formatAmount(account.market_cap)}`}
-                minWidth="$10"
-                ai="flex-end"
-              />
-              <Field
-                label="Price"
-                value={`$${Number(account.price_usd).toFixed(2)}`}
-                minWidth="$10"
-                ai="flex-end"
-              />
-              <Field
-                label="Holders"
-                value={formatAmount(account.holders)}
-                minWidth="$10"
-                ai="flex-end"
-              />
-            </XStack>
-          </XStack>
-          <Actions account={account} />
-        </YStack>
-      ))}
+    <YStack
+      key={community.id}
+      theme="surface1"
+      themeShallow
+      bg="$background"
+      bc="$borderColor"
+      bbw="$0.5"
+      p="$3"
+      gap="$4"
+      $gtXs={{
+        br: '$4',
+        bw: '$0.5',
+      }}
+      f={1}
+    >
+      <XStack ai="center" jc="space-between">
+        <XStack ai="center" gap="$2">
+          <Image src={community.image_url} w="$4" h="$4" br="$12" />
+          <Field label={community.symbol} value={community.name} minWidth="$10" />
+        </XStack>
+        <XStack gap="$4" ai="center" px="$4">
+          <Field
+            label="Mkt Cap"
+            value={`$${formatAmount(community.market_cap)}`}
+            minWidth="$10"
+            ai="flex-end"
+          />
+          <Field
+            label="Price"
+            value={`$${Number(community.price_usd).toFixed(2)}`}
+            minWidth="$10"
+            ai="flex-end"
+          />
+          <Field
+            label="Holders"
+            value={formatAmount(community.holders)}
+            minWidth="$10"
+            ai="flex-end"
+          />
+        </XStack>
+      </XStack>
+      <Actions community={community} />
     </YStack>
   )
 }
 
-function Actions({ account }: { account: Community }) {
+function Actions({ community }: { community: Community }) {
   const { data } = useActions()
 
   return (
     <XStack gap="$2" ai="center" jc="space-between">
       <XStack gap="$2">
-        <Badge>{timeAgo(account.created_at)}</Badge>
-        <Badge icon={<MessageSquare size={12} />}>{formatAmount(account.posts)}</Badge>
+        <Badge>{timeAgo(community.created_at)}</Badge>
+        <Badge icon={<MessageSquare size={12} />}>{formatAmount(community.posts)}</Badge>
       </XStack>
       <XStack gap="$2">
         {data?.map((action) => {
           switch (action.type) {
             case ActionType.COPY_POST_FARCASTER:
-              if (action.metadata.fid === account.fid) {
+              if (action.metadata.fid === community.fid) {
                 return <CopyPostFarcaster fid={action.metadata.fid} action={action} />
               }
               break
             case ActionType.COPY_POST_TWITTER:
-              if (action.metadata.twitter === account.twitter_username) {
+              if (action.metadata.twitter === community.twitter_username) {
                 return <TwitterBadge action={action} />
               }
               break

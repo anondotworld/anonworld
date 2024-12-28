@@ -98,7 +98,7 @@ export const credentialInstancesTable = pgTable('credential_instances', {
   updated_at: timestamp().notNull().defaultNow(),
 })
 
-export const accountsTable = pgTable('accounts', {
+export const communitiesTable = pgTable('communities', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar({ length: 255 }).notNull(),
   description: varchar({ length: 255 }).notNull(),

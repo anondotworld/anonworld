@@ -1,12 +1,12 @@
 import { useSDK } from '../providers/sdk'
 import { useQuery } from '@tanstack/react-query'
 
-export function useAccounts() {
+export function useCommunities() {
   const { sdk } = useSDK()
   return useQuery({
-    queryKey: ['accounts'],
+    queryKey: ['communities'],
     queryFn: async () => {
-      const data = await sdk.getAccounts()
+      const data = await sdk.getCommunities()
       return data?.data?.data ?? []
     },
   })
