@@ -1,11 +1,12 @@
 import { Credential } from '../../../types'
-import { Image, Text, View, XStack, YStack } from '@anonworld/ui'
+import { View, XStack, YStack } from '@anonworld/ui'
 import { chains, formatHexId, timeAgo } from '../../../utils'
 import { Badge } from '../../badge'
 import { CredentialActions } from './actions'
 import { useToken } from '../../../hooks'
 import { extractChain, formatUnits } from 'viem/utils'
 import { CredentialAvatar } from './id'
+import { Field } from '../../field'
 
 export function CredentialDisplay({ credential }: { credential: Credential }) {
   return (
@@ -59,15 +60,7 @@ function ERC20CredentialDisplay({ credential }: { credential: Credential }) {
             .name,
         },
       ].map(({ label, value, image }) => (
-        <YStack key={label} gap="$1" minWidth="$14">
-          <XStack ai="center" gap="$2">
-            {image && <Image src={image} w={16} h={16} />}
-            <Text fow="600">{value}</Text>
-          </XStack>
-          <Text fos="$1" fow="400" color="$color11" textTransform="uppercase">
-            {label}
-          </Text>
-        </YStack>
+        <Field key={label} label={label} value={value} image={image} />
       ))}
     </XStack>
   )

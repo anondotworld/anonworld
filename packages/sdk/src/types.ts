@@ -537,14 +537,14 @@ export type Action =
   | (BaseAction & {
       type: ActionType.COPY_POST_FARCASTER
       metadata: {
-        fid: string
+        fid: number
         target: ActionTargetPost
       }
     })
   | (BaseAction & {
       type: ActionType.DELETE_POST_FARCASTER
       metadata: {
-        fid: string
+        fid: number
       }
     })
   | (BaseAction & {
@@ -691,4 +691,22 @@ export type RevealPostArgs = {
   phrase: string
   signature: string
   address: string
+}
+
+export type Account = {
+  id: string
+  name: string
+  description: string
+  image_url: string
+  chain_id: number
+  token_address: string
+  symbol: string
+  fid: number
+  twitter_username: string
+  price_usd: string
+  market_cap: number
+  total_supply: number
+  holders: number
+  posts: number
+  created_at: string
 }

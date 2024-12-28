@@ -12,6 +12,7 @@ import {
   FungiblePosition,
   Fungible,
   RevealPostArgs,
+  Account,
 } from './types'
 
 export class Api {
@@ -181,5 +182,9 @@ export class Api {
     return await this.request<{ slot: number }>(
       `/tokens/${chainId}/${tokenAddress}/balance-slot`
     )
+  }
+
+  async getAccounts() {
+    return await this.request<{ data: Account[] }>('/accounts')
   }
 }

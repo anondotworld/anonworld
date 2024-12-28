@@ -185,7 +185,7 @@ function DeletePostFarcaster({
   action,
   post,
 }: {
-  fid: string
+  fid: number
   action: Action
   post: Cast
 }) {
@@ -196,7 +196,7 @@ function DeletePostFarcaster({
   }
 
   const hasRelationship = post.relationships.some(
-    (c) => c.targetAccount === action.metadata.fid
+    (c) => c.targetAccount === action.metadata.fid.toString()
   )
   if (!hasRelationship) {
     return null
@@ -219,7 +219,7 @@ function CopyPostFarcaster({
   action,
   post,
 }: {
-  fid: string
+  fid: number
   action: Action
   post: Cast
 }) {
@@ -230,7 +230,7 @@ function CopyPostFarcaster({
   }
 
   const hasRelationship = post.relationships.some(
-    (c) => c.targetAccount === action.metadata.fid
+    (c) => c.targetAccount === action.metadata.fid.toString()
   )
   if (hasRelationship) {
     return null

@@ -96,6 +96,16 @@ class SimplehashService {
       next_cursor: string
     }>(url)
   }
+
+  async getFungible(chainId: number, tokenAddress: string) {
+    const chain = CHAIN_ID_TO_SIMPLEHASH_CHAIN_ID[chainId]
+    if (!chain) {
+      throw new Error(`Unsupported chainId: ${chainId}`)
+    }
+
+    const url = `/fungibles/assets?fungible_ids=${chain}.${tokenAddress}&include_prices=1`
+    return await this.makeRequest<{ holder_count: number }>(url)
+  }
 }
 
 export const simplehash = SimplehashService.getInstance()

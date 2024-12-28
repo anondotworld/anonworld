@@ -6,6 +6,7 @@ import {
   integer,
   jsonb,
   primaryKey,
+  decimal,
 } from 'drizzle-orm/pg-core'
 
 export const actionsTable = pgTable('actions', {
@@ -93,6 +94,29 @@ export const credentialInstancesTable = pgTable('credential_instances', {
   metadata: jsonb('metadata').notNull(),
   proof: jsonb('proof').notNull(),
   verified_at: timestamp().notNull(),
+  created_at: timestamp().notNull().defaultNow(),
+  updated_at: timestamp().notNull().defaultNow(),
+})
+
+export const accountsTable = pgTable('accounts', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar({ length: 255 }).notNull(),
+  description: varchar({ length: 255 }).notNull(),
+  image_url: varchar({ length: 255 }).notNull(),
+  chain_id: integer('chain_id').notNull(),
+  token_address: varchar({ length: 255 }).notNull(),
+  symbol: varchar({ length: 255 }).notNull(),
+  fid: integer('fid')
+    .references(() => farcasterAccountsTable.fid)
+    .notNull(),
+  twitter_username: varchar({ length: 255 }).references(
+    () => twitterAccountsTable.username
+  ),
+  price_usd: decimal('price_usd', { precision: 18, scale: 8 }).notNull().default('0'),
+  market_cap: integer('market_cap').notNull().default(0),
+  total_supply: integer('total_supply').notNull().default(0),
+  holders: integer('holders').notNull().default(0),
+  posts: integer('posts').notNull().default(0),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 })

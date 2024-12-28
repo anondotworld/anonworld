@@ -2,6 +2,7 @@ import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import {
+  accountsTable,
   actionExecutionsTable,
   actionsTable,
   credentialInstancesTable,
@@ -51,7 +52,7 @@ export const getAction = async (actionId: string) => {
 }
 
 export const getAvailableActions = async () => {
-  return await db.select().from(actionsTable).where(isNull(actionsTable.trigger))
+  return await db.select().from(actionsTable)
 }
 
 export const getActionsForTrigger = async (trigger: string) => {
@@ -272,4 +273,23 @@ export const getCredentials = async (ids: string[]) => {
     .select()
     .from(credentialInstancesTable)
     .where(inArray(credentialInstancesTable.id, ids))
+}
+
+export const getAccounts = async () => {
+  return await db.select().from(accountsTable)
+}
+
+export const updateAccount = async (
+  accountId: string,
+  params: Partial<typeof accountsTable.$inferInsert>
+) => {
+  await db.update(accountsTable).set(params).where(eq(accountsTable.id, accountId))
+}
+
+export const countPostsForAccount = async (fid: number) => {
+  const [result] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(postsTable)
+    .where(eq(postsTable.fid, fid))
+  return result.count
 }
