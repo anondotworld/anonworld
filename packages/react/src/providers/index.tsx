@@ -6,7 +6,13 @@ import { ToastProvider } from './toast'
 import { ReactNode } from 'react'
 export { SDKProvider, useSDK } from './sdk'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 export function Provider({
   children,

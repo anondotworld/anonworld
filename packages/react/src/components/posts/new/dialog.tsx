@@ -6,6 +6,7 @@ import { NewPostImage, NewPostLink, NewPostReply } from './content'
 import { NewPostText } from './text'
 import { NewPostFooter } from './footer'
 import { NewPostRevealPhrase } from './reveal'
+import { NewPostCommunities } from './communities'
 
 export function NewPostDialog({ children }: { children?: React.ReactNode }) {
   const { isOpen, setIsOpen } = useNewPost()
@@ -33,48 +34,51 @@ export function NewPostDialog({ children }: { children?: React.ReactNode }) {
           exitStyle={{ opacity: 0 }}
         />
 
-        <Dialog.Content
-          bordered
-          elevate
-          key="content"
-          animateOnly={['transform', 'opacity']}
-          animation={[
-            'quicker',
-            {
-              opacity: {
-                overshootClamping: true,
+        {isOpen && (
+          <Dialog.Content
+            bordered
+            elevate
+            key="content"
+            animateOnly={['transform', 'opacity']}
+            animation={[
+              'quicker',
+              {
+                opacity: {
+                  overshootClamping: true,
+                },
               },
-            },
-          ]}
-          enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
-          exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
-          w={600}
-          gap="$3"
-        >
-          <Dialog.Title display="none">Create Post</Dialog.Title>
-          <NewPostCredentials />
-          <NewPostReply />
-          <NewPostText />
-          <NewPostLink />
-          <NewPostImage />
-          <NewPostRevealPhrase />
-          <NewPostFooter />
-          <NewPostError />
-          <Dialog.Close asChild>
-            <View
-              bg="$background"
-              p="$2"
-              br="$12"
-              hoverStyle={{ bg: '$color5' }}
-              cursor="pointer"
-              position="absolute"
-              top="$2"
-              right="$2"
-            >
-              <X size={20} />
-            </View>
-          </Dialog.Close>
-        </Dialog.Content>
+            ]}
+            enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
+            exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
+            w={600}
+            gap="$3"
+          >
+            <Dialog.Title display="none">Create Post</Dialog.Title>
+            <NewPostCredentials />
+            <NewPostReply />
+            <NewPostText />
+            <NewPostLink />
+            <NewPostImage />
+            <NewPostRevealPhrase />
+            <NewPostCommunities />
+            <NewPostFooter />
+            <NewPostError />
+            <Dialog.Close asChild>
+              <View
+                bg="$background"
+                p="$2"
+                br="$12"
+                hoverStyle={{ bg: '$color5' }}
+                cursor="pointer"
+                position="absolute"
+                top="$2"
+                right="$2"
+              >
+                <X size={20} />
+              </View>
+            </Dialog.Close>
+          </Dialog.Content>
+        )}
       </Dialog.Portal>
     </Dialog>
   )

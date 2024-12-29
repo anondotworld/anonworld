@@ -7,23 +7,20 @@ import { View, XStack } from '@anonworld/ui'
 export default function Home() {
   const router = useRouter()
 
-  const handleSelect = (sort: string) => {
-    if (sort === 'new') {
-      router.push('/new')
-    } else {
-      router.push('/')
-    }
-  }
-
-  const handlePost = (hash: string) => {
-    router.push(`/posts/${hash}`)
-  }
-
   return (
     <View maxWidth={700} mx="auto" my="$3" gap="$3">
       <XStack ai="center" jc="space-between">
-        <PostFeedSelector selected="New" onSelect={handleSelect} />
-        <NewPost onSuccess={handlePost} />
+        <PostFeedSelector
+          selected="New"
+          onSelect={(sort: string) => {
+            if (sort === 'new') {
+              router.push('/new')
+            } else {
+              router.push('/')
+            }
+          }}
+        />
+        <NewPost onSuccess={(hash) => router.push(`/posts/${hash}`)} />
       </XStack>
       <PostFeed
         fid={899289}

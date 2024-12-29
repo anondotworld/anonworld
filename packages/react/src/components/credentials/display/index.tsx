@@ -8,7 +8,10 @@ import { extractChain, formatUnits } from 'viem/utils'
 import { CredentialAvatar } from './id'
 import { Field } from '../../field'
 
-export function CredentialDisplay({ credential }: { credential: Credential }) {
+export function CredentialDisplay({
+  credential,
+  onPress,
+}: { credential: Credential; onPress?: () => void }) {
   return (
     <YStack
       theme="surface1"
@@ -22,6 +25,9 @@ export function CredentialDisplay({ credential }: { credential: Credential }) {
         br: '$4',
         bw: '$0.5',
       }}
+      onPress={onPress}
+      hoverStyle={onPress ? { bg: '$color3' } : {}}
+      cursor={onPress ? 'pointer' : undefined}
       f={1}
     >
       <XStack ai="center" gap="$2">

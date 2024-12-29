@@ -187,4 +187,8 @@ export class Api {
   async getCommunities() {
     return await this.request<{ data: Community[] }>('/communities')
   }
+
+  async getCommunity(id: string) {
+    return await this.request<Community>(`/communities/${id}`)
+  }
 }

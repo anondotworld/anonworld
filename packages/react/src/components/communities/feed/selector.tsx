@@ -45,7 +45,8 @@ export function CommunityFeedSelector({
         >
           <YGroup>
             <ActionButton label="Sort by" fow="600" bbw="$0.5" />
-            <ActionButton label="Trending" onPress={() => onSelect('trending')} />
+            <ActionButton label="Market Cap" onPress={() => onSelect('market_cap')} />
+            <ActionButton label="Popular" onPress={() => onSelect('popular')} />
             <ActionButton label="New" onPress={() => onSelect('new')} />
           </YGroup>
         </Popover.Content>

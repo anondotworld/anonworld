@@ -45,16 +45,29 @@ export function formatAddress(address: string): string {
 }
 
 export function getUsableCredential(credentials: Credential[], action: Action) {
-  if (!action.credential_id || credentials.length === 0) {
+  if (
+    !action.credential_id ||
+    credentials.length === 0 ||
+    !action.credential_requirement?.minimumBalance
+  ) {
     return
   }
 
-  for (const credential of credentials) {
+  const potentialCredentials = credentials
+    .filter((credential) => credential.credential_id === action.credential_id)
+    .sort((a, b) => {
+      const aBalance = BigInt(a.metadata.balance)
+      const bBalance = BigInt(b.metadata.balance)
+      if (aBalance === bBalance) {
+        return 0
+      }
+      return aBalance < bBalance ? -1 : 1
+    })
+
+  for (const credential of potentialCredentials) {
     if (
-      credential.credential_id === action.credential_id &&
-      action.credential_requirement?.minimumBalance &&
       BigInt(credential.metadata.balance) >=
-        BigInt(action.credential_requirement.minimumBalance)
+      BigInt(action.credential_requirement.minimumBalance)
     ) {
       return credential
     }

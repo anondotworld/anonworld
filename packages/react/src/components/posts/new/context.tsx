@@ -40,13 +40,15 @@ export function NewPostProvider({
   children,
   onSuccess,
   initialReply,
+  initialCredentials,
 }: {
   children: React.ReactNode
   onSuccess: (hash: string) => void
   initialReply?: Content
+  initialCredentials?: Credential[]
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [credentials, setCredentials] = useState<Credential[]>([])
+  const [credentials, setCredentials] = useState<Credential[]>(initialCredentials || [])
   const [reply, setReply] = useState<Content | null>(initialReply || null)
   const [text, setText] = useState<string | null>(null)
   const [link, setLink] = useState<Content | null>(null)
@@ -56,10 +58,15 @@ export function NewPostProvider({
   const toast = useToastController()
 
   useEffect(() => {
-    if (isOpen && initialReply) {
-      setReply(initialReply)
+    if (isOpen) {
+      if (initialReply) {
+        setReply(initialReply)
+      }
+      if (initialCredentials) {
+        setCredentials(initialCredentials)
+      }
     }
-  }, [isOpen, initialReply])
+  }, [isOpen, initialReply, initialCredentials])
 
   const {
     mutate: post,

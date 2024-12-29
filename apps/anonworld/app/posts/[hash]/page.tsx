@@ -9,7 +9,7 @@ import {
 } from '@anonworld/react'
 import { View, YStack } from '@anonworld/ui'
 
-export default function Home({ params }: { params: { hash: string } }) {
+export default function PostPage({ params }: { params: { hash: string } }) {
   const { data: post } = usePost({ hash: params.hash })
   const { data: conversation } = usePostConversation({ hash: params.hash })
 

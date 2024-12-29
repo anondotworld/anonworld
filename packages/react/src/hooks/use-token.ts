@@ -6,7 +6,7 @@ export function useToken({
   address,
 }: {
   chainId: number
-  address: `0x${string}`
+  address: string
 }) {
   const { sdk } = useSDK()
   return useQuery({

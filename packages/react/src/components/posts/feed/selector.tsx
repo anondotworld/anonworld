@@ -20,7 +20,7 @@ export function PostFeedSelector({
           <Button size="$3" bg="$color1" br="$12" bw="$0">
             <XStack gap="$2" ai="center">
               <Text fos="$2" fow="400" color="$color11">
-                {selected}
+                {selected.charAt(0).toUpperCase() + selected.slice(1)}
               </Text>
               <ChevronDown size={16} color="$color11" />
             </XStack>

@@ -187,5 +187,11 @@ const formatConversations = (
     })
   }
 
-  return formattedConversations.filter((c) => !copies.includes(c.hash))
+  return formattedConversations
+    .filter((c) => !copies.includes(c.hash))
+    .sort(
+      (a, b) =>
+        (b.aggregate?.likes || b.reactions.likes_count) -
+        (a.aggregate?.likes || a.reactions.likes_count)
+    )
 }

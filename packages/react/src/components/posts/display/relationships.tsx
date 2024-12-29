@@ -18,7 +18,7 @@ export function PostRelationships({ post }: { post: Cast }) {
 }
 
 function FarcasterBadge({ farcaster }: { farcaster: Relationship }) {
-  const { data } = useFarcasterUser(farcaster.targetAccount)
+  const { data } = useFarcasterUser(Number(farcaster.targetAccount))
   return (
     <Badge
       onPress={() => {

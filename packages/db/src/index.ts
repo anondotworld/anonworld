@@ -279,6 +279,15 @@ export const getCommunities = async () => {
   return await db.select().from(communitiesTable)
 }
 
+export const getCommunity = async (id: string) => {
+  const [community] = await db
+    .select()
+    .from(communitiesTable)
+    .where(eq(communitiesTable.id, id))
+    .limit(1)
+  return community
+}
+
 export const updateCommunity = async (
   communityId: string,
   params: Partial<typeof communitiesTable.$inferInsert>

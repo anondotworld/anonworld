@@ -69,7 +69,7 @@ export function Header() {
               py="$2"
               px="$3"
               br="$12"
-              themeInverse={pathname === Pathname.COMMUNITIES}
+              themeInverse={pathname.startsWith(Pathname.COMMUNITIES)}
               hoverStyle={{ bg: '$color5' }}
             >
               <Text fow="600" fos="$2">
