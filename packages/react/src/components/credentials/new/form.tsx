@@ -1,5 +1,8 @@
 import {
   Adapt,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
   Button,
   Circle,
   Image,
@@ -17,11 +20,12 @@ import {
 import { useNewCredential } from './context'
 import { CredentialType, FungiblePosition } from '../../../types'
 import { useAccount, useDisconnect } from 'wagmi'
-import { formatAddress, zerionToChainId } from '../../../utils'
+import { formatAddress, toHslColors, zerionToChainId } from '../../../utils'
 import { useWalletFungibles } from '../../../hooks/use-wallet-fungibles'
 import { useEffect, useMemo, useState } from 'react'
 import { useSDK } from '../../../providers'
 import { parseUnits } from 'viem'
+import { LinearGradient } from '@tamagui/linear-gradient'
 
 export function NewCredentialForm() {
   const { credentialType } = useNewCredential()
@@ -39,7 +43,7 @@ function ERC20CredentialForm() {
       <WalletField />
       {address && (
         <>
-          <TokenField address={address} />
+          <TokenField />
           <BalanceField />
         </>
       )}
@@ -99,42 +103,14 @@ function WalletField() {
   )
 }
 
-function TokenField({
-  address,
-}: {
-  address: string
-}) {
-  const { data } = useWalletFungibles(address)
-  const { token, setToken, setBalance } = useNewCredential()
+function TokenField() {
+  const { fungibles, token, setToken } = useNewCredential()
 
-  const handleSetToken = (token?: FungiblePosition) => {
-    setToken(token)
-    if (token) {
-      setBalance(Math.floor(token.attributes.quantity.float / 2))
-    }
-  }
-
-  const filteredData = useMemo(() => {
-    return (
-      data?.filter(
-        (t) =>
-          !t.attributes.fungible_info.implementations.some((i) => i.address === null) &&
-          t.attributes.value
-      ) ?? []
-    )
-  }, [data])
-
-  useEffect(() => {
-    if (filteredData.length > 0) {
-      handleSetToken(filteredData[0])
-    }
-  }, [filteredData])
-
-  if (filteredData.length === 0) {
+  if (fungibles.length === 0) {
     return null
   }
 
-  const selectedToken = token ?? filteredData[0]
+  const selectedToken = token ?? fungibles[0]
 
   return (
     <YStack>
@@ -144,8 +120,20 @@ function TokenField({
       <Select
         value={selectedToken.id}
         onValueChange={(value) => {
-          const token = data?.find((t) => t.id === value)
-          handleSetToken(token)
+          const token = fungibles.find((t) => t.id === value)
+          if (!token) {
+            setToken(undefined)
+            return
+          }
+
+          const chainId = token.relationships.chain.data.id
+          const address = token.attributes.fungible_info.implementations.find(
+            (i) => i.address !== null
+          )?.address
+
+          if (!chainId || !address) return
+
+          setToken({ chainId: zerionToChainId[chainId], address })
         }}
         disablePreventBodyScroll
       >
@@ -182,7 +170,7 @@ function TokenField({
           <Select.Viewport minWidth={200}>
             <Select.Group>
               <Select.Label>Select a token</Select.Label>
-              {filteredData.map((token, index) => (
+              {fungibles.map((token, index) => (
                 <Select.Item key={token.id} index={index} value={token.id}>
                   <TokenValue token={token} />
                 </Select.Item>
@@ -199,10 +187,22 @@ function TokenValue({ token }: { token: FungiblePosition }) {
   const impl = token.attributes.fungible_info.implementations.find(
     (impl) => impl.chain_id === token.relationships.chain.data.id
   )
+  const { background, secondary } = toHslColors(token.id)
+
   return (
     <XStack ai="center" jc="space-between" w="100%">
       <XStack gap="$3" ai="center">
-        <Image src={token.attributes.fungible_info.icon?.url} width={28} height={28} />
+        <Avatar circular size={28}>
+          <AvatarImage src={token.attributes.fungible_info.icon?.url} />
+          <AvatarFallback>
+            <LinearGradient
+              colors={[secondary, background]}
+              start={[1, 1]}
+              end={[0, 0]}
+              fg={1}
+            />
+          </AvatarFallback>
+        </Avatar>
         <YStack>
           <Text fos="$2" fow="500">
             {token.attributes.fungible_info.name}

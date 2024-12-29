@@ -20,7 +20,7 @@ export function CommunityFeedSelector({
           <Button size="$3" bg="$color1" br="$12" bw="$0">
             <XStack gap="$2" ai="center">
               <Text fos="$2" fow="400" color="$color11">
-                {selected}
+                {selected.charAt(0).toUpperCase() + selected.slice(1)}
               </Text>
               <ChevronDown size={16} color="$color11" />
             </XStack>
@@ -45,7 +45,6 @@ export function CommunityFeedSelector({
         >
           <YGroup>
             <ActionButton label="Sort by" fow="600" bbw="$0.5" />
-            <ActionButton label="Market Cap" onPress={() => onSelect('market_cap')} />
             <ActionButton label="Popular" onPress={() => onSelect('popular')} />
             <ActionButton label="New" onPress={() => onSelect('new')} />
           </YGroup>

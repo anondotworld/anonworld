@@ -4,9 +4,18 @@ import { Button, Text, XStack } from '@anonworld/ui'
 import { Dialog } from '@anonworld/ui'
 import { Plus } from '@tamagui/lucide-icons'
 
-export function NewCredential() {
+export function NewCredential({
+  initialTokenId,
+  initialBalance,
+}: {
+  initialTokenId?: { chainId: number; address: string }
+  initialBalance?: number
+}) {
   return (
-    <NewCredentialProvider>
+    <NewCredentialProvider
+      initialTokenId={initialTokenId}
+      initialBalance={initialBalance}
+    >
       <NewCredentialDialog>
         <Dialog.Trigger asChild>
           <Button

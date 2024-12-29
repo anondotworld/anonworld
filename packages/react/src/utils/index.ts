@@ -7,6 +7,10 @@ export const zerionToChainId: Record<string, number> = {
   base: 8453,
 }
 
+export const chainIdToZerion: Record<number, string> = Object.fromEntries(
+  Object.entries(zerionToChainId).map(([key, value]) => [value, key])
+)
+
 export function timeAgo(timestamp: string): string {
   const now = new Date()
   const past = new Date(timestamp)

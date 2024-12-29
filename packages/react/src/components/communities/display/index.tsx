@@ -8,6 +8,7 @@ import { CommunityToken } from './token'
 import { formatAmount } from '../../../utils'
 import { timeAgo } from '../../../utils'
 import { useFarcasterUser } from '../../../hooks/use-farcaster-user'
+import { CommunityActions } from './actions'
 
 export function CommunityDisplay({
   community,
@@ -62,9 +63,7 @@ export function CommunityDisplay({
       </XStack>
       <CommunityToken community={community} />
       <View position="absolute" top="$2" right="$3">
-        <View p="$2" br="$12" hoverStyle={{ bg: '$color5' }} cursor="pointer">
-          <MoreHorizontal size={20} />
-        </View>
+        <CommunityActions community={community} />
       </View>
     </YStack>
   )

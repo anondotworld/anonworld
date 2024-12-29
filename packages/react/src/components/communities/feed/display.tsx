@@ -10,7 +10,6 @@ import { useActions } from '../../../hooks/use-actions'
 import { Action, ActionType } from '../../../types'
 import { formatUnits } from 'viem'
 import { useToken } from '../../../hooks/use-token'
-import { MessageSquare } from '@tamagui/lucide-icons'
 
 export function CommunityDisplay({
   community,
@@ -42,6 +41,12 @@ export function CommunityDisplay({
         </XStack>
         <XStack gap="$4" ai="center" px="$4">
           <Field
+            label="Posts"
+            value={community.posts.toLocaleString()}
+            minWidth="$10"
+            ai="flex-end"
+          />
+          <Field
             label="Mkt Cap"
             value={`$${formatAmount(community.market_cap)}`}
             minWidth="$10"
@@ -50,12 +55,6 @@ export function CommunityDisplay({
           <Field
             label="Price"
             value={`$${Number(community.price_usd).toFixed(4)}`}
-            minWidth="$10"
-            ai="flex-end"
-          />
-          <Field
-            label="Holders"
-            value={formatAmount(community.holders)}
             minWidth="$10"
             ai="flex-end"
           />
@@ -73,7 +72,6 @@ function Actions({ community }: { community: Community }) {
     <XStack gap="$2" ai="center" jc="space-between">
       <XStack gap="$2">
         <Badge>{timeAgo(community.created_at)}</Badge>
-        <Badge icon={<MessageSquare size={12} />}>{formatAmount(community.posts)}</Badge>
       </XStack>
       <XStack gap="$2">
         {data?.map((action) => {

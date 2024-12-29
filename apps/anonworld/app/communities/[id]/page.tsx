@@ -10,13 +10,14 @@ import {
 import { Spinner, View, XStack, YStack } from '@anonworld/ui'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+
 export default function CommunityPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const { data: community } = useCommunity({ id: params.id })
   const [feedType, setFeedType] = useState('new')
 
   if (!community) {
-    return <Spinner color="$color12" />
+    return null
   }
 
   return (
