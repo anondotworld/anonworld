@@ -32,7 +32,7 @@ export class RedisService {
   }
 
   async setNewFeed(fid: number, feed: string) {
-    return this.client.set(`feed:new:v2:${fid}`, feed, 'EX', 30)
+    return this.client.set(`feed:new:v2:${fid}`, feed)
   }
 
   async actionOccurred(actionId: string, hash: string) {

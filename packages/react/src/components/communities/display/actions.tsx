@@ -5,6 +5,7 @@ import { extractChain } from 'viem'
 import { chains } from '../../../utils'
 import { DexScreener } from '../../svg/dexscreener'
 import { Etherscan } from '../../svg/etherscan'
+import { Uniswap } from '../../svg/uniswap'
 
 export function CommunityActions({ community }: { community: Community }) {
   const chain = extractChain({ chains, id: Number(community.chain_id) as any })
@@ -34,6 +35,26 @@ export function CommunityActions({ community }: { community: Community }) {
         userSelect="none"
       >
         <YGroup>
+          <YGroup.Item>
+            <View
+              fd="row"
+              gap="$2"
+              px="$3.5"
+              py="$2.5"
+              hoverStyle={{ bg: '$color5' }}
+              onPress={() =>
+                window.open(
+                  `https://app.uniswap.org/swap?outputCurrency=${community.token_address}&chain=${chain.id}&inputCurrency=ETH`,
+                  '_blank'
+                )
+              }
+            >
+              <Uniswap size={16} />
+              <Text fos="$2" fow="400">
+                Uniswap
+              </Text>
+            </View>
+          </YGroup.Item>
           <YGroup.Item>
             <View
               fd="row"

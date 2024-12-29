@@ -2,16 +2,13 @@ import { Image, Separator, Text, XStack, YStack } from '@anonworld/ui'
 import { Field } from '../../field'
 import { chains, formatAddress, formatAmount } from '../../../utils'
 import { extractChain } from 'viem'
-import { Button, Dialog } from '@anonworld/ui'
 import { formatEther, formatUnits } from 'viem'
 import { useToken } from '../../../hooks'
 import { useActions } from '../../../hooks/use-actions'
 import { Action, ActionType, Community } from '../../../types'
 import { useSDK } from '../../../providers'
 import { getUsableCredential } from '../../../utils'
-import { ArrowLeftRight, CircleCheck, CircleX, Plus } from '@tamagui/lucide-icons'
-import { NewCredentialProvider } from '../../credentials/new/context'
-import { NewCredentialDialog } from '../../credentials/new/dialog'
+import { CircleCheck, CircleX } from '@tamagui/lucide-icons'
 
 export function CommunityToken({ community }: { community: Community }) {
   const { data } = useToken({
@@ -61,7 +58,9 @@ export function CommunityToken({ community }: { community: Community }) {
           />
         </XStack>
       </XStack>
-      <CommunityActions community={community} />
+      <XStack gap="$4" ai="flex-end" jc="space-between" mt="$2">
+        <CommunityActions community={community} />
+      </XStack>
     </YStack>
   )
 }
@@ -116,23 +115,18 @@ export function CommunityActions({ community }: { community: Community }) {
   }
 
   return (
-    <XStack gap="$4" ai="flex-end" jc="space-between" mt="$2">
-      <YStack gap="$2.5" theme="surface3" themeShallow br="$4">
-        {Object.entries(communityActions)
-          .sort((a, b) => Number(a[0]) - Number(b[0]))
-          .map(([_, action], i) => (
-            <CommunityActionItem
-              key={i}
-              chainId={community.chain_id}
-              tokenAddress={community.token_address}
-              action={action}
-            />
-          ))}
-      </YStack>
-      <XStack gap="$2">
-        <SwapButton />
-      </XStack>
-    </XStack>
+    <YStack gap="$2.5" theme="surface3" themeShallow br="$4">
+      {Object.entries(communityActions)
+        .sort((a, b) => Number(a[0]) - Number(b[0]))
+        .map(([_, action], i) => (
+          <CommunityActionItem
+            key={i}
+            chainId={community.chain_id}
+            tokenAddress={community.token_address}
+            action={action}
+          />
+        ))}
+    </YStack>
   )
 }
 
@@ -172,24 +166,5 @@ function CommunityActionItem({
         {labels.join(', ')}
       </Text>
     </XStack>
-  )
-}
-
-function SwapButton() {
-  return (
-    <Button
-      size="$2"
-      px="$3"
-      bg="$background"
-      bc="$borderColor"
-      bw="$0.25"
-      br="$12"
-      hoverStyle={{ opacity: 0.9 }}
-    >
-      <XStack ai="center" gap="$1">
-        <ArrowLeftRight size={12} />
-        <Text fos="$1">Swap</Text>
-      </XStack>
-    </Button>
   )
 }

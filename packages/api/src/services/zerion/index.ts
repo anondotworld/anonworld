@@ -1,3 +1,4 @@
+import { zeroAddress } from 'viem'
 import {
   Chain,
   Portfolio,
@@ -73,9 +74,14 @@ class ZerionService {
   }
 
   async getFungible(chainId: number, tokenAddress: string): Promise<Fungible> {
-    const response = await this.makeRequest<Fungible[]>(
-      `/fungibles?filter[implementation_chain_id]=${chainId}&filter[implementation_address]=${tokenAddress}`
-    )
+    const query = new URLSearchParams()
+    query.set('filter[implementation_chain_id]', chainId.toString())
+    if (tokenAddress !== zeroAddress) {
+      query.set('filter[implementation_address]', tokenAddress)
+    } else {
+      query.set('filter[fungible_ids]', 'eth')
+    }
+    const response = await this.makeRequest<Fungible[]>(`/fungibles?${query.toString()}`)
     return response.data[0]
   }
 }

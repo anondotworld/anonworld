@@ -7,12 +7,18 @@ import {
   keccak256,
   pad,
   toHex,
+  zeroAddress,
 } from 'viem'
 import { base } from 'viem/chains'
 import { simplehash } from '../services/simplehash'
 import { t } from 'elysia'
 import { redis } from '../services/redis'
 import { zerion } from '../services/zerion'
+import { createClientV2 } from '@0x/swap-ts-sdk'
+
+const zeroExClient = createClientV2({
+  apiKey: process.env.ZERO_EX_API_KEY!,
+})
 
 const client = createPublicClient({
   chain: base,
@@ -72,6 +78,34 @@ export const tokenRoutes = createElysia({ prefix: '/tokens' })
       params: t.Object({
         chainId: t.Number(),
         tokenAddress: t.String(),
+      }),
+    }
+  )
+  .post(
+    '/swap/quote',
+    async ({ body, error }) => {
+      const quote = await zeroExClient.swap.permit2.getQuote.query({
+        chainId: body.chainId,
+        taker: body.taker,
+        buyToken:
+          body.buyToken === zeroAddress
+            ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+            : body.buyToken,
+        sellToken:
+          body.sellToken === zeroAddress
+            ? '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+            : body.sellToken,
+        sellAmount: body.sellAmount,
+      })
+      return quote
+    },
+    {
+      body: t.Object({
+        chainId: t.Number(),
+        taker: t.String(),
+        buyToken: t.String(),
+        sellToken: t.String(),
+        sellAmount: t.String(),
       }),
     }
   )

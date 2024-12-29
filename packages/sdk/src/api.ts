@@ -13,6 +13,8 @@ import {
   Fungible,
   RevealPostArgs,
   Community,
+  SwapQuote,
+  SwapQuoteError,
 } from './types'
 
 export class Api {
@@ -190,5 +192,18 @@ export class Api {
 
   async getCommunity(id: string) {
     return await this.request<Community>(`/communities/${id}`)
+  }
+
+  async getSwapQuote(args: {
+    chainId: number
+    taker: string
+    buyToken: string
+    sellToken: string
+    sellAmount: string
+  }) {
+    return await this.request<{ data: SwapQuote | SwapQuoteError }>('/swap/quote', {
+      method: 'POST',
+      body: JSON.stringify(args),
+    })
   }
 }
