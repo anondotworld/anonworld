@@ -1,21 +1,13 @@
-import { Button, Image, Separator, Text, View, XStack, YStack } from '@anonworld/ui'
-import { Field } from '../../field'
-import { chains, formatAddress, formatAmount, timeAgo } from '../../../utils'
-import { useFarcasterUser } from '../../../hooks/use-farcaster-user'
+import { Image, Text, View, XStack, YStack } from '@anonworld/ui'
 import { Badge } from '../../badge'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
 import { Community } from '../../../types'
-import {
-  ArrowLeftRight,
-  ArrowUpRight,
-  Coins,
-  MessageSquare,
-  MoreHorizontal,
-} from '@tamagui/lucide-icons'
-import { useToken } from '../../../hooks'
-import { extractChain } from 'viem'
+import { MessageSquare, MoreHorizontal } from '@tamagui/lucide-icons'
 import { CommunityToken } from './token'
+import { formatAmount } from '../../../utils'
+import { timeAgo } from '../../../utils'
+import { useFarcasterUser } from '../../../hooks/use-farcaster-user'
 
 export function CommunityDisplay({
   community,

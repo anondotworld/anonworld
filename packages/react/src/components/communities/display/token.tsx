@@ -55,7 +55,7 @@ export function CommunityToken({ community }: { community: Community }) {
           />
         </XStack>
       </XStack>
-      <XStack gap="$2" ai="center" jc="space-between">
+      <XStack gap="$4" ai="flex-end" jc="space-between" mt="$2">
         <CommunityActions community={community} />
         <XStack gap="$2">
           <Button
