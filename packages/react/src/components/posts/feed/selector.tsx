@@ -5,8 +5,8 @@ export function PostFeedSelector({
   selected,
   onSelect,
 }: {
-  selected: string
-  onSelect: (sort: string) => void
+  selected: 'new' | 'trending'
+  onSelect: (feedType: 'new' | 'trending') => void
 }) {
   return (
     <View ai="flex-end">

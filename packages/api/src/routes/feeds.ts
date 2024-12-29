@@ -75,8 +75,14 @@ const buildTrendingFeed = async (fid: number, posts: Array<Cast>) => {
 }
 
 const buildNewFeed = async (fid: number, posts: Array<Cast>) => {
-  await redis.setNewFeed(fid, JSON.stringify(posts.slice(0, 25)))
-  return posts.slice(0, 25)
+  const feed = posts
+    .sort((a, b) => {
+      return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    })
+    .slice(0, 25)
+
+  await redis.setNewFeed(fid, JSON.stringify(feed))
+  return feed
 }
 
 export const buildFeeds = async (fid: number) => {

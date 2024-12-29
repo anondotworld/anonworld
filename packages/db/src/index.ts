@@ -59,6 +59,10 @@ export const getActionsForTrigger = async (trigger: string) => {
   return await db.select().from(actionsTable).where(eq(actionsTable.trigger, trigger))
 }
 
+export const getActions = async (ids: string[]) => {
+  return await db.select().from(actionsTable).where(inArray(actionsTable.id, ids))
+}
+
 export const getSignerForFid = async (fid: number) => {
   const [signer] = await db
     .select()
@@ -89,9 +93,12 @@ export const getPosts = async (
   return posts as Post[]
 }
 
-export const createPost = async (
-  params: Omit<typeof postsTable.$inferInsert, 'created_at' | 'updated_at'>
-) => {
+export const createPost = async (params: {
+  hash: string
+  fid: number
+  data: PostDataV1
+  reveal_hash?: string
+}) => {
   await db
     .insert(postsTable)
     .values(params)

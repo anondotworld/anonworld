@@ -464,6 +464,7 @@ export type CreatePostActionData = {
   links: string[]
   images: string[]
   revealHash?: string
+  copyActionIds?: string[]
 }
 
 export type DeletePostFarcasterActionData = {

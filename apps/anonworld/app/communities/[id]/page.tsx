@@ -7,14 +7,14 @@ import {
   PostFeedSelector,
   useCommunity,
 } from '@anonworld/react'
-import { Spinner, View, XStack, YStack } from '@anonworld/ui'
+import { View, XStack, YStack } from '@anonworld/ui'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function CommunityPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const { data: community } = useCommunity({ id: params.id })
-  const [feedType, setFeedType] = useState('new')
+  const [feedType, setFeedType] = useState<'new' | 'trending'>('trending')
 
   if (!community) {
     return null
@@ -34,7 +34,7 @@ export default function CommunityPage({ params }: { params: { id: string } }) {
       </XStack>
       <PostFeed
         fid={community.fid}
-        type={feedType as 'new' | 'trending'}
+        type={feedType}
         onPress={(hash) => router.push(`/posts/${hash}`)}
       />
     </View>

@@ -1,10 +1,4 @@
-import {
-  createPost,
-  createPostCredentials,
-  getActionsForTrigger,
-  PostData,
-  PostDataV1,
-} from '@anonworld/db'
+import { createPost, createPostCredentials, getActions, PostDataV1 } from '@anonworld/db'
 import { neynar } from '../services/neynar'
 import { BaseAction } from './base'
 import { ActionRequest } from './types'
@@ -30,6 +24,7 @@ export type CreatePostMetadata = {
 
 export type CreatePostData = PostDataV1 & {
   revealHash?: string
+  copyActionIds?: string[]
 }
 
 export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
@@ -60,7 +55,12 @@ export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
     await createPost({
       hash: response.cast.hash,
       fid: this.action.metadata.fid,
-      data: { ...this.data, revealHash: undefined },
+      data: {
+        text,
+        reply,
+        links,
+        images,
+      },
       reveal_hash: revealHash,
     })
 
@@ -75,9 +75,9 @@ export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
   }
 
   async next(): Promise<ActionRequest[]> {
-    if (!this.hash) return []
+    if (!this.hash || !this.data.copyActionIds) return []
 
-    const actions = await getActionsForTrigger(this.action.id)
+    const actions = await getActions(this.data.copyActionIds)
 
     const nextActions: ActionRequest[] = []
 

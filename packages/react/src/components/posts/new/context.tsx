@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { Credential } from '../../../types'
+import { Action, Credential } from '../../../types'
 import { useExecuteActions } from '../../../hooks/use-execute-actions'
 import { useToastController } from '@anonworld/ui'
 import { hashMessage } from 'viem'
-import { encodeJson } from '../../../utils'
+import { encodeJson, getUsableCredential } from '../../../utils'
+import { useActions } from '../../../hooks/use-actions'
 
 const ACTION_ID = 'b6ec8ee8-f8bf-474f-8b28-f788f37e4066'
 
@@ -32,6 +33,7 @@ interface NewPostContextValue {
   error: Error | null
   revealPhrase: string | null
   setRevealPhrase: (revealPhrase: string | null) => void
+  copyActions: Action[]
 }
 
 const NewPostContext = createContext<NewPostContextValue | null>(null)
@@ -54,8 +56,10 @@ export function NewPostProvider({
   const [link, setLink] = useState<Content | null>(null)
   const [image, setImage] = useState<Content | null>(null)
   const [revealPhrase, setRevealPhrase] = useState<string | null>(null)
-
+  const [copyActions, setCopyActions] = useState<Action[]>([])
   const toast = useToastController()
+
+  const { data } = useActions()
 
   useEffect(() => {
     if (isOpen) {
@@ -82,6 +86,7 @@ export function NewPostProvider({
           reply: reply?.url ?? null,
           links: link?.url ? [link.url] : [],
           images: image?.url ? [image.url] : [],
+          copyActionIds: copyActions.map((action) => action.id),
           revealHash: revealPhrase
             ? hashMessage(
                 encodeJson({
@@ -122,6 +127,16 @@ export function NewPostProvider({
   const removeCredential = (credential: Credential) => {
     setCredentials(credentials.filter((c) => c.id !== credential.id))
   }
+
+  useEffect(() => {
+    const actions = data?.filter((action) => action.trigger)
+    const relevantActions =
+      actions?.filter((action) => {
+        const credential = getUsableCredential(credentials, action)
+        return credential
+      }) ?? []
+    setCopyActions(relevantActions)
+  }, [credentials])
 
   const parseContent = (url: string): Content => {
     try {
@@ -219,6 +234,7 @@ export function NewPostProvider({
         error,
         revealPhrase,
         setRevealPhrase,
+        copyActions,
       }}
     >
       {children}
