@@ -1,15 +1,11 @@
-import { Image, Text, XStack, YStack } from '@anonworld/ui'
+import { Image, XStack, YStack } from '@anonworld/ui'
 import { Field } from '../../field'
 import { formatAmount, timeAgo } from '../../../utils'
 import { useFarcasterUser } from '../../../hooks/use-farcaster-user'
 import { Badge } from '../../badge'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
-import { Community, CredentialRequirement } from '../../../types'
-import { useActions } from '../../../hooks/use-actions'
-import { Action, ActionType } from '../../../types'
-import { formatUnits } from 'viem'
-import { useToken } from '../../../hooks/use-token'
+import { Community } from '../../../types'
 
 export function CommunityDisplay({
   community,
@@ -37,7 +33,7 @@ export function CommunityDisplay({
       <XStack ai="center" jc="space-between">
         <XStack ai="center" gap="$2">
           <Image src={community.image_url} w="$4" h="$4" br="$12" />
-          <Field label={community.symbol} value={community.name} minWidth="$10" />
+          <Field label={community.token.symbol} value={community.name} minWidth="$10" />
         </XStack>
         <XStack gap="$4" ai="center" px="$4">
           <Field
@@ -48,59 +44,35 @@ export function CommunityDisplay({
           />
           <Field
             label="Mkt Cap"
-            value={`$${formatAmount(community.market_cap)}`}
+            value={`$${formatAmount(community.token.market_cap)}`}
             minWidth="$10"
             ai="flex-end"
           />
           <Field
             label="Price"
-            value={`$${Number(community.price_usd).toFixed(4)}`}
+            value={`$${Number(community.token.price_usd).toFixed(4)}`}
             minWidth="$10"
             ai="flex-end"
           />
         </XStack>
       </XStack>
-      <Actions community={community} />
+      <XStack gap="$2" ai="center" jc="space-between">
+        <XStack gap="$2">
+          <Badge>{timeAgo(community.created_at)}</Badge>
+        </XStack>
+        <XStack gap="$2">
+          {community.fid && <FarcasterBadge fid={community.fid} />}
+          {community.twitter_username && (
+            <TwitterBadge username={community.twitter_username} />
+          )}
+        </XStack>
+      </XStack>
     </YStack>
   )
 }
 
-function Actions({ community }: { community: Community }) {
-  const { data } = useActions()
-
-  return (
-    <XStack gap="$2" ai="center" jc="space-between">
-      <XStack gap="$2">
-        <Badge>{timeAgo(community.created_at)}</Badge>
-      </XStack>
-      <XStack gap="$2">
-        {data?.map((action) => {
-          switch (action.type) {
-            case ActionType.COPY_POST_FARCASTER:
-              if (action.metadata.fid === community.fid) {
-                return <CopyPostFarcaster fid={action.metadata.fid} action={action} />
-              }
-              break
-            case ActionType.COPY_POST_TWITTER:
-              if (action.metadata.twitter === community.twitter_username) {
-                return <TwitterBadge action={action} />
-              }
-              break
-          }
-
-          return null
-        })}
-      </XStack>
-    </XStack>
-  )
-}
-
-function CopyPostFarcaster({ fid, action }: { fid: number; action: Action }) {
+function FarcasterBadge({ fid }: { fid: number }) {
   const { data } = useFarcasterUser(fid)
-
-  if (action.type !== ActionType.COPY_POST_FARCASTER) {
-    return null
-  }
 
   return (
     <Badge
@@ -110,52 +82,19 @@ function CopyPostFarcaster({ fid, action }: { fid: number; action: Action }) {
       icon={<Farcaster size={12} />}
     >
       {data?.username}
-      {action.credential_requirement && (
-        <ERC20Requirement req={action.credential_requirement} />
-      )}
     </Badge>
   )
 }
 
-function TwitterBadge({ action }: { action: Action }) {
-  if (action.type !== ActionType.COPY_POST_TWITTER) {
-    return null
-  }
-
+function TwitterBadge({ username }: { username: string }) {
   return (
     <Badge
       onPress={() => {
-        window.open(`https://x.com/${action.metadata.twitter}`, '_blank')
+        window.open(`https://x.com/${username}`, '_blank')
       }}
       icon={<X size={10} />}
     >
-      {action.metadata.twitter}
-      {action.credential_requirement && (
-        <ERC20Requirement req={action.credential_requirement} />
-      )}
+      {username}
     </Badge>
-  )
-}
-
-function ERC20Requirement({
-  req,
-}: {
-  req: CredentialRequirement
-}) {
-  const { data } = useToken({
-    chainId: Number(req.chainId),
-    address: req.tokenAddress,
-  })
-
-  const symbol = data?.attributes.symbol
-  const implementation = data?.attributes.implementations[0]
-  const amount = Number.parseFloat(
-    formatUnits(BigInt(req.minimumBalance), implementation?.decimals ?? 18)
-  )
-
-  return (
-    <Text fos="$1" fow="400" color="$color11" ml="$2">
-      {`${formatAmount(amount)} ${symbol}`}
-    </Text>
   )
 }

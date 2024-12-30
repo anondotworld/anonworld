@@ -10,11 +10,11 @@ import {
   UploadImageResponse,
   ConversationCast,
   FungiblePosition,
-  Fungible,
   RevealPostArgs,
   Community,
   SwapQuote,
   SwapQuoteError,
+  Token,
 } from './types'
 
 export class Api {
@@ -176,8 +176,8 @@ export class Api {
     )
   }
 
-  async getFungible(chainId: number, tokenAddress: string) {
-    return await this.request<Fungible>(`/tokens/${chainId}/${tokenAddress}`)
+  async getToken(chainId: number, tokenAddress: string) {
+    return await this.request<Token>(`/tokens/${chainId}/${tokenAddress}`)
   }
 
   async getBalanceStorageSlot(chainId: number, tokenAddress: string) {

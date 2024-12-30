@@ -3,7 +3,15 @@ import { t } from 'elysia'
 import { redis } from '../services/redis'
 import { neynar } from '../services/neynar'
 import { Cast } from '../services/neynar/types'
-import { getPostCredentials, getPostRelationships, getPosts, Post } from '@anonworld/db'
+import {
+  getPostCredentials,
+  getPostRelationships,
+  getPosts,
+  Post,
+  getTokens,
+  getFarcasterAccounts,
+  getTwitterAccounts,
+} from '@anonworld/db'
 
 export const feedsRoutes = createElysia({ prefix: '/feeds' })
   .get(
@@ -100,6 +108,35 @@ export async function formatPosts(posts: Array<Post>): Promise<Array<Cast>> {
     getPostCredentials(posts.map((p) => p.hash)),
   ])
 
+  const tokenIds = [
+    ...new Set(
+      credentials
+        .filter((c) => c.credential_instances.credential_id.startsWith('ERC20_BALANCE'))
+        .map(
+          (c) =>
+            `${c.credential_instances.metadata.chainId}:${c.credential_instances.metadata.tokenAddress}`
+        )
+    ),
+  ]
+  const fids = [
+    ...new Set(
+      relationships
+        .filter((r) => r.target === 'farcaster')
+        .map((r) => Number(r.target_account))
+    ),
+  ]
+  const usernames = [
+    ...new Set(
+      relationships.filter((r) => r.target === 'twitter').map((r) => r.target_account)
+    ),
+  ]
+
+  const [tokens, farcasterAccounts, twitterAccounts] = await Promise.all([
+    getTokens(tokenIds),
+    getFarcasterAccounts(fids),
+    getTwitterAccounts(usernames),
+  ])
+
   const hashes = posts.map((p) => p.hash)
   for (const relationship of relationships) {
     if (relationship.target === 'farcaster') {
@@ -136,6 +173,12 @@ export async function formatPosts(posts: Array<Post>): Promise<Array<Cast>> {
       credentials: postCredentials.map((c) => ({
         ...c.credential_instances,
         displayId: formatHexId(c.credential_instances.id),
+        token: tokens.find(
+          (t) =>
+            t.chain_id === Number(c.credential_instances.metadata.chainId) &&
+            t.address.toLowerCase() ===
+              c.credential_instances.metadata.tokenAddress.toLowerCase()
+        ),
         id: undefined,
         proof: undefined,
       })),
@@ -143,6 +186,9 @@ export async function formatPosts(posts: Array<Post>): Promise<Array<Cast>> {
         target: r.target,
         targetAccount: r.target_account,
         targetId: r.target_id,
+        twitter: twitterAccounts.find((t) => t.username === r.target_account)?.metadata,
+        farcaster: farcasterAccounts.find((f) => f.fid === Number(r.target_account))
+          ?.metadata,
       })),
       aggregate: {
         likes:

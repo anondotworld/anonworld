@@ -41,6 +41,7 @@ export function NewCredentialProvider({
   const [balance, setBalance] = useState<number>(initialBalance ?? 0)
 
   const { data } = useWalletFungibles()
+
   const fungibles = useMemo(() => {
     if (!data) return []
     return data.filter((t) => {
@@ -97,13 +98,17 @@ export function NewCredentialProvider({
   const token = useMemo(() => {
     if (!tokenId) return
     const chainId = chainIdToZerion[tokenId.chainId]
-    return fungibles.find((t) => {
+    const token = fungibles.find((t) => {
       if (t.relationships.chain.data.id !== chainId) return false
       const impl = t.attributes.fungible_info.implementations.find(
-        (i) => i.address !== null
+        (i) =>
+          i.address !== null &&
+          i.address.toLowerCase() === tokenId.address.toLowerCase() &&
+          i.chain_id === chainId
       )
-      return impl?.address && impl.address.toLowerCase() === tokenId.address.toLowerCase()
+      return impl
     })
+    return token
   }, [fungibles, tokenId])
 
   useEffect(() => {

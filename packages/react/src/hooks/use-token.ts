@@ -12,7 +12,7 @@ export function useToken({
   return useQuery({
     queryKey: ['token', chainId, address],
     queryFn: async () => {
-      const response = await sdk.getFungible(chainId, address)
+      const response = await sdk.getToken(chainId, address)
       return response.data ?? null
     },
   })

@@ -11,9 +11,17 @@ import {
   postRelationshipsTable,
   postsTable,
   twitterAccountsTable,
+  tokensTable,
 } from './db/schema'
 
-export type CredentialInstance = typeof credentialInstancesTable.$inferSelect
+export type PostCredential = typeof postCredentialsTable.$inferSelect
+export type CredentialInstance = typeof credentialInstancesTable.$inferSelect & {
+  metadata: {
+    chainId: number
+    tokenAddress: string
+    balance: string
+  }
+}
 export type Action<T = unknown> = typeof actionsTable.$inferSelect & {
   metadata: T
 }
@@ -51,8 +59,20 @@ export const getAction = async (actionId: string) => {
   return action
 }
 
-export const getAvailableActions = async () => {
-  return await db.select().from(actionsTable)
+export const getAllActions = async () => {
+  const actions = await db
+    .select()
+    .from(actionsTable)
+    .leftJoin(communitiesTable, eq(actionsTable.community_id, communitiesTable.id))
+    .leftJoin(tokensTable, eq(communitiesTable.token_id, tokensTable.id))
+
+  return actions.map((action) => ({
+    ...action.actions,
+    community: {
+      ...action.communities,
+      token: action.tokens,
+    },
+  }))
 }
 
 export const getActionsForTrigger = async (trigger: string) => {
@@ -224,6 +244,10 @@ export const getAllFarcasterAccounts = async () => {
   return await db.select().from(farcasterAccountsTable)
 }
 
+export const getAllTwitterAccounts = async () => {
+  return await db.select().from(twitterAccountsTable)
+}
+
 export const createPostCredentials = async (
   hash: string,
   credentials: CredentialInstance[]
@@ -237,7 +261,7 @@ export const createPostCredentials = async (
 }
 
 export const getPostCredentials = async (hashes: string[]) => {
-  return await db
+  const credentials = await db
     .select()
     .from(postCredentialsTable)
     .innerJoin(
@@ -245,6 +269,11 @@ export const getPostCredentials = async (hashes: string[]) => {
       eq(postCredentialsTable.credential_id, credentialInstancesTable.id)
     )
     .where(inArray(postCredentialsTable.post_hash, hashes))
+
+  return credentials as {
+    credential_instances: CredentialInstance
+    post_credentials: PostCredential
+  }[]
 }
 
 export const getTwitterAccount = async (username: string) => {
@@ -283,7 +312,14 @@ export const getCredentials = async (ids: string[]) => {
 }
 
 export const getCommunities = async () => {
-  return await db.select().from(communitiesTable)
+  const communities = await db
+    .select()
+    .from(communitiesTable)
+    .innerJoin(tokensTable, eq(communitiesTable.token_id, tokensTable.id))
+  return communities.map((community) => ({
+    ...community.communities,
+    token: community.tokens,
+  }))
 }
 
 export const getCommunity = async (id: string) => {
@@ -291,8 +327,12 @@ export const getCommunity = async (id: string) => {
     .select()
     .from(communitiesTable)
     .where(eq(communitiesTable.id, id))
+    .innerJoin(tokensTable, eq(communitiesTable.token_id, tokensTable.id))
     .limit(1)
-  return community
+  return {
+    ...community.communities,
+    token: community.tokens,
+  }
 }
 
 export const updateCommunity = async (
@@ -311,4 +351,69 @@ export const countPostsForCommunity = async (fid: number) => {
     .from(postsTable)
     .where(eq(postsTable.fid, fid))
   return result.count
+}
+
+export const getAllTokens = async () => {
+  return await db.select().from(tokensTable)
+}
+
+export const getTokens = async (ids: string[]) => {
+  return await db.select().from(tokensTable).where(inArray(tokensTable.id, ids))
+}
+
+export const getToken = async (id: string) => {
+  const [token] = await db
+    .select()
+    .from(tokensTable)
+    .where(eq(tokensTable.id, id))
+    .limit(1)
+  return token
+}
+
+export const updateToken = async (
+  id: string,
+  params: Partial<typeof tokensTable.$inferInsert>
+) => {
+  await db.update(tokensTable).set(params).where(eq(tokensTable.id, id))
+}
+
+export const createToken = async (
+  params: Omit<typeof tokensTable.$inferInsert, 'created_at' | 'updated_at'>
+) => {
+  const [token] = await db.insert(tokensTable).values(params).returning()
+  return token
+}
+
+export const updateFarcasterAccount = async (
+  fid: number,
+  params: Partial<typeof farcasterAccountsTable.$inferInsert>
+) => {
+  await db
+    .update(farcasterAccountsTable)
+    .set(params)
+    .where(eq(farcasterAccountsTable.fid, fid))
+}
+
+export const updateTwitterAccount = async (
+  username: string,
+  params: Partial<typeof twitterAccountsTable.$inferInsert>
+) => {
+  await db
+    .update(twitterAccountsTable)
+    .set(params)
+    .where(eq(twitterAccountsTable.username, username))
+}
+
+export const getFarcasterAccounts = async (fids: number[]) => {
+  return await db
+    .select()
+    .from(farcasterAccountsTable)
+    .where(inArray(farcasterAccountsTable.fid, fids))
+}
+
+export const getTwitterAccounts = async (usernames: string[]) => {
+  return await db
+    .select()
+    .from(twitterAccountsTable)
+    .where(inArray(twitterAccountsTable.username, usernames))
 }

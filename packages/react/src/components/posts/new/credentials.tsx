@@ -103,18 +103,15 @@ function ERC20Credential({ credential }: { credential: Credential }) {
     address: credential.metadata.tokenAddress,
   })
 
-  const symbol = data?.attributes.symbol
-  const implementation = data?.attributes.implementations[0]
+  const symbol = data?.symbol
   const amount = Number.parseFloat(
-    formatUnits(BigInt(credential.metadata.balance), implementation?.decimals ?? 18)
+    formatUnits(BigInt(credential.metadata.balance), data?.decimals ?? 18)
   )
 
   return (
     <XStack gap="$4" ai="center" jc="space-between" f={1}>
       <XStack gap="$2" ai="center">
-        {data?.attributes.icon.url && (
-          <Image src={data.attributes.icon.url} w={16} h={16} />
-        )}
+        {data?.image_url && <Image src={data.image_url} w={16} h={16} />}
         <Text fos="$1" fow="500" color="$color11" textTransform="uppercase">
           {symbol}
         </Text>

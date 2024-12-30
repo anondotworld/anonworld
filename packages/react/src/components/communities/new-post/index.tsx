@@ -6,7 +6,6 @@ import { NewPostProvider } from '../../posts/new/context'
 import { NewPostDialog } from '../../posts/new/dialog'
 import { NewPostButton } from '../../posts/new'
 import { NewCredential } from '../../credentials'
-import { useToken } from '../../../hooks'
 import { formatUnits } from 'viem'
 
 export function NewPost({ onSuccess }: { onSuccess: (hash: string) => void }) {
@@ -28,11 +27,6 @@ export function NewCommunityPost({
 }) {
   const { data: actions } = useActions()
   const { credentials } = useSDK()
-  const { data } = useToken({
-    chainId: community.chain_id,
-    address: community.token_address,
-  })
-
   const relevantAction = actions?.find((action) => {
     if (
       action.type === ActionType.COPY_POST_FARCASTER &&
@@ -51,24 +45,30 @@ export function NewCommunityPost({
   if (!actions) return null
 
   if (!credential) {
-    const minimumBalance = Math.min(
-      ...actions
-        .map((action) => action.credential_requirement?.minimumBalance)
-        .filter((b) => b !== undefined)
-        .map((b) =>
-          Number.parseFloat(
-            formatUnits(BigInt(b), data?.attributes.implementations[0].decimals ?? 18)
-          )
-        )
-    )
+    let minimumBalance: number | undefined = undefined
+    for (const action of actions) {
+      if (
+        !action.credential_requirement ||
+        !action.community ||
+        action.community.id !== community.id
+      )
+        continue
+      const balance = action.credential_requirement.minimumBalance
+      const value = Number.parseFloat(
+        formatUnits(BigInt(balance), community.token.decimals)
+      )
+      if (!minimumBalance || value < minimumBalance) {
+        minimumBalance = value
+      }
+    }
 
     return (
       <NewCredential
         initialTokenId={{
-          chainId: community.chain_id,
-          address: community.token_address,
+          chainId: community.token.chain_id,
+          address: community.token.address,
         }}
-        initialBalance={minimumBalance}
+        initialBalance={minimumBalance ?? 0}
       />
     )
   }

@@ -46,7 +46,7 @@ export const farcasterRoutes = createElysia({ prefix: '/farcaster' })
     '/identities',
     async ({ query }) => {
       try {
-        const users = await neynar.getBulkUsers([query.address.toLowerCase()])
+        const users = await neynar.getBulkUsersByAddresses([query.address.toLowerCase()])
         const user = users?.[query.address.toLowerCase()]?.[0] || null
         return user
       } catch (error) {

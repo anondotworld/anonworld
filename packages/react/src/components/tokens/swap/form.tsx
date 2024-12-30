@@ -63,7 +63,7 @@ function TokenField({ token, disabled }: { token: Token; disabled?: boolean }) {
       />
       <XStack gap="$2" ai="center">
         <Avatar circular size={28}>
-          <AvatarImage src={data?.attributes.icon.url} />
+          <AvatarImage src={data?.image_url} />
           <AvatarFallback>
             <LinearGradient
               colors={[secondary, background]}
@@ -74,7 +74,7 @@ function TokenField({ token, disabled }: { token: Token; disabled?: boolean }) {
           </AvatarFallback>
         </Avatar>
         <Text fow="600" fos="$4">
-          {data?.attributes.symbol}
+          {data?.symbol}
         </Text>
       </XStack>
     </XStack>

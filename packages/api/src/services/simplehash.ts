@@ -104,7 +104,7 @@ class SimplehashService {
     }
 
     const url = `/fungibles/assets?fungible_ids=${chain}.${tokenAddress}&include_prices=1`
-    return await this.makeRequest<{ holder_count: number }>(url)
+    return await this.makeRequest<{ holder_count: number; decimals: number }>(url)
   }
 }
 

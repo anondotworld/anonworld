@@ -89,7 +89,13 @@ class NeynarService {
     return this.makeRequest<GetUsersResponse>(`/farcaster/user/bulk?fids=${fid}`)
   }
 
-  async getBulkUsers(addresses: string[]) {
+  async getBulkUsersByFids(fids: number[]) {
+    return this.makeRequest<GetBulkUsersResponse>(
+      `/farcaster/user/bulk?fids=${fids.join(',')}`
+    )
+  }
+
+  async getBulkUsersByAddresses(addresses: string[]) {
     return this.makeRequest<GetBulkUsersResponse>(
       `/farcaster/user/bulk-by-address?addresses=${addresses.join(',')}`
     )

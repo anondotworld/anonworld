@@ -94,7 +94,7 @@ export const postsRoutes = createElysia({ prefix: '/posts' })
       let username: string | undefined
 
       try {
-        const users = await neynar.getBulkUsers([address])
+        const users = await neynar.getBulkUsersByAddresses([address])
         username = users?.[address]?.[0]?.username
       } catch (error) {
         console.error(error)

@@ -1,6 +1,6 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import { getAction, getAvailableActions, getCredentials } from '@anonworld/db'
+import { getAction, getAllActions, getCredentials } from '@anonworld/db'
 import { CreatePost } from '../actions/create-post'
 import { CopyPostFarcaster } from '../actions/copy-post-farcaster'
 import { CopyPostTwitter } from '../actions/copy-post-twitter'
@@ -51,7 +51,7 @@ async function getActionInstance(request: ActionRequest) {
 
 export const actionsRoutes = createElysia({ prefix: '/actions' })
   .get('/', async () => {
-    const data = await getAvailableActions()
+    const data = await getAllActions()
     return {
       data,
     }

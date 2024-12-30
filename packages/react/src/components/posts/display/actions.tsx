@@ -16,7 +16,7 @@ import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
 import { NamedExoticComponent, useState } from 'react'
 import { useFarcasterUser } from '../../../hooks/use-farcaster-user'
-import { useExecuteActions, useToken } from '../../../hooks'
+import { useExecuteActions } from '../../../hooks'
 import { formatUnits } from 'viem/utils'
 import { NewCredentialProvider, useNewCredential } from '../../credentials/new/context'
 import { NewCredentialDialog } from '../../credentials/new/dialog'
@@ -155,13 +155,13 @@ function CopyPostTwitter({
   }
 
   const isValidEq =
-    !action.metadata.target.post.text.eq ||
-    action.metadata.target.post.text.eq.some((text) =>
+    !action.metadata.target?.post.text.eq ||
+    action.metadata.target?.post.text.eq.some((text) =>
       post.text.toLowerCase().match(text)
     )
   const isValidNe =
-    !action.metadata.target.post.text.ne ||
-    !action.metadata.target.post.text.ne.some((text) =>
+    !action.metadata.target?.post.text.ne ||
+    !action.metadata.target?.post.text.ne.some((text) =>
       post.text.toLowerCase().match(text)
     )
 
@@ -237,13 +237,13 @@ function CopyPostFarcaster({
   }
 
   const validateEq =
-    !action.metadata.target.post.text.eq ||
-    action.metadata.target.post.text.eq?.some((text) =>
+    !action.metadata.target?.post.text.eq ||
+    action.metadata.target?.post.text.eq?.some((text) =>
       post.text.toLowerCase().match(text)
     )
   const validateNe =
-    !action.metadata.target.post.text.ne ||
-    action.metadata.target.post.text.ne?.some(
+    !action.metadata.target?.post.text.ne ||
+    action.metadata.target?.post.text.ne?.some(
       (text) => !post.text.toLowerCase().match(text)
     )
 
@@ -332,7 +332,7 @@ function BasePostAction({
             {label}
           </Text>
           {!credential && action.credential_requirement && (
-            <ERC20Requirement req={action.credential_requirement} />
+            <ERC20Requirement action={action} req={action.credential_requirement} />
           )}
         </YStack>
       </View>
@@ -341,19 +341,15 @@ function BasePostAction({
 }
 
 function ERC20Requirement({
+  action,
   req,
 }: {
+  action: Action
   req: CredentialRequirement
 }) {
-  const { data } = useToken({
-    chainId: Number(req.chainId),
-    address: req.tokenAddress,
-  })
-
-  const symbol = data?.attributes.symbol
-  const implementation = data?.attributes.implementations[0]
+  const symbol = action.community?.token.symbol
   const amount = Number.parseFloat(
-    formatUnits(BigInt(req.minimumBalance), implementation?.decimals ?? 18)
+    formatUnits(BigInt(req.minimumBalance), action.community?.token.decimals ?? 18)
   )
 
   return (

@@ -15,6 +15,7 @@ import { t } from 'elysia'
 import { redis } from '../services/redis'
 import { zerion } from '../services/zerion'
 import { createClientV2 } from '@0x/swap-ts-sdk'
+import { createToken, getToken, updateToken } from '@anonworld/db'
 
 const zeroExClient = createClientV2({
   apiKey: process.env.ZERO_EX_API_KEY!,
@@ -28,19 +29,8 @@ const client = createPublicClient({
 export const tokenRoutes = createElysia({ prefix: '/tokens' })
   .get(
     '/:chainId/:tokenAddress',
-    async ({ params, error }) => {
-      const chainId = params.chainId
-      const tokenAddress = params.tokenAddress
-
-      const token = await redis.getToken(chainId, tokenAddress)
-      if (token) return JSON.parse(token)
-
-      const response = await zerion.getFungible(chainId, tokenAddress)
-      if (!response) return error(404, 'Token not found')
-
-      await redis.setToken(chainId, tokenAddress, JSON.stringify(response))
-
-      return response
+    async ({ params }) => {
+      return await getOrCreateToken(params.chainId, params.tokenAddress)
     },
     {
       params: t.Object({
@@ -68,6 +58,10 @@ export const tokenRoutes = createElysia({ prefix: '/tokens' })
         })
         if (data && hexToBigInt(data) === topHolder.balance) {
           await redis.setBalanceStorageSlot(chainId, tokenAddress, slot)
+          await getOrCreateToken(chainId, tokenAddress)
+          await updateToken(`${chainId}:${tokenAddress}`, {
+            balance_slot: slot,
+          })
           return { slot }
         }
       }
@@ -109,3 +103,56 @@ export const tokenRoutes = createElysia({ prefix: '/tokens' })
       }),
     }
   )
+
+export const getOrCreateToken = async (chainId: number, tokenAddress: string) => {
+  const token = await redis.getToken(chainId, tokenAddress)
+  if (token) return JSON.parse(token)
+  return syncToken(chainId, tokenAddress)
+}
+
+export const syncToken = async (chainId: number, tokenAddress: string) => {
+  const zerionToken = await zerion.getFungible(chainId, tokenAddress)
+  const simpleHashToken = await simplehash.getFungible(chainId, tokenAddress)
+
+  const id = `${chainId}:${tokenAddress}`
+  const token = await getToken(id)
+  if (token) {
+    const fields = {
+      price_usd: zerionToken.attributes.market_data.price.toFixed(8),
+      market_cap: Math.round(zerionToken.attributes.market_data.market_cap),
+      total_supply: Math.round(zerionToken.attributes.market_data.total_supply),
+      holders: simpleHashToken.holder_count ?? 0,
+    }
+    await updateToken(id, fields)
+    await redis.setToken(
+      chainId,
+      tokenAddress,
+      JSON.stringify({
+        ...token,
+        ...fields,
+      })
+    )
+  } else {
+    const impl = zerionToken.attributes.implementations.find(
+      (i) =>
+        i.chain_id === zerionToken.relationships.chain.data.id &&
+        i.address === tokenAddress
+    )
+
+    const token = {
+      id,
+      chain_id: chainId,
+      address: tokenAddress,
+      symbol: zerionToken.attributes.symbol,
+      name: zerionToken.attributes.name,
+      decimals: impl?.decimals ?? simpleHashToken?.decimals ?? 18,
+      image_url: zerionToken.attributes.icon.url,
+      price_usd: zerionToken.attributes.market_data.price.toFixed(8),
+      market_cap: Math.round(zerionToken.attributes.market_data.market_cap),
+      total_supply: Math.round(zerionToken.attributes.market_data.total_supply),
+      holders: simpleHashToken?.holder_count ?? 0,
+    }
+    await createToken(token)
+    await redis.setToken(chainId, tokenAddress, JSON.stringify(token))
+  }
+}

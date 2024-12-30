@@ -8,7 +8,7 @@ import { Etherscan } from '../../svg/etherscan'
 import { Uniswap } from '../../svg/uniswap'
 
 export function CommunityActions({ community }: { community: Community }) {
-  const chain = extractChain({ chains, id: Number(community.chain_id) as any })
+  const chain = extractChain({ chains, id: Number(community.token.chain_id) as any })
   return (
     <Popover size="$5" placement="bottom">
       <Popover.Trigger>
@@ -44,7 +44,7 @@ export function CommunityActions({ community }: { community: Community }) {
               hoverStyle={{ bg: '$color5' }}
               onPress={() =>
                 window.open(
-                  `https://app.uniswap.org/swap?outputCurrency=${community.token_address}&chain=${chain.id}&inputCurrency=ETH`,
+                  `https://app.uniswap.org/swap?outputCurrency=${community.token.address}&chain=${chain.id}&inputCurrency=ETH`,
                   '_blank'
                 )
               }
@@ -64,7 +64,7 @@ export function CommunityActions({ community }: { community: Community }) {
               hoverStyle={{ bg: '$color5' }}
               onPress={() =>
                 window.open(
-                  `https://dexscreener.com/${chain.name.toLowerCase()}/${community.token_address}`,
+                  `https://dexscreener.com/${chain.name.toLowerCase()}/${community.token.address}`,
                   '_blank'
                 )
               }
@@ -84,7 +84,7 @@ export function CommunityActions({ community }: { community: Community }) {
               hoverStyle={{ bg: '$color5' }}
               onPress={() =>
                 window.open(
-                  `https://basescan.org/token/${community.token_address}`,
+                  `https://basescan.org/token/${community.token.address}`,
                   '_blank'
                 )
               }

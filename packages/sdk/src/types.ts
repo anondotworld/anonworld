@@ -303,6 +303,8 @@ export type Relationship = {
   target: string
   targetAccount: string
   targetId: string
+  farcaster?: FarcasterAccount
+  twitter?: TwitterAccount
 }
 
 export type Credential = {
@@ -314,11 +316,12 @@ export type Credential = {
     publicInputs: string[]
   }
   metadata: {
-    chainId: string
+    chainId: number
     tokenAddress: `0x${string}`
     balance: string
   }
   verified_at: string
+  token?: Token
 }
 
 export enum CredentialType {
@@ -504,6 +507,7 @@ type BaseAction = {
   credential_id: string | null
   credential_requirement: CredentialRequirement | null
   trigger: string
+  community: Community | null
 }
 
 export type CredentialRequirement = {
@@ -627,65 +631,6 @@ export interface FungiblePosition {
   }
 }
 
-export interface Fungible {
-  type: string
-  id: string
-  attributes: {
-    name: string
-    symbol: string
-    description: string
-    icon: {
-      url: string
-    }
-    flags: {
-      verified: boolean
-    }
-    external_links: Array<{
-      type: string
-      name: string
-      url: string
-    }>
-    implementations: Array<{
-      chain_id: string
-      address: string
-      decimals: number
-    }>
-    market_data: {
-      total_supply: number
-      circulating_supply: number
-      market_cap: number
-      fully_diluted_valuation: number
-      price: number
-      changes: {
-        percent_1d: number
-        percent_30d: number
-        percent_90d: number
-        percent_365d: any
-      }
-    }
-  }
-  relationships: {
-    chain: {
-      links: {
-        related: string
-      }
-      data: {
-        type: string
-        id: string
-      }
-    }
-    fungible: {
-      links: {
-        related: string
-      }
-      data: {
-        type: string
-        id: string
-      }
-    }
-  }
-}
-
 export type RevealPostArgs = {
   hash: string
   message: string
@@ -699,17 +644,26 @@ export type Community = {
   name: string
   description: string
   image_url: string
-  chain_id: number
-  token_address: string
-  symbol: string
   fid: number
   twitter_username: string
+  posts: number
+  token: Token
+  created_at: string
+}
+
+export type Token = {
+  id: string
+  chain_id: number
+  address: string
+  name: string
+  symbol: string
+  decimals: number
+  image_url: string
   price_usd: string
   market_cap: number
   total_supply: number
   holders: number
-  posts: number
-  created_at: string
+  balance_slot: number
 }
 
 export type SwapQuote = {
@@ -725,4 +679,70 @@ export type SwapQuote = {
 export type SwapQuoteError = {
   liquidityAvailable: boolean
   error: string
+}
+
+export type TwitterAccount = {
+  url: string
+  id: string
+  followers: number
+  following: number
+  likes: number
+  tweets: number
+  name: string
+  screen_name: string
+  description: string
+  location: string
+  banner_url: string
+  avatar_url: string
+  joined: string
+  website: any
+}
+
+export type FarcasterAccount = {
+  object: 'user'
+  fid: number
+  username: string
+  display_name: string
+  custody_address: string
+  pfp_url: string
+  profile: {
+    bio: {
+      text: string
+      mentioned_profiles: string[]
+    }
+    location: {
+      latitude: number
+      longitude: number
+      address: {
+        city: string
+        state: string
+        state_code: string
+        country: string
+        country_code: string
+      }
+    }
+  }
+  follower_count: number
+  following_count: number
+  verifications: string[]
+  verified_addresses: {
+    eth_addresses: string[]
+    sol_addresses: string[]
+  }
+  verified_accounts?: [
+    {
+      platform: 'x'
+      username: string
+    },
+  ]
+  power_badge: boolean
+  experimental: {
+    neynar_user_score: number
+  }
+  viewer_context: {
+    following: boolean
+    followed_by: boolean
+    blocking: boolean
+    blocked_by: boolean
+  }
 }

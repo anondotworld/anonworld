@@ -7,6 +7,7 @@ import {
   jsonb,
   primaryKey,
   decimal,
+  bigint,
 } from 'drizzle-orm/pg-core'
 
 export const actionsTable = pgTable('actions', {
@@ -16,6 +17,7 @@ export const actionsTable = pgTable('actions', {
   credential_requirement: jsonb('credential_requirement'),
   metadata: jsonb('metadata'),
   trigger: varchar({ length: 255 }),
+  community_id: uuid('community_id').references(() => communitiesTable.id),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 })
@@ -103,20 +105,33 @@ export const communitiesTable = pgTable('communities', {
   name: varchar({ length: 255 }).notNull(),
   description: varchar({ length: 255 }).notNull(),
   image_url: varchar({ length: 255 }).notNull(),
-  chain_id: integer('chain_id').notNull(),
-  token_address: varchar({ length: 255 }).notNull(),
-  symbol: varchar({ length: 255 }).notNull(),
+  token_id: varchar({ length: 255 })
+    .references(() => tokensTable.id)
+    .notNull(),
   fid: integer('fid')
     .references(() => farcasterAccountsTable.fid)
     .notNull(),
   twitter_username: varchar({ length: 255 }).references(
     () => twitterAccountsTable.username
   ),
-  price_usd: decimal('price_usd', { precision: 18, scale: 8 }).notNull().default('0'),
-  market_cap: integer('market_cap').notNull().default(0),
-  total_supply: integer('total_supply').notNull().default(0),
-  holders: integer('holders').notNull().default(0),
   posts: integer('posts').notNull().default(0),
+  created_at: timestamp().notNull().defaultNow(),
+  updated_at: timestamp().notNull().defaultNow(),
+})
+
+export const tokensTable = pgTable('tokens', {
+  id: varchar({ length: 255 }).primaryKey(),
+  chain_id: integer('chain_id').notNull(),
+  address: varchar({ length: 255 }).notNull(),
+  name: varchar({ length: 255 }).notNull(),
+  symbol: varchar({ length: 255 }).notNull(),
+  decimals: integer('decimals').notNull(),
+  image_url: varchar({ length: 255 }).notNull(),
+  price_usd: decimal('price_usd', { precision: 18, scale: 8 }).notNull().default('0'),
+  market_cap: bigint('market_cap', { mode: 'number' }).notNull().default(0),
+  total_supply: bigint('total_supply', { mode: 'number' }).notNull().default(0),
+  holders: bigint('holders', { mode: 'number' }).notNull().default(0),
+  balance_slot: integer('balance_slot'),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 })

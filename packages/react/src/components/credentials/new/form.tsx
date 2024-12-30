@@ -234,14 +234,25 @@ function TokenValue({ token }: { token: FungiblePosition }) {
 
 function BalanceField() {
   const { balance, setBalance, token } = useNewCredential()
-  const maxBalance = Number(token?.attributes.quantity.float.toFixed(2) ?? 0)
+
+  const maxBalance = useMemo(
+    () => Number(token?.attributes.quantity.float.toFixed(2) ?? 0),
+    [token]
+  )
+
+  useEffect(() => {
+    if (balance > maxBalance) {
+      setBalance(maxBalance)
+    }
+  }, [maxBalance])
+
   return (
     <YStack>
       <Label fos="$1" fow="400" color="$color11" textTransform="uppercase">
         Balance
       </Label>
       <Slider
-        value={[balance]}
+        value={[Math.min(balance, maxBalance)]}
         max={maxBalance}
         onValueChange={(value) => setBalance(value[0])}
       >

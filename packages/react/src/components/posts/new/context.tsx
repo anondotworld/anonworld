@@ -34,6 +34,7 @@ interface NewPostContextValue {
   revealPhrase: string | null
   setRevealPhrase: (revealPhrase: string | null) => void
   copyActions: Action[]
+  setCopyActions: (copyActions: Action[]) => void
 }
 
 const NewPostContext = createContext<NewPostContextValue | null>(null)
@@ -58,8 +59,6 @@ export function NewPostProvider({
   const [revealPhrase, setRevealPhrase] = useState<string | null>(null)
   const [copyActions, setCopyActions] = useState<Action[]>([])
   const toast = useToastController()
-
-  const { data } = useActions()
 
   useEffect(() => {
     if (isOpen) {
@@ -127,16 +126,6 @@ export function NewPostProvider({
   const removeCredential = (credential: Credential) => {
     setCredentials(credentials.filter((c) => c.id !== credential.id))
   }
-
-  useEffect(() => {
-    const actions = data?.filter((action) => action.trigger)
-    const relevantActions =
-      actions?.filter((action) => {
-        const credential = getUsableCredential(credentials, action)
-        return credential
-      }) ?? []
-    setCopyActions(relevantActions)
-  }, [credentials])
 
   const parseContent = (url: string): Content => {
     try {
@@ -235,6 +224,7 @@ export function NewPostProvider({
         revealPhrase,
         setRevealPhrase,
         copyActions,
+        setCopyActions,
       }}
     >
       {children}
