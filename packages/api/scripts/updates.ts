@@ -42,8 +42,11 @@ const updateCommunities = async () => {
   for (const community of communities) {
     console.log(`[community] updating community for ${community.id}`)
     const posts = await countPostsForCommunity(community.fid)
+    const followers =
+      (community.farcaster?.follower_count ?? 0) + (community.twitter?.followers ?? 0)
     await updateCommunity(community.id, {
       posts,
+      followers,
     })
   }
 }

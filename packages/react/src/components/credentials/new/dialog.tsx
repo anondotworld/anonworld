@@ -57,7 +57,7 @@ export function NewCredentialDialog({ children }: { children?: ReactNode }) {
             </Label>
             <CredentialTypeSelect />
           </YStack>
-          <NewCredentialForm />
+          {isOpen && <NewCredentialForm />}
           <Unspaced>
             <Dialog.Close asChild>
               <View

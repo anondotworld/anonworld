@@ -11,12 +11,12 @@ import {
 } from '@anonworld/ui'
 import { Heart, MessageSquare } from '@tamagui/lucide-icons'
 import { CredentialBadge } from '../../credentials/badge'
-import { PostActions } from './actions'
 import { PostRelationships } from './relationships'
 import { PostEmbed } from './embeds'
 import { Badge } from '../../badge'
 import { useFarcasterIdentity } from '../../../hooks/use-farcaster-identity'
 import { CredentialAvatar } from '../../credentials/display/id'
+import { PostActions } from './actions'
 
 export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
   let text = post.text
@@ -71,7 +71,7 @@ export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
         </XStack>
         <PostRelationships post={post} />
       </XStack>
-      <View position="absolute" top="$2" right="$3">
+      <View position="absolute" top="$2" right="$3" onPress={(e) => e.stopPropagation()}>
         <PostActions post={post} />
       </View>
     </YStack>

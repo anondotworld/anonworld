@@ -50,9 +50,7 @@ export function CommunityToken({ community }: { community: Community }) {
           />
         </XStack>
       </XStack>
-      <XStack gap="$4" ai="flex-end" jc="space-between" mt="$2">
-        <CommunityActions community={community} />
-      </XStack>
+      <CommunityActions community={community} />
     </YStack>
   )
 }
@@ -106,8 +104,12 @@ export function CommunityActions({ community }: { community: Community }) {
     }
   }
 
+  if (Object.keys(communityActions).length === 0) {
+    return null
+  }
+
   return (
-    <YStack gap="$2.5" theme="surface3" themeShallow br="$4">
+    <YStack gap="$2.5" theme="surface3" themeShallow br="$4" mt="$2">
       {Object.entries(communityActions)
         .sort((a, b) => Number(a[0]) - Number(b[0]))
         .map(([_, action], i) => (

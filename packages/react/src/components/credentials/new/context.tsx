@@ -1,8 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { CredentialType, FungiblePosition } from '../../../types'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { CredentialType } from '../../../types'
 import { useSDK } from '../../../providers'
-import { useWalletFungibles } from '../../../hooks/use-wallet-fungibles'
-import { chainIdToZerion, zerionToChainId } from '../../../utils'
 
 interface NewCredentialContextValue {
   isOpen: boolean
@@ -11,11 +9,14 @@ interface NewCredentialContextValue {
   setCredentialType: (credentialType: CredentialType) => void
   connectWallet: () => void
   isConnecting: boolean
-  token: FungiblePosition | undefined
-  setToken: (token?: { chainId: number; address: string }) => void
+  tokenId: { chainId: number; address: string } | undefined
+  setTokenId: (token?: { chainId: number; address: string }) => void
   balance: number
   setBalance: (balance: number) => void
-  fungibles: FungiblePosition[]
+  maxBalance: number
+  setMaxBalance: (maxBalance: number) => void
+  decimals: number
+  setDecimals: (decimals: number) => void
 }
 
 const NewCredentialContext = createContext<NewCredentialContextValue | null>(null)
@@ -39,18 +40,8 @@ export function NewCredentialProvider({
     { chainId: number; address: string } | undefined
   >(initialTokenId)
   const [balance, setBalance] = useState<number>(initialBalance ?? 0)
-
-  const { data } = useWalletFungibles()
-
-  const fungibles = useMemo(() => {
-    if (!data) return []
-    return data.filter((t) => {
-      const impl = t.attributes.fungible_info.implementations.find(
-        (i) => i.address !== null
-      )
-      return impl && t.attributes.value
-    })
-  }, [data])
+  const [maxBalance, setMaxBalance] = useState<number>(0)
+  const [decimals, setDecimals] = useState<number>(18)
 
   const handleConnectWallet = () => {
     if (!connectWallet) return
@@ -67,24 +58,6 @@ export function NewCredentialProvider({
   }, [isConnecting])
 
   useEffect(() => {
-    if (fungibles.length > 0) {
-      if (initialTokenId) {
-        setTokenId(initialTokenId)
-      } else {
-        const token = fungibles[0]
-        const chainId = token.relationships.chain.data.id
-        const address = token.attributes.fungible_info.implementations.find(
-          (i) => i.address !== null
-        )?.address
-
-        if (!chainId || !address) return
-
-        setTokenId({ chainId: zerionToChainId[chainId], address })
-      }
-    }
-  }, [fungibles])
-
-  useEffect(() => {
     if (isOpen) {
       if (initialTokenId) {
         setTokenId(initialTokenId)
@@ -95,28 +68,6 @@ export function NewCredentialProvider({
     }
   }, [isOpen, initialTokenId, initialBalance])
 
-  const token = useMemo(() => {
-    if (!tokenId) return
-    const chainId = chainIdToZerion[tokenId.chainId]
-    const token = fungibles.find((t) => {
-      if (t.relationships.chain.data.id !== chainId) return false
-      const impl = t.attributes.fungible_info.implementations.find(
-        (i) =>
-          i.address !== null &&
-          i.address.toLowerCase() === tokenId.address.toLowerCase() &&
-          i.chain_id === chainId
-      )
-      return impl
-    })
-    return token
-  }, [fungibles, tokenId])
-
-  useEffect(() => {
-    if (token) {
-      setBalance(Math.floor(token.attributes.quantity.float / 2))
-    }
-  }, [token])
-
   return (
     <NewCredentialContext.Provider
       value={{
@@ -126,11 +77,14 @@ export function NewCredentialProvider({
         credentialType,
         setCredentialType,
         isConnecting: isConnectingWallet,
-        token,
-        setToken: setTokenId,
+        tokenId,
+        setTokenId,
         balance,
         setBalance,
-        fungibles,
+        maxBalance,
+        setMaxBalance,
+        decimals,
+        setDecimals,
       }}
     >
       {children}

@@ -2,12 +2,11 @@ import { Image, Text, View, XStack, YStack } from '@anonworld/ui'
 import { Badge } from '../../badge'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
-import { Community } from '../../../types'
+import { Community, FarcasterAccount, TwitterAccount } from '../../../types'
 import { MessageSquare } from '@tamagui/lucide-icons'
 import { CommunityToken } from './token'
 import { formatAmount } from '../../../utils'
 import { timeAgo } from '../../../utils'
-import { useFarcasterUser } from '../../../hooks/use-farcaster-user'
 import { CommunityActions } from './actions'
 
 export function CommunityDisplay({
@@ -51,10 +50,8 @@ export function CommunityDisplay({
             <Badge icon={<MessageSquare size={12} />}>
               {formatAmount(community.posts)}
             </Badge>
-            {community.fid && <FarcasterBadge fid={community.fid} />}
-            {community.twitter_username && (
-              <TwitterBadge username={community.twitter_username} />
-            )}
+            {community.farcaster && <FarcasterBadge farcaster={community.farcaster} />}
+            {community.twitter && <TwitterBadge twitter={community.twitter} />}
           </XStack>
           <Text fos="$2" fow="400" color="$color11">
             {community.description}
@@ -69,30 +66,30 @@ export function CommunityDisplay({
   )
 }
 
-function FarcasterBadge({ fid }: { fid: number }) {
-  const { data } = useFarcasterUser(fid)
-
+function FarcasterBadge({ farcaster }: { farcaster: FarcasterAccount }) {
   return (
     <Badge
       onPress={() => {
-        window.open(`https://warpcast.com/${data?.username}`, '_blank')
+        window.open(`https://warpcast.com/~/${farcaster.username}`, '_blank')
       }}
       icon={<Farcaster size={12} />}
     >
-      {data?.username}
+      {`${farcaster.username} `}
+      <Text col="$color11">{formatAmount(farcaster.follower_count)}</Text>
     </Badge>
   )
 }
 
-function TwitterBadge({ username }: { username: string }) {
+function TwitterBadge({ twitter }: { twitter: TwitterAccount }) {
   return (
     <Badge
       onPress={() => {
-        window.open(`https://x.com/${username}`, '_blank')
+        window.open(`https://x.com/${twitter.screen_name}`, '_blank')
       }}
       icon={<X size={10} />}
     >
-      {username}
+      {`${twitter.screen_name} `}
+      <Text col="$color11">{formatAmount(twitter.followers)}</Text>
     </Badge>
   )
 }

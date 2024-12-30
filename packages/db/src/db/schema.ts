@@ -115,6 +115,7 @@ export const communitiesTable = pgTable('communities', {
     () => twitterAccountsTable.username
   ),
   posts: integer('posts').notNull().default(0),
+  followers: integer('followers').notNull().default(0),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 })

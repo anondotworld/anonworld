@@ -29,6 +29,19 @@ export type Post = typeof postsTable.$inferSelect & {
   data: PostDataV1
 }
 
+type FarcasterAccount = {
+  follower_count: number
+}
+type TwitterAccount = {
+  followers: number
+}
+
+export type Community = typeof communitiesTable.$inferSelect & {
+  token: typeof tokensTable.$inferSelect | null
+  farcaster: FarcasterAccount | null
+  twitter: TwitterAccount | null
+}
+
 export type PostDataV0 = {
   text?: string
   embeds?: string[]
@@ -311,27 +324,47 @@ export const getCredentials = async (ids: string[]) => {
     .where(inArray(credentialInstancesTable.id, ids))
 }
 
-export const getCommunities = async () => {
+export const getCommunities = async (): Promise<Community[]> => {
   const communities = await db
     .select()
     .from(communitiesTable)
-    .innerJoin(tokensTable, eq(communitiesTable.token_id, tokensTable.id))
+    .leftJoin(tokensTable, eq(communitiesTable.token_id, tokensTable.id))
+    .leftJoin(
+      farcasterAccountsTable,
+      eq(communitiesTable.fid, farcasterAccountsTable.fid)
+    )
+    .leftJoin(
+      twitterAccountsTable,
+      eq(communitiesTable.twitter_username, twitterAccountsTable.username)
+    )
   return communities.map((community) => ({
     ...community.communities,
     token: community.tokens,
+    farcaster: community.farcaster_accounts?.metadata as FarcasterAccount | null,
+    twitter: community.twitter_accounts?.metadata as TwitterAccount | null,
   }))
 }
 
-export const getCommunity = async (id: string) => {
+export const getCommunity = async (id: string): Promise<Community> => {
   const [community] = await db
     .select()
     .from(communitiesTable)
     .where(eq(communitiesTable.id, id))
-    .innerJoin(tokensTable, eq(communitiesTable.token_id, tokensTable.id))
+    .leftJoin(tokensTable, eq(communitiesTable.token_id, tokensTable.id))
+    .leftJoin(
+      farcasterAccountsTable,
+      eq(communitiesTable.fid, farcasterAccountsTable.fid)
+    )
+    .leftJoin(
+      twitterAccountsTable,
+      eq(communitiesTable.twitter_username, twitterAccountsTable.username)
+    )
     .limit(1)
   return {
     ...community.communities,
     token: community.tokens,
+    farcaster: community.farcaster_accounts?.metadata as FarcasterAccount | null,
+    twitter: community.twitter_accounts?.metadata as TwitterAccount | null,
   }
 }
 

@@ -647,7 +647,10 @@ export type Community = {
   fid: number
   twitter_username: string
   posts: number
+  followers: number
   token: Token
+  farcaster: FarcasterAccount
+  twitter?: TwitterAccount
   created_at: string
 }
 

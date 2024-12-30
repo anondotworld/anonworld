@@ -20,12 +20,17 @@ import {
 import { useNewCredential } from './context'
 import { CredentialType, FungiblePosition } from '../../../types'
 import { useAccount, useDisconnect } from 'wagmi'
-import { formatAddress, toHslColors, zerionToChainId } from '../../../utils'
-import { useWalletFungibles } from '../../../hooks/use-wallet-fungibles'
+import {
+  chainIdToZerion,
+  formatAddress,
+  toHslColors,
+  zerionToChainId,
+} from '../../../utils'
 import { useEffect, useMemo, useState } from 'react'
 import { useSDK } from '../../../providers'
 import { parseUnits } from 'viem'
 import { LinearGradient } from '@tamagui/linear-gradient'
+import { useWalletFungibles } from '../../../hooks/use-wallet-fungibles'
 
 export function NewCredentialForm() {
   const { credentialType } = useNewCredential()
@@ -104,7 +109,64 @@ function WalletField() {
 }
 
 function TokenField() {
-  const { fungibles, token, setToken } = useNewCredential()
+  const { tokenId, setTokenId, setBalance, setMaxBalance, setDecimals } =
+    useNewCredential()
+
+  const { data } = useWalletFungibles()
+
+  const fungibles = useMemo(() => {
+    if (!data) return []
+    return data.filter((t) => {
+      const impl = t.attributes.fungible_info.implementations.find(
+        (i) => i.address !== null
+      )
+      return impl && t.attributes.value
+    })
+  }, [data])
+
+  const token = useMemo(() => {
+    if (!tokenId) return
+    const chainId = chainIdToZerion[tokenId.chainId]
+    const token = fungibles.find((t) => {
+      if (t.relationships.chain.data.id !== chainId) return false
+      const impl = t.attributes.fungible_info.implementations.find(
+        (i) =>
+          i.address !== null &&
+          i.address.toLowerCase() === tokenId.address.toLowerCase() &&
+          i.chain_id === chainId
+      )
+      return impl
+    })
+    return token
+  }, [fungibles, tokenId])
+
+  useEffect(() => {
+    if (token) {
+      setBalance(Math.floor(token.attributes.quantity.float / 2))
+    }
+  }, [token])
+
+  const handleSelect = (id: string) => {
+    const token = fungibles.find((t) => t.id === id)
+    if (!token) {
+      setTokenId(undefined)
+      setBalance(0)
+      setMaxBalance(0)
+      return
+    }
+
+    const chainId = token.relationships.chain.data.id
+    const impl = token.attributes.fungible_info.implementations.find(
+      (i) => i.address !== null && i.chain_id === chainId
+    )
+
+    if (!chainId || !impl?.address) return
+
+    setTokenId({ chainId: zerionToChainId[chainId], address: impl.address })
+    setBalance(Math.floor(token.attributes.quantity.float / 2))
+    setMaxBalance(Math.floor(token.attributes.quantity.float))
+    setDecimals(impl.decimals)
+  }
 
   if (fungibles.length === 0) {
     return null
@@ -119,22 +181,7 @@ function TokenField() {
       </Label>
       <Select
         value={selectedToken.id}
-        onValueChange={(value) => {
-          const token = fungibles.find((t) => t.id === value)
-          if (!token) {
-            setToken(undefined)
-            return
-          }
-
-          const chainId = token.relationships.chain.data.id
-          const address = token.attributes.fungible_info.implementations.find(
-            (i) => i.address !== null
-          )?.address
-
-          if (!chainId || !address) return
-
-          setToken({ chainId: zerionToChainId[chainId], address })
-        }}
+        onValueChange={handleSelect}
         disablePreventBodyScroll
       >
         <Select.Trigger>
@@ -233,18 +280,7 @@ function TokenValue({ token }: { token: FungiblePosition }) {
 }
 
 function BalanceField() {
-  const { balance, setBalance, token } = useNewCredential()
-
-  const maxBalance = useMemo(
-    () => Number(token?.attributes.quantity.float.toFixed(2) ?? 0),
-    [token]
-  )
-
-  useEffect(() => {
-    if (balance > maxBalance) {
-      setBalance(maxBalance)
-    }
-  }, [maxBalance])
+  const { balance, setBalance, maxBalance } = useNewCredential()
 
   return (
     <YStack>
@@ -292,24 +328,19 @@ function BalanceField() {
 
 function AddCredentialButton() {
   const { address } = useAccount()
-  const { token, balance, setIsOpen } = useNewCredential()
+  const { tokenId, balance, setIsOpen, decimals } = useNewCredential()
   const { credentials } = useSDK()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
 
   const handleAddCredential = async () => {
-    const impl = token?.attributes.fungible_info.implementations.find(
-      (impl) => impl.chain_id === token.relationships.chain.data.id
-    )
-    if (!impl?.address) return
-    const chainId = zerionToChainId[impl.chain_id]
-    if (!chainId) return
+    if (!tokenId) return
     try {
       setIsLoading(true)
       await credentials.addERC20Balance({
-        chainId: chainId,
-        tokenAddress: impl.address as `0x${string}`,
-        verifiedBalance: parseUnits(balance.toString(), impl.decimals),
+        chainId: tokenId.chainId,
+        tokenAddress: tokenId.address as `0x${string}`,
+        verifiedBalance: parseUnits(balance.toString(), decimals),
       })
       setIsLoading(false)
       setIsOpen(false)

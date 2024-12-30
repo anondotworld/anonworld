@@ -1,11 +1,10 @@
-import { Image, XStack, YStack } from '@anonworld/ui'
+import { Image, Text, XStack, YStack } from '@anonworld/ui'
 import { Field } from '../../field'
 import { formatAmount, timeAgo } from '../../../utils'
-import { useFarcasterUser } from '../../../hooks/use-farcaster-user'
 import { Badge } from '../../badge'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
-import { Community } from '../../../types'
+import { Community, FarcasterAccount, TwitterAccount } from '../../../types'
 
 export function CommunityDisplay({
   community,
@@ -43,14 +42,14 @@ export function CommunityDisplay({
             ai="flex-end"
           />
           <Field
-            label="Mkt Cap"
-            value={`$${formatAmount(community.token.market_cap)}`}
+            label="Followers"
+            value={community.followers.toLocaleString()}
             minWidth="$10"
             ai="flex-end"
           />
           <Field
-            label="Price"
-            value={`$${Number(community.token.price_usd).toFixed(4)}`}
+            label="Mkt Cap"
+            value={`$${formatAmount(community.token.market_cap)}`}
             minWidth="$10"
             ai="flex-end"
           />
@@ -61,40 +60,38 @@ export function CommunityDisplay({
           <Badge>{timeAgo(community.created_at)}</Badge>
         </XStack>
         <XStack gap="$2">
-          {community.fid && <FarcasterBadge fid={community.fid} />}
-          {community.twitter_username && (
-            <TwitterBadge username={community.twitter_username} />
-          )}
+          {community.farcaster && <FarcasterBadge farcaster={community.farcaster} />}
+          {community.twitter && <TwitterBadge twitter={community.twitter} />}
         </XStack>
       </XStack>
     </YStack>
   )
 }
 
-function FarcasterBadge({ fid }: { fid: number }) {
-  const { data } = useFarcasterUser(fid)
-
+function FarcasterBadge({ farcaster }: { farcaster: FarcasterAccount }) {
   return (
     <Badge
       onPress={() => {
-        window.open(`https://warpcast.com/${data?.username}`, '_blank')
+        window.open(`https://warpcast.com/~/${farcaster.username}`, '_blank')
       }}
       icon={<Farcaster size={12} />}
     >
-      {data?.username}
+      {`${farcaster.username} `}
+      <Text col="$color11">{formatAmount(farcaster.follower_count)}</Text>
     </Badge>
   )
 }
 
-function TwitterBadge({ username }: { username: string }) {
+function TwitterBadge({ twitter }: { twitter: TwitterAccount }) {
   return (
     <Badge
       onPress={() => {
-        window.open(`https://x.com/${username}`, '_blank')
+        window.open(`https://x.com/${twitter.screen_name}`, '_blank')
       }}
       icon={<X size={10} />}
     >
-      {username}
+      {`${twitter.screen_name} `}
+      <Text col="$color11">{formatAmount(twitter.followers)}</Text>
     </Badge>
   )
 }
