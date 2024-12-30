@@ -16,8 +16,22 @@ export function PostRelationships({ post }: { post: Cast }) {
   return (
     <View fd="row" gap="$2" ai="center">
       {relationships.map((r) => {
-        if (r.farcaster) return <FarcasterBadge farcaster={r.farcaster} id={r.targetId} />
-        if (r.twitter) return <TwitterBadge twitter={r.twitter} id={r.targetId} />
+        if (r.farcaster)
+          return (
+            <FarcasterBadge
+              key={r.farcaster.username}
+              farcaster={r.farcaster}
+              id={r.targetId}
+            />
+          )
+        if (r.twitter)
+          return (
+            <TwitterBadge
+              key={r.twitter.screen_name}
+              twitter={r.twitter}
+              id={r.targetId}
+            />
+          )
       })}
     </View>
   )

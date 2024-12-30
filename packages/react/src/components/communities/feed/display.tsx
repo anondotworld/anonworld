@@ -19,7 +19,7 @@ export function CommunityDisplay({
       bc="$borderColor"
       bbw="$0.5"
       p="$3"
-      gap="$4"
+      gap="$3"
       $gtXs={{
         br: '$4',
         bw: '$0.5',

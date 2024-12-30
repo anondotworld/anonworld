@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import { Action, Credential } from '../../../types'
 import { useExecuteActions } from '../../../hooks/use-execute-actions'
 import { useToastController } from '@anonworld/ui'
@@ -34,7 +41,7 @@ interface NewPostContextValue {
   revealPhrase: string | null
   setRevealPhrase: (revealPhrase: string | null) => void
   copyActions: Action[]
-  setCopyActions: (copyActions: Action[]) => void
+  setCopyActions: Dispatch<SetStateAction<Action[]>>
 }
 
 const NewPostContext = createContext<NewPostContextValue | null>(null)
