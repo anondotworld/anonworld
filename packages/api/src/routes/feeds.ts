@@ -11,6 +11,7 @@ import {
   getTokens,
   getFarcasterAccounts,
   getTwitterAccounts,
+  getComunnitiesForAccounts,
 } from '@anonworld/db'
 
 export const feedsRoutes = createElysia({ prefix: '/feeds' })
@@ -132,10 +133,11 @@ export async function formatPosts(posts: Array<Post>): Promise<Array<Cast>> {
     ),
   ]
 
-  const [tokens, farcasterAccounts, twitterAccounts] = await Promise.all([
+  const [tokens, farcasterAccounts, twitterAccounts, communities] = await Promise.all([
     getTokens(tokenIds),
     getFarcasterAccounts(fids),
     getTwitterAccounts(usernames),
+    getComunnitiesForAccounts(fids, usernames),
   ])
 
   const hashes = posts.map((p) => p.hash)
@@ -183,14 +185,27 @@ export async function formatPosts(posts: Array<Post>): Promise<Array<Cast>> {
         id: undefined,
         proof: undefined,
       })),
-      relationships: postRelationships.map((r) => ({
-        target: r.target,
-        targetAccount: r.target_account,
-        targetId: r.target_id,
-        twitter: twitterAccounts.find((t) => t.username === r.target_account)?.metadata,
-        farcaster: farcasterAccounts.find((f) => f.fid === Number(r.target_account))
-          ?.metadata,
-      })),
+      relationships: postRelationships.map((r) => {
+        const twitterAccount = twitterAccounts.find(
+          (t) => t.username === r.target_account
+        )
+        const farcasterAccount = farcasterAccounts.find(
+          (f) => f.fid === Number(r.target_account)
+        )
+        const community = communities.find(
+          (c) =>
+            c.fid === Number(r.target_account) || c.twitter_username === r.target_account
+        )
+
+        return {
+          target: r.target,
+          targetAccount: r.target_account,
+          targetId: r.target_id,
+          twitter: twitterAccount?.metadata,
+          farcaster: farcasterAccount?.metadata,
+          community: community,
+        }
+      }),
       aggregate: {
         likes:
           primaryCast.reactions.likes_count +

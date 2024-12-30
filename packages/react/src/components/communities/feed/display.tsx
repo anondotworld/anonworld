@@ -30,7 +30,7 @@ export function CommunityDisplay({
       f={1}
     >
       <XStack ai="center" jc="space-between">
-        <XStack ai="center" gap="$2">
+        <XStack ai="center" gap="$3">
           <Image src={community.image_url} w="$4" h="$4" br="$12" />
           <Field label={community.token.symbol} value={community.name} minWidth="$10" />
         </XStack>

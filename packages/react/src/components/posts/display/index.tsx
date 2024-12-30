@@ -17,6 +17,7 @@ import { Badge } from '../../badge'
 import { useFarcasterIdentity } from '../../../hooks/use-farcaster-identity'
 import { CredentialAvatar } from '../../credentials/display/id'
 import { PostActions } from './actions'
+import { PostCommunities } from './communities'
 
 export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
   let text = post.text
@@ -69,7 +70,11 @@ export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
           </Badge>
           {post.reveal?.phrase && <RevealBadge reveal={post.reveal} />}
         </XStack>
-        <PostRelationships post={post} />
+        {post.relationships.length > 0 && (
+          <View onPress={(e) => e.stopPropagation()}>
+            <PostCommunities post={post} />
+          </View>
+        )}
       </XStack>
       <View position="absolute" top="$2" right="$3" onPress={(e) => e.stopPropagation()}>
         <PostActions post={post} />

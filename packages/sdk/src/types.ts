@@ -305,6 +305,7 @@ export type Relationship = {
   targetId: string
   farcaster?: FarcasterAccount
   twitter?: TwitterAccount
+  community?: Community
 }
 
 export type Credential = {

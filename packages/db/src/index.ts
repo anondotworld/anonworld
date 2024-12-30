@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, or, sql } from 'drizzle-orm'
 import {
   communitiesTable,
   actionExecutionsTable,
@@ -78,7 +78,7 @@ export const getAllActions = async () => {
     .from(actionsTable)
     .leftJoin(communitiesTable, eq(actionsTable.community_id, communitiesTable.id))
     .leftJoin(tokensTable, eq(communitiesTable.token_id, tokensTable.id))
-    .where(isNull(actionsTable.hidden))
+    .where(eq(actionsTable.hidden, false))
 
   return actions.map((action) => ({
     ...action.actions,
@@ -318,11 +318,13 @@ export const createCredentialInstance = async (
   return credential
 }
 
-export const getCredentials = async (ids: string[]) => {
-  return await db
+export const getCredentials = async (ids: string[]): Promise<CredentialInstance[]> => {
+  const credentials = await db
     .select()
     .from(credentialInstancesTable)
     .where(inArray(credentialInstancesTable.id, ids))
+
+  return credentials as CredentialInstance[]
 }
 
 export const getCommunities = async (): Promise<Community[]> => {
@@ -450,4 +452,16 @@ export const getTwitterAccounts = async (usernames: string[]) => {
     .select()
     .from(twitterAccountsTable)
     .where(inArray(twitterAccountsTable.username, usernames))
+}
+
+export const getComunnitiesForAccounts = async (fids: number[], usernames: string[]) => {
+  return await db
+    .select()
+    .from(communitiesTable)
+    .where(
+      or(
+        inArray(communitiesTable.fid, fids),
+        inArray(communitiesTable.twitter_username, usernames)
+      )
+    )
 }

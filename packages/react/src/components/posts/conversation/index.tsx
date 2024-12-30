@@ -127,10 +127,10 @@ function Post({
           <XStack ai="center" ml="$-3">
             <XStack
               py="$2"
-              px="$3"
+              px="$2.5"
               br="$12"
-              hoverStyle={{ bg: '$color5' }}
-              gap="$2"
+              hoverStyle={{ bg: '$color4' }}
+              gap="$1.5"
               ai="center"
               cursor="pointer"
             >

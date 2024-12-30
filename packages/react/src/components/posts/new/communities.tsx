@@ -55,8 +55,6 @@ function CopyActionSelector({ actions }: { actions: Action[] }) {
   const copyAction = copyActions.find((action) => action.community)
   if (!copyAction?.community) return null
 
-  console.log(actions)
-
   return (
     <Popover size="$5" placement="bottom" open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger>
