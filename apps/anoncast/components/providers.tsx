@@ -2,10 +2,15 @@
 
 import '@rainbow-me/rainbowkit/styles.css'
 
-import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit'
+import {
+  getDefaultConfig,
+  RainbowKitProvider,
+  useConnectModal,
+} from '@rainbow-me/rainbowkit'
 import { base } from 'wagmi/chains'
 import { ThemeProvider } from 'next-themes'
-import { Provider } from '@anonworld/react'
+import { Provider, SDKProvider } from '@anonworld/react'
+import { ReactNode } from 'react'
 
 const config = getDefaultConfig({
   appName: 'anoncast',
@@ -24,8 +29,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <Provider wagmiConfig={config}>
-        <RainbowKitProvider>{children}</RainbowKitProvider>
+        <RainbowKitProvider>
+          <SDKInner>{children}</SDKInner>
+        </RainbowKitProvider>
       </Provider>
     </ThemeProvider>
+  )
+}
+
+function SDKInner({ children }: { children: ReactNode }) {
+  const { connectModalOpen, openConnectModal } = useConnectModal()
+  return (
+    <SDKProvider
+      apiUrl={process.env.NEXT_PUBLIC_API_URL}
+      connectWallet={openConnectModal}
+      isConnecting={connectModalOpen}
+    >
+      {children}
+    </SDKProvider>
   )
 }

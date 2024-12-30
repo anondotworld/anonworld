@@ -18,7 +18,7 @@ export const SDKProvider = ({
   apiUrl,
 }: {
   connectWallet?: () => void
-  isConnecting: boolean
+  isConnecting?: boolean
   children: ReactNode
   apiUrl?: string
 }) => {

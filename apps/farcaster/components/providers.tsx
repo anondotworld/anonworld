@@ -4,7 +4,7 @@ import { createConfig, http } from 'wagmi'
 import { base } from 'wagmi/chains'
 import { ThemeProvider } from 'next-themes'
 import { frameConnector } from '@/lib/connector'
-import { Provider } from '@anonworld/react'
+import { Provider, SDKProvider } from '@anonworld/react'
 
 export const config = createConfig({
   chains: [base],
@@ -24,7 +24,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       forcedTheme="dark"
       disableTransitionOnChange
     >
-      <Provider wagmiConfig={config}>{children}</Provider>
+      <Provider wagmiConfig={config}>
+        <SDKProvider apiUrl={process.env.NEXT_PUBLIC_API_URL}>{children}</SDKProvider>
+      </Provider>
     </ThemeProvider>
   )
 }
