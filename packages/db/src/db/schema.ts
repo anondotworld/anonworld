@@ -8,6 +8,7 @@ import {
   primaryKey,
   decimal,
   bigint,
+  boolean,
 } from 'drizzle-orm/pg-core'
 
 export const actionsTable = pgTable('actions', {
@@ -18,6 +19,7 @@ export const actionsTable = pgTable('actions', {
   metadata: jsonb('metadata'),
   trigger: varchar({ length: 255 }),
   community_id: uuid('community_id').references(() => communitiesTable.id),
+  hidden: boolean('hidden').notNull().default(false),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 })

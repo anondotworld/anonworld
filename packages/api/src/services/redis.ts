@@ -1,4 +1,5 @@
 import { Redis } from 'ioredis'
+import { Cast } from './neynar/types'
 
 export class RedisService {
   private readonly client: Redis
@@ -17,6 +18,15 @@ export class RedisService {
       RedisService.instance = new RedisService(url)
     }
     return RedisService.instance
+  }
+
+  async getPost(hash: string) {
+    return this.client.get(`post:${hash}`)
+  }
+
+  async setPosts(posts: Cast[]) {
+    const args = posts.flatMap((post) => [`post:${post.hash}`, JSON.stringify(post)])
+    return this.client.mset(args)
   }
 
   async getTrendingFeed(fid: number) {

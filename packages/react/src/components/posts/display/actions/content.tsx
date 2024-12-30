@@ -59,9 +59,11 @@ function PostAction({ action, post }: { action: Action; post: Cast }) {
       return <DeletePostTwitter action={action} post={post} />
     }
     case ActionType.COPY_POST_FARCASTER: {
+      if (!action.metadata) return null
       return <CopyPostFarcaster fid={action.metadata.fid} action={action} post={post} />
     }
     case ActionType.DELETE_POST_FARCASTER: {
+      if (!action.metadata) return null
       return <DeletePostFarcaster fid={action.metadata.fid} action={action} post={post} />
     }
   }

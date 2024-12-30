@@ -13,11 +13,17 @@ import {
 } from '@anonworld/db'
 import { formatPosts } from './feeds'
 import { Cast, ConversationCast } from '../services/neynar/types'
+import { redis } from '../services/redis'
 
 export const postsRoutes = createElysia({ prefix: '/posts' })
   .get(
     '/:hash',
     async ({ params }) => {
+      const cached = await redis.getPost(params.hash)
+      if (cached) {
+        return JSON.parse(cached)
+      }
+
       const relationship = await getPostParent(params.hash)
 
       let post: Post | null = null

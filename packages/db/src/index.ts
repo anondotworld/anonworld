@@ -78,6 +78,7 @@ export const getAllActions = async () => {
     .from(actionsTable)
     .leftJoin(communitiesTable, eq(actionsTable.community_id, communitiesTable.id))
     .leftJoin(tokensTable, eq(communitiesTable.token_id, tokensTable.id))
+    .where(isNull(actionsTable.hidden))
 
   return actions.map((action) => ({
     ...action.actions,

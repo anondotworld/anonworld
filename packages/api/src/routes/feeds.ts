@@ -98,6 +98,7 @@ export const buildFeeds = async (fid: number) => {
   if (posts.length === 0) return
   await buildTrendingFeed(fid, posts)
   await buildNewFeed(fid, posts)
+  await redis.setPosts(posts)
 }
 
 export async function formatPosts(posts: Array<Post>): Promise<Array<Cast>> {
