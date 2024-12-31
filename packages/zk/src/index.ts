@@ -1,7 +1,8 @@
 import { BaseCircuit } from './base'
-import erc20BalanceCircuit from '../circuits/erc20-balance/target/0.1.5/main.json'
-import erc20BalanceVkey from '../circuits/erc20-balance/target/0.1.5/vkey.json'
 export type { ProofData } from '@aztec/bb.js'
+export type { BaseCircuit } from './base'
+
+export const ERC20_BALANCE_VERSION = '0.1.5'
 
 export type ERC20BalanceData = {
   balance: string
@@ -13,8 +14,8 @@ export type ERC20BalanceData = {
 }
 
 export class ERC20Balance extends BaseCircuit {
-  constructor() {
-    super(erc20BalanceCircuit, erc20BalanceVkey)
+  constructor(version = ERC20_BALANCE_VERSION) {
+    super('erc20-balance', version)
   }
 
   parseData(publicInputs: string[]): ERC20BalanceData {
@@ -39,4 +40,31 @@ export class ERC20Balance extends BaseCircuit {
   }
 }
 
-export const erc20Balance = new ERC20Balance()
+const circuits: Record<string, Record<string, BaseCircuit>> = {}
+
+export enum CircuitType {
+  ERC20_BALANCE = 'ERC20_BALANCE',
+}
+
+type Circuit = {
+  [CircuitType.ERC20_BALANCE]: ERC20Balance
+}
+
+export const getCircuit = <T extends CircuitType>(
+  circuitType: T,
+  circuitVersion = ERC20_BALANCE_VERSION
+): Circuit[T] => {
+  if (circuitType === 'ERC20_BALANCE') {
+    if (!circuits[circuitType]) {
+      circuits[circuitType] = {}
+    }
+
+    if (!circuits[circuitType][circuitVersion]) {
+      circuits[circuitType][circuitVersion] = new ERC20Balance(circuitVersion)
+    }
+
+    return circuits[circuitType][circuitVersion] as Circuit[T]
+  }
+
+  throw new Error('Invalid circuit type')
+}

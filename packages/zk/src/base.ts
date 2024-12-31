@@ -11,15 +11,39 @@ type VerifierModules = {
   BarretenbergVerifier: typeof BarretenbergVerifier
 }
 
+type CircuitModules = {
+  circuit: CompiledCircuit
+  vkey: Uint8Array
+}
+
 export abstract class BaseCircuit {
   private proverPromise: Promise<ProverModules> | null = null
   private verifierPromise: Promise<VerifierModules> | null = null
-  private circuit: CompiledCircuit
-  private vkey: Uint8Array
+  private circuitPromise: Promise<CircuitModules> | null = null
 
-  constructor(circuit: unknown, vkey: number[]) {
-    this.circuit = circuit as CompiledCircuit
-    this.vkey = Uint8Array.from(vkey)
+  public key: string
+  public version: string
+
+  constructor(circuitKey: string, circuitVersion: string) {
+    this.key = circuitKey
+    this.version = circuitVersion
+  }
+
+  async initCircuit() {
+    if (!this.circuitPromise) {
+      this.circuitPromise = (async () => {
+        const [circuit, vkey] = await Promise.all([
+          import(`../circuits/${this.key}/target/${this.version}/main.json`).then(
+            (res) => res.default
+          ),
+          import(`../circuits/${this.key}/target/${this.version}/vkey.json`).then(
+            (res) => res.default
+          ),
+        ])
+        return { circuit, vkey }
+      })()
+    }
+    return this.circuitPromise
   }
 
   async initProver(): Promise<ProverModules> {
@@ -49,30 +73,30 @@ export abstract class BaseCircuit {
   }
 
   async verify(proofData: ProofData) {
-    if (!this.circuit) {
-      throw new Error('Circuit not initialized')
-    }
-
-    const { BarretenbergVerifier } = await this.initVerifier()
+    const [{ vkey }, { BarretenbergVerifier }] = await Promise.all([
+      this.initCircuit(),
+      this.initVerifier(),
+    ])
 
     const verifier = new BarretenbergVerifier({ crsPath: process.env.TEMP_DIR })
-    const result = await verifier.verifyUltraHonkProof(proofData, this.vkey)
+    const result = await verifier.verifyUltraHonkProof(proofData, vkey)
 
     return result
   }
 
   async generate(input: Record<string, any>) {
-    if (!this.circuit) {
-      throw new Error('Circuit not initialized')
-    }
+    const [{ circuit }, { Noir, UltraHonkBackend }] = await Promise.all([
+      this.initCircuit(),
+      this.initProver(),
+    ])
 
-    const { Noir, UltraHonkBackend } = await this.initProver()
-
-    const backend = new UltraHonkBackend(this.circuit.bytecode)
-    const noir = new Noir(this.circuit)
+    const backend = new UltraHonkBackend(circuit.bytecode)
+    const noir = new Noir(circuit)
 
     const { witness } = await noir.execute(input)
 
     return await backend.generateProof(witness)
   }
+
+  abstract parseData(publicInputs: string[]): any
 }

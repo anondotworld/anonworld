@@ -201,7 +201,7 @@ function NewPostSubmit({ disabled }: { disabled: boolean }) {
       onPress={post}
     >
       {status === 'pending' ? (
-        <Spinner color="$color12" />
+        <Spinner color="$color1" />
       ) : (
         <Text fos="$2" fow="600" color="$color1">
           Post

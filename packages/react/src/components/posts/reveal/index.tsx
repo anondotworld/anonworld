@@ -153,7 +153,7 @@ export function PostReveal({
                   Reveal Post
                 </Text>
               ) : (
-                <Spinner color="$color12" />
+                <Spinner color="$color1" />
               )}
             </Button>
           </YStack>

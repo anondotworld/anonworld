@@ -109,7 +109,7 @@ export function AuthLogin({ children }: { children: ReactNode }) {
             disabled={isLoading}
           >
             {isLoading ? (
-              <Spinner color="$color12" />
+              <Spinner color="$color1" />
             ) : (
               <Text fos="$3" fow="600" color="$color1">
                 Login

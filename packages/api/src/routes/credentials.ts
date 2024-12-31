@@ -5,7 +5,7 @@ import {
   deleteCredentialInstance,
   getCredentialInstance,
 } from '@anonworld/db'
-import { erc20Balance } from '@anonworld/zk'
+import { CircuitType, getCircuit } from '@anonworld/zk'
 import {
   createPublicClient,
   keccak256,
@@ -26,11 +26,13 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
   .post(
     '/',
     async ({ body }) => {
-      if (body.type !== 'ERC20_BALANCE') {
-        throw new Error('Invalid type')
+      if (!body.type || !body.version) {
+        throw new Error('Invalid type or version')
       }
 
-      const verified = await erc20Balance.verify({
+      const circuit = getCircuit(body.type as CircuitType, body.version)
+
+      const verified = await circuit.verify({
         proof: new Uint8Array(body.proof),
         publicInputs: body.publicInputs,
       })
@@ -38,7 +40,7 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
         throw new Error('Invalid proof')
       }
 
-      const metadata = erc20Balance.parseData(body.publicInputs)
+      const metadata = circuit.parseData(body.publicInputs)
       const credentialId = `${body.type}:${metadata.chainId}:${metadata.tokenAddress}`
       const id = keccak256(new Uint8Array(body.proof))
       const existingCredential = await getCredentialInstance(id)
@@ -66,7 +68,7 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
         id,
         credential_id: credentialId,
         metadata,
-        version: body.version,
+        version: circuit.version,
         proof: {
           proof: body.proof,
           publicInputs: body.publicInputs,

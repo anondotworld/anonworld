@@ -1,4 +1,4 @@
-import { erc20Balance } from '../src'
+import { getCircuit, CircuitType } from '../src'
 import { bytesToHex, concat, createPublicClient, http, keccak256, pad, toHex } from 'viem'
 import { base } from 'viem/chains'
 import { formatArray, formatHexArray } from './utils'
@@ -7,6 +7,8 @@ const client = createPublicClient({
   chain: base,
   transport: http(),
 })
+
+const circuit = getCircuit(CircuitType.ERC20_BALANCE)
 
 const chainId = 8453
 const signature =
@@ -51,14 +53,14 @@ async function main() {
   }
 
   console.time('generateProof')
-  const proof = await erc20Balance.generate(input)
+  const proof = await circuit.generate(input)
   console.timeEnd('generateProof')
 
   console.time('verifyProof')
-  const verified = await erc20Balance.verify(proof)
+  const verified = await circuit.verify(proof)
   console.timeEnd('verifyProof')
 
-  const data = erc20Balance.parseData(proof.publicInputs)
+  const data = circuit.parseData(proof.publicInputs)
 
   const id = keccak256(bytesToHex(proof.proof))
 

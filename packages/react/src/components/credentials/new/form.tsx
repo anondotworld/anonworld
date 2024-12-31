@@ -361,7 +361,7 @@ function AddCredentialButton() {
             {address ? 'Add Credential' : 'Connect Wallet'}
           </Text>
         ) : (
-          <Spinner color="$color12" />
+          <Spinner color="$color1" />
         )}
       </Button>
     </YStack>
