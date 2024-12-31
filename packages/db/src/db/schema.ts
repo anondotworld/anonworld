@@ -102,6 +102,7 @@ export const credentialInstancesTable = pgTable('credential_instances', {
   vault_id: uuid('vault_id').references(() => vaultsTable.id),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
+  deleted_at: timestamp(),
 })
 
 export const communitiesTable = pgTable('communities', {
@@ -146,6 +147,7 @@ export const vaultsTable = pgTable('vaults', {
   passkey_id: varchar({ length: 255 })
     .references(() => passkeysTable.id)
     .notNull(),
+  posts: integer('posts').notNull().default(0),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 })

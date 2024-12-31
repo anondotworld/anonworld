@@ -5,7 +5,7 @@ import { Badge } from '../../badge'
 import { useEffect, useMemo, useState } from 'react'
 import { useActions } from '../../../hooks/use-actions'
 import { formatAmount, getUsableCredential } from '../../../utils'
-import { VaultBadge } from '../../auth/vault'
+import { VaultBadge } from '../../vaults/badge'
 
 export function NewPostCommunities() {
   const { credentials, setCopyActions } = useNewPost()

@@ -9,27 +9,17 @@ import { formatAmount } from '../../../utils'
 import { timeAgo } from '../../../utils'
 import { CommunityActions } from './actions'
 
-export function CommunityDisplay({
-  community,
-  onPress,
-}: { community: Community; onPress?: () => void }) {
+export function CommunityDisplay({ community }: { community: Community }) {
   return (
     <YStack
-      key={community.id}
       theme="surface1"
       themeShallow
       bg="$background"
       bc="$borderColor"
-      bbw="$0.5"
+      bw="$0.5"
+      br="$4"
       p="$4"
       gap="$4"
-      $gtXs={{
-        br: '$4',
-        bw: '$0.5',
-      }}
-      onPress={onPress}
-      hoverStyle={onPress ? { bg: '$color3' } : {}}
-      cursor={onPress ? 'pointer' : undefined}
       f={1}
     >
       <XStack ai="center" gap="$4">

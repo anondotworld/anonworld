@@ -16,7 +16,7 @@ import { useFarcasterIdentity } from '../../../hooks/use-farcaster-identity'
 import { PostActions } from './actions'
 import { PostCommunities } from './communities'
 import { PostCredential } from './credential'
-import { VaultBadge } from '../../auth/vault'
+import { VaultBadge } from '../../vaults/badge'
 
 export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
   let text = post.text

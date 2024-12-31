@@ -173,6 +173,12 @@ export class Api {
     })
   }
 
+  async deleteCredential(id: string) {
+    return await this.request<{ success: boolean }>(`/credentials/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
   async getCredential(id: string) {
     return await this.request<Credential>(`/credentials/${id}`)
   }
@@ -256,7 +262,7 @@ export class Api {
   }
 
   async getVaults(passkeyId: string) {
-    return await this.request<{ data: Vault[] }>(`/passkeys/${passkeyId}/vaults`)
+    return await this.request<{ data: { id: string }[] }>(`/passkeys/${passkeyId}/vaults`)
   }
 
   async addToVault(vaultId: string, credentialId: string) {
@@ -271,5 +277,13 @@ export class Api {
       method: 'DELETE',
       body: JSON.stringify({ credentialId }),
     })
+  }
+
+  async getVault(vaultId: string) {
+    return await this.request<Vault>(`/vaults/${vaultId}`)
+  }
+
+  async getVaultPosts(vaultId: string) {
+    return await this.request<{ data: Array<Cast> }>(`/vaults/${vaultId}/posts`)
   }
 }

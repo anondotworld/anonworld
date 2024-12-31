@@ -2,7 +2,6 @@ import { Popover, XStack } from '@anonworld/ui'
 import { Credential } from '../../../types'
 import { CredentialBadge } from '../../credentials/badge'
 import { useState } from 'react'
-import { CredentialAvatar } from '../../credentials/display/id'
 import { timeAgo } from '../../../utils'
 import { Badge } from '../../badge'
 
@@ -34,7 +33,6 @@ export function PostCredential({ credential }: { credential: Credential }) {
       >
         {isOpen && (
           <XStack ai="center" gap="$2">
-            <CredentialAvatar id={credential.displayId} size="$1" />
             <Badge>ERC20 Balance</Badge>
             <Badge>{`Verified ${timeAgo(credential.verified_at)}`}</Badge>
           </XStack>

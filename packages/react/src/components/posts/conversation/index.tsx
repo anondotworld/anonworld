@@ -5,8 +5,8 @@ import { PostEmbed } from '../display/embeds'
 import { timeAgo } from '../../../utils'
 import { Heart } from '@tamagui/lucide-icons'
 import { PostActions } from './actions'
-import { CredentialAvatar } from '../../credentials/display/id'
 import { ReplyButton } from './reply'
+import { VaultAvatar } from '../../vaults/avatar'
 
 export function PostConversation({
   conversation,
@@ -71,10 +71,12 @@ function Post({
           )
         })}
         <XStack gap="$2.5" ai="center" pt="$2">
-          {post.credentials && (
+          {post.credentials && post.credentials.length > 0 && (
             <>
               <View w={32} ai="center">
-                <CredentialAvatar id={post.credentials[0].displayId} />
+                <VaultAvatar
+                  id={post.credentials[0].vault_id ?? post.credentials[0].displayId}
+                />
               </View>
               {post.credentials.map((credential, index) => (
                 <CredentialBadge key={index} credential={credential} />

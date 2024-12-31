@@ -8,7 +8,7 @@ import { formatUnits } from 'viem'
 import { useNewPost } from './context'
 import { CredentialBadge } from '../../credentials/badge'
 import { TokenImage } from '../../tokens/image'
-import { VaultBadge } from '../../auth/vault'
+import { VaultBadge } from '../../vaults/badge'
 
 export function NewPostCredentials() {
   const { credentials, removeCredential } = useNewPost()

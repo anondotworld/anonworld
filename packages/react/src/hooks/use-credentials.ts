@@ -91,7 +91,8 @@ export function useCredentials(sdk: AnonWorldSDK) {
     return credential.data
   }
 
-  const deleteCredential = (id: string) => {
+  const deleteCredential = async (id: string) => {
+    await sdk.deleteCredential(id)
     setCredentials((prev) => prev.filter((cred) => cred.id !== id))
   }
 

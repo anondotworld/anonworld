@@ -8,6 +8,9 @@ import {
   updateFarcasterAccount,
   getAllTwitterAccounts,
   updateTwitterAccount,
+  getAllVaults,
+  countPostsForVault,
+  updateVault,
 } from '@anonworld/db'
 import { buildFeeds } from '../src/routes/feeds'
 import { zerion } from '../src/services/zerion'
@@ -95,6 +98,17 @@ const updateTwitterAccounts = async () => {
   }
 }
 
+const updateVaults = async () => {
+  const vaults = await getAllVaults()
+  for (const vault of vaults) {
+    console.log(`[vault] updating vault for ${vault.id}`)
+    const posts = await countPostsForVault(vault.id)
+    await updateVault(vault.id, {
+      posts,
+    })
+  }
+}
+
 const main = async () => {
   let i = 0
   while (true) {
@@ -107,6 +121,7 @@ const main = async () => {
       if (i % 20 === 0) {
         await updateFarcasterAccounts()
         await updateTwitterAccounts()
+        await updateVaults()
       }
     } catch (error) {
       console.error('[error]', error)

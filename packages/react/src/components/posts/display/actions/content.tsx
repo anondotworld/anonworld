@@ -20,14 +20,33 @@ export function PostActionsContent({
   setPostRevealOpen: (open: boolean) => void
 }) {
   const { data } = useActions()
-  const actions = data?.sort((a, b) => a.type.localeCompare(b.type))
+  const actions = data
+    ?.sort((a, b) => a.type.localeCompare(b.type))
+    .filter((action) =>
+      post.credentials.some(
+        (credential) => credential.credential_id === action.credential_id
+      )
+    )
+
+  const hasActions = actions && actions.length > 0
+  const hasReveal = post.reveal && !post.reveal.phrase
 
   return (
     <YGroup>
-      {actions?.map((action) => (
-        <PostAction key={action.id} post={post} action={action} />
-      ))}
-      {post.reveal && !post.reveal.phrase && (
+      {!hasActions && !hasReveal && (
+        <YGroup.Item>
+          <View fd="row" gap="$2" px="$3.5" py="$2.5">
+            <Text fos="$2" fow="400" color="$color11">
+              No actions
+            </Text>
+          </View>
+        </YGroup.Item>
+      )}
+      {hasActions &&
+        actions?.map((action) => (
+          <PostAction key={action.id} post={post} action={action} />
+        ))}
+      {hasReveal && (
         <YGroup.Item>
           <View
             fd="row"

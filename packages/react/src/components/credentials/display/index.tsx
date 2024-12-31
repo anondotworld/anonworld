@@ -6,7 +6,7 @@ import { CredentialActions } from './actions'
 import { useToken } from '../../../hooks'
 import { extractChain, formatUnits } from 'viem/utils'
 import { Field } from '../../field'
-import { VaultBadge } from '../../auth/vault'
+import { VaultBadge } from '../../vaults/badge'
 
 export function CredentialDisplay({
   credential,

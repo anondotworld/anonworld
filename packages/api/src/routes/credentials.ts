@@ -1,6 +1,10 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import { createCredentialInstance, getCredentialInstance } from '@anonworld/db'
+import {
+  createCredentialInstance,
+  deleteCredentialInstance,
+  getCredentialInstance,
+} from '@anonworld/db'
 import { erc20Balance } from '@anonworld/zk'
 import {
   createPublicClient,
@@ -86,6 +90,12 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
       }),
     }
   )
+  .delete('/:id', async ({ params }) => {
+    await deleteCredentialInstance(params.id)
+    return {
+      success: true,
+    }
+  })
   .get('/:id', async ({ params }) => {
     const credential = await getCredentialInstance(params.id)
     return {

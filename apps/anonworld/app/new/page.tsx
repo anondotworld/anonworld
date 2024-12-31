@@ -11,7 +11,7 @@ export default function Home() {
     <View maxWidth={700} mx="auto" my="$3" gap="$3">
       <XStack ai="center" jc="space-between">
         <PostFeedSelector
-          selected="New"
+          selected="new"
           onSelect={(sort: string) => {
             if (sort === 'new') {
               router.push('/new')

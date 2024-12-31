@@ -751,3 +751,10 @@ export type FarcasterAccount = {
     blocked_by: boolean
   }
 }
+
+export type Vault = {
+  id: string
+  created_at: string
+  posts: number
+  credentials: Array<Credential>
+}

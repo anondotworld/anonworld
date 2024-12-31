@@ -2,14 +2,14 @@ import { LogOut } from '@tamagui/lucide-icons'
 import { Popover, Text, View, YGroup } from '@anonworld/ui'
 import { NamedExoticComponent, ReactNode } from 'react'
 import { useSDK } from '../../providers'
-import { formatHexId, toHslColors } from '../../utils'
-import { LinearGradient } from '@tamagui/linear-gradient'
+import { formatHexId } from '../../utils'
 import { useVaults } from '../../hooks/use-vaults'
+import { VaultAvatar } from '../vaults/avatar'
 
 export function AuthActions({ passkeyId }: { passkeyId: string }) {
   const { auth } = useSDK()
   const { data: vaults } = useVaults(passkeyId)
-  const { background, secondary } = toHslColors(formatHexId(vaults?.[0]?.id ?? ''))
+  const id = formatHexId(vaults?.[0]?.id ?? '')
 
   return (
     <Popover size="$5" placement="bottom">
@@ -19,14 +19,7 @@ export function AuthActions({ passkeyId }: { passkeyId: string }) {
         }}
         cursor="pointer"
       >
-        <LinearGradient
-          width={32}
-          height={32}
-          borderRadius="$12"
-          colors={[secondary, background]}
-          start={[1, 1]}
-          end={[0, 0]}
-        />
+        <VaultAvatar id={id} size={32} />
       </Popover.Trigger>
       <Popover.Content
         enterStyle={{ y: -10, opacity: 0 }}
@@ -47,21 +40,14 @@ export function AuthActions({ passkeyId }: { passkeyId: string }) {
         <YGroup>
           {vaults?.map((vault) => {
             const displayId = formatHexId(vault.id)
-            const { background, secondary } = toHslColors(displayId)
             return (
               <ActionItem
                 key={vault.id}
                 label={displayId}
-                image={
-                  <LinearGradient
-                    width={16}
-                    height={16}
-                    borderRadius="$12"
-                    colors={[secondary, background]}
-                    start={[1, 1]}
-                    end={[0, 0]}
-                  />
-                }
+                image={<VaultAvatar id={displayId} size={16} />}
+                onPress={() => {
+                  window.location.href = `/profiles/${vault.id}`
+                }}
               />
             )
           })}

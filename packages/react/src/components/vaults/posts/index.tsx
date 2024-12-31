@@ -1,20 +1,12 @@
-import { usePosts } from '../../../hooks/use-posts'
 import { Spinner, Text, YStack } from '@anonworld/ui'
-import { Post } from '../display'
+import { useVaultPosts } from '../../../hooks/use-vault-posts'
+import { Post } from '../../posts'
 
-export function PostFeed({
-  fid,
-  type,
+export function VaultPosts({
+  id,
   onPress,
-}: {
-  fid: number
-  type: 'new' | 'trending'
-  onPress: (hash: string) => void
-}) {
-  const { data, isLoading } = usePosts({
-    fid,
-    type,
-  })
+}: { id: string; onPress: (hash: string) => void }) {
+  const { data, isLoading } = useVaultPosts(id)
 
   if (isLoading) {
     return <Spinner color="$color12" />

@@ -333,6 +333,13 @@ export const createCredentialInstance = async (
   return credential
 }
 
+export const deleteCredentialInstance = async (id: string) => {
+  await db
+    .update(credentialInstancesTable)
+    .set({ deleted_at: new Date(), vault_id: null, updated_at: new Date() })
+    .where(eq(credentialInstancesTable.id, id))
+}
+
 export const getCredentials = async (ids: string[]): Promise<CredentialInstance[]> => {
   const credentials = await db
     .select()
@@ -511,6 +518,15 @@ export const getVaults = async (passkeyId: string) => {
   return await db.select().from(vaultsTable).where(eq(vaultsTable.passkey_id, passkeyId))
 }
 
+export const getVault = async (vaultId: string) => {
+  const [vault] = await db
+    .select()
+    .from(vaultsTable)
+    .where(eq(vaultsTable.id, vaultId))
+    .limit(1)
+  return vault
+}
+
 export const addCredentialToVault = async (vaultId: string, credentialId: string) => {
   await db
     .update(credentialInstancesTable)
@@ -530,4 +546,64 @@ export const getCredentialsFromVault = async (vaultId: string) => {
     .select()
     .from(credentialInstancesTable)
     .where(eq(credentialInstancesTable.vault_id, vaultId))
+}
+
+export const getPostsFromVault = async (
+  vaultId: string,
+  opts: { limit: number; offset: number }
+) => {
+  return await db
+    .select()
+    .from(postsTable)
+    .innerJoin(postCredentialsTable, eq(postsTable.hash, postCredentialsTable.post_hash))
+    .innerJoin(
+      credentialInstancesTable,
+      eq(postCredentialsTable.credential_id, credentialInstancesTable.id)
+    )
+    .leftJoin(
+      postRelationshipsTable,
+      eq(postsTable.hash, postRelationshipsTable.target_id)
+    )
+    .where(
+      and(
+        eq(credentialInstancesTable.vault_id, vaultId),
+        isNull(postRelationshipsTable.target_id)
+      )
+    )
+    .orderBy(desc(postsTable.created_at))
+    .limit(opts.limit)
+    .offset(opts.offset)
+}
+
+export const getAllVaults = async () => {
+  return await db.select().from(vaultsTable)
+}
+
+export const countPostsForVault = async (vaultId: string) => {
+  const [result] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(postsTable)
+    .innerJoin(postCredentialsTable, eq(postsTable.hash, postCredentialsTable.post_hash))
+    .innerJoin(
+      credentialInstancesTable,
+      eq(postCredentialsTable.credential_id, credentialInstancesTable.id)
+    )
+    .leftJoin(
+      postRelationshipsTable,
+      eq(postsTable.hash, postRelationshipsTable.target_id)
+    )
+    .where(
+      and(
+        eq(credentialInstancesTable.vault_id, vaultId),
+        isNull(postRelationshipsTable.target_id)
+      )
+    )
+  return result.count
+}
+
+export const updateVault = async (
+  vaultId: string,
+  params: Partial<typeof vaultsTable.$inferInsert>
+) => {
+  await db.update(vaultsTable).set(params).where(eq(vaultsTable.id, vaultId))
 }
