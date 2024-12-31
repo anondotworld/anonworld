@@ -53,6 +53,23 @@ export const postsTable = pgTable('posts', {
   deleted_at: timestamp(),
 })
 
+export const postLikesTable = pgTable(
+  'post_likes',
+  {
+    post_hash: varchar({ length: 255 })
+      .references(() => postsTable.hash)
+      .notNull(),
+    passkey_id: varchar({ length: 255 })
+      .references(() => passkeysTable.id)
+      .notNull(),
+    created_at: timestamp().notNull().defaultNow(),
+    updated_at: timestamp().notNull().defaultNow(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.post_hash, table.passkey_id] }),
+  })
+)
+
 export const postRelationshipsTable = pgTable(
   'post_relationships',
   {

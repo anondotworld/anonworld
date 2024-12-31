@@ -14,6 +14,7 @@ import {
   tokensTable,
   vaultsTable,
   passkeysTable,
+  postLikesTable,
 } from './db/schema'
 import { alias } from 'drizzle-orm/pg-core'
 
@@ -28,7 +29,7 @@ export type Passkey = typeof passkeysTable.$inferSelect & {
 export type PostCredential = typeof postCredentialsTable.$inferSelect
 export type CredentialInstance = typeof credentialInstancesTable.$inferSelect & {
   metadata: {
-    chainId: number
+    chainId: string
     tokenAddress: string
     balance: string
   }
@@ -39,6 +40,8 @@ export type Action<T = unknown> = typeof actionsTable.$inferSelect & {
 export type Post = typeof postsTable.$inferSelect & {
   data: PostDataV1
 }
+export type PostRelationship = typeof postRelationshipsTable.$inferSelect
+export type Token = typeof tokensTable.$inferSelect
 
 type FarcasterAccount = {
   follower_count: number
@@ -476,7 +479,7 @@ export const getTwitterAccounts = async (usernames: string[]) => {
     .where(inArray(twitterAccountsTable.username, usernames))
 }
 
-export const getComunnitiesForAccounts = async (fids: number[], usernames: string[]) => {
+export const getCommunitiesForAccounts = async (fids: number[], usernames: string[]) => {
   return await db
     .select()
     .from(communitiesTable)
@@ -606,4 +609,43 @@ export const updateVault = async (
   params: Partial<typeof vaultsTable.$inferInsert>
 ) => {
   await db.update(vaultsTable).set(params).where(eq(vaultsTable.id, vaultId))
+}
+
+export const likePost = async (passkeyId: string, hash: string) => {
+  await db.insert(postLikesTable).values({ passkey_id: passkeyId, post_hash: hash })
+}
+
+export const unlikePost = async (passkeyId: string, hash: string) => {
+  await db
+    .delete(postLikesTable)
+    .where(
+      and(eq(postLikesTable.passkey_id, passkeyId), eq(postLikesTable.post_hash, hash))
+    )
+}
+
+export const getLikedPosts = async (passkeyId: string, hashes: string[]) => {
+  return await db
+    .select()
+    .from(postLikesTable)
+    .where(
+      and(
+        eq(postLikesTable.passkey_id, passkeyId),
+        inArray(postLikesTable.post_hash, hashes)
+      )
+    )
+}
+
+export const getLikeCounts = async (hashes: string[]) => {
+  const counts = await db
+    .select({ post_hash: postLikesTable.post_hash, count: sql<number>`count(*)` })
+    .from(postLikesTable)
+    .where(inArray(postLikesTable.post_hash, hashes))
+    .groupBy(postLikesTable.post_hash)
+  return counts.reduce(
+    (acc, count) => {
+      acc[count.post_hash] = Number(count.count)
+      return acc
+    },
+    {} as Record<string, number>
+  )
 }

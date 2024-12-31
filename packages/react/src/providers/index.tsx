@@ -5,6 +5,7 @@ import { WagmiProvider } from 'wagmi'
 import { ToastProvider } from './toast'
 import { ReactNode } from 'react'
 export { SDKProvider, useSDK } from './sdk'
+export { AuthProvider, useAuth } from './auth'
 
 const queryClient = new QueryClient({
   defaultOptions: {

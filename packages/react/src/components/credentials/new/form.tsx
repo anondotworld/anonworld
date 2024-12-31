@@ -316,10 +316,10 @@ function BalanceField() {
 function AddCredentialButton() {
   const { address } = useAccount()
   const { tokenId, balance, setIsOpen, decimals } = useNewCredential()
-  const { credentials, auth } = useSDK()
+  const { credentials } = useSDK()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
-  const { data: vaults } = useVaults(auth.passkeyId)
+  const { data: vaults } = useVaults()
 
   const handleAddCredential = async () => {
     if (!tokenId) return

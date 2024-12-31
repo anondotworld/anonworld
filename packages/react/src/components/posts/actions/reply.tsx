@@ -4,14 +4,12 @@ import { Cast } from '../../../types'
 import { XStack, Text, Dialog, View } from '@anonworld/ui'
 import { MessageCircle } from '@tamagui/lucide-icons'
 import { formatAmount } from '../../../utils'
+import { ActionButton, variants } from './button'
 
 export function ReplyButton({
   post,
-  showCount = false,
-  color = '$color12',
-  bg = '$color4',
-  bgHover = '$color5',
-}: { post: Cast; showCount?: boolean; color?: string; bg?: string; bgHover?: string }) {
+  variant = 'default',
+}: { post: Cast; showCount?: boolean; variant?: keyof typeof variants }) {
   return (
     <View onPress={(e) => e.preventDefault()}>
       <NewPostProvider
@@ -21,28 +19,12 @@ export function ReplyButton({
         }}
       >
         <NewPostDialog>
-          <Dialog.Trigger asChild>
-            <XStack
-              ai="center"
-              gap="$2"
-              bg={bg}
-              br="$12"
-              px="$2.5"
-              py="$2"
-              hoverStyle={{ bg: bgHover }}
-              cursor="pointer"
-            >
-              <MessageCircle size={14} col={color} />
-              {showCount ? (
-                <Text fos="$1" col={color}>
-                  {formatAmount(post.aggregate?.replies ?? post.replies.count)}
-                </Text>
-              ) : (
-                <Text fos="$1" col={color}>
-                  Reply
-                </Text>
-              )}
-            </XStack>
+          <Dialog.Trigger>
+            <ActionButton variant={variant} Icon={MessageCircle}>
+              {variant === 'default'
+                ? formatAmount(post.aggregate?.replies ?? post.replies.count)
+                : 'Reply'}
+            </ActionButton>
           </Dialog.Trigger>
         </NewPostDialog>
       </NewPostProvider>

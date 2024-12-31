@@ -11,11 +11,11 @@ import {
   XStack,
   YStack,
 } from '@anonworld/ui'
-import { useSDK } from '../../providers'
+import { useAuth } from '../../providers'
 import { ReactNode, useState } from 'react'
 
 export function AuthLogin({ children }: { children: ReactNode }) {
-  const { auth } = useSDK()
+  const { authenticate, isLoading } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   return (
     <Dialog modal open={isOpen} onOpenChange={setIsOpen}>
@@ -103,12 +103,12 @@ export function AuthLogin({ children }: { children: ReactNode }) {
             disabledStyle={{ opacity: 0.5 }}
             hoverStyle={{ opacity: 0.9 }}
             onPress={async () => {
-              await auth.authenticate()
+              await authenticate()
               setIsOpen(false)
             }}
-            disabled={auth.isLoading}
+            disabled={isLoading}
           >
-            {auth.isLoading ? (
+            {isLoading ? (
               <Spinner color="$color12" />
             ) : (
               <Text fos="$3" fow="600">

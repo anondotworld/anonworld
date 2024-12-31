@@ -1,26 +1,60 @@
+'use client'
+
+import { createContext, useContext } from 'react'
 import { AnonWorldSDK } from '@anonworld/sdk'
 import { WebAuthnP256 } from 'ox'
 import { useEffect, useMemo, useState } from 'react'
 import { hexToBytes } from 'viem'
 
-const LOCAL_STORAGE_KEY = 'anon:auth:v1'
+export const LOCAL_AUTH_KEY = 'anon:auth:v1'
 
-export const useAuth = (sdk: AnonWorldSDK) => {
-  const [auth, setAuth] = useState<{ passkeyId: string; token: string } | null>(null)
+const getInitialAuth = () => {
+  const stored = localStorage.getItem(LOCAL_AUTH_KEY)
+  if (stored) {
+    try {
+      return JSON.parse(stored)
+    } catch (error) {
+      localStorage.removeItem(LOCAL_AUTH_KEY)
+      return null
+    }
+  }
+  return null
+}
+
+type AuthContextType = {
+  authenticate: () => Promise<void>
+  logout: () => void
+  passkeyId?: string
+  token?: string
+  isLoading: boolean
+}
+
+const AuthContext = createContext<AuthContextType | null>(null)
+
+export const AuthProvider = ({
+  children,
+  sdk,
+}: {
+  children: React.ReactNode
+  sdk: AnonWorldSDK
+}) => {
+  const initialAuth = getInitialAuth()
+  if (initialAuth) {
+    sdk.setToken(initialAuth.token)
+  }
+
+  const [auth, setAuth] = useState<{ passkeyId: string; token: string } | null>(
+    initialAuth
+  )
   const [isLoading, setIsLoading] = useState(false)
 
   const nonce = useMemo(() => crypto.randomUUID(), [])
 
   useEffect(() => {
-    const stored = localStorage.getItem(LOCAL_STORAGE_KEY)
-    if (stored) {
-      try {
-        setAuth(JSON.parse(stored))
-      } catch (error) {
-        logout()
-      }
+    if (auth) {
+      sdk.setToken(auth.token)
     }
-  }, [])
+  }, [auth])
 
   const getChallenge = async () => {
     const response = await sdk.getPasskeyChallenge(nonce)
@@ -86,7 +120,7 @@ export const useAuth = (sdk: AnonWorldSDK) => {
       if (!auth) {
         auth = await createPasskey()
       }
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(auth))
+      localStorage.setItem(LOCAL_AUTH_KEY, JSON.stringify(auth))
       setAuth(auth)
     } catch (error) {
       console.error('Failed to login:', error)
@@ -96,15 +130,29 @@ export const useAuth = (sdk: AnonWorldSDK) => {
   }
 
   const logout = () => {
-    localStorage.removeItem(LOCAL_STORAGE_KEY)
+    localStorage.removeItem(LOCAL_AUTH_KEY)
     setAuth(null)
   }
 
-  return {
-    authenticate,
-    logout,
-    passkeyId: auth?.passkeyId,
-    token: auth?.token,
-    isLoading,
+  return (
+    <AuthContext.Provider
+      value={{
+        authenticate,
+        logout,
+        passkeyId: auth?.passkeyId,
+        token: auth?.token,
+        isLoading,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
   }
+  return context
 }

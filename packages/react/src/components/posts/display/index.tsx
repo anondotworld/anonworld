@@ -1,16 +1,14 @@
 import { Cast, Reveal } from '../../../types'
-import { formatAddress, formatAmount, timeAgo } from '../../../utils'
+import { formatAddress, timeAgo } from '../../../utils'
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-  Dialog,
   Text,
   View,
   XStack,
   YStack,
 } from '@anonworld/ui'
-import { Heart, MessageCircle } from '@tamagui/lucide-icons'
 import { PostEmbed } from './embeds'
 import { Badge } from '../../badge'
 import { useFarcasterIdentity } from '../../../hooks/use-farcaster-identity'
@@ -18,8 +16,6 @@ import { PostActions } from './actions'
 import { PostCommunities } from './communities'
 import { PostCredential } from './credential'
 import { VaultBadge } from '../../vaults/badge'
-import { NewPostProvider } from '../new/context'
-import { NewPostDialog } from '../new/dialog'
 import { ReplyButton } from '../actions/reply'
 import { LikeButton } from '../actions/like'
 
@@ -52,7 +48,7 @@ export function Post({ post, hoverable }: { post: Cast; hoverable?: boolean }) {
       cursor={hoverable ? 'pointer' : undefined}
       f={1}
     >
-      <XStack gap="$2" ai="center" onPress={(e) => e.stopPropagation()}>
+      <XStack gap="$2" ai="center" onPress={(e) => e.preventDefault()}>
         {vaultId && <VaultBadge vaultId={vaultId} />}
         {post.credentials?.map((credential, index) => (
           <PostCredential key={index} credential={credential} />
@@ -70,14 +66,14 @@ export function Post({ post, hoverable }: { post: Cast; hoverable?: boolean }) {
         </XStack>
         <XStack ai="center" gap="$2">
           {post.relationships.length > 0 && (
-            <View onPress={(e) => e.stopPropagation()}>
+            <View onPress={(e) => e.preventDefault()}>
               <PostCommunities post={post} />
             </View>
           )}
           <Badge>{timeAgo(post.timestamp)}</Badge>
         </XStack>
       </XStack>
-      <View position="absolute" top="$2" right="$3" onPress={(e) => e.stopPropagation()}>
+      <View position="absolute" top="$2" right="$3" onPress={(e) => e.preventDefault()}>
         <PostActions post={post} />
       </View>
     </YStack>

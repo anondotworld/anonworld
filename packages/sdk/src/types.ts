@@ -288,6 +288,9 @@ export type Cast = {
     likes: number
     replies: number
   }
+  user?: {
+    liked: boolean
+  }
 }
 
 export type Reveal = {

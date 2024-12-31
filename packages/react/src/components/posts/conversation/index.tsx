@@ -142,8 +142,8 @@ function Post({
             <PostEmbed key={embed.url} embed={embed} />
           ))}
           <XStack ai="center" ml="$-3" gap="$2">
-            <LikeButton post={post} color="$color11" bg="$color3" bgHover="$color4" />
-            <ReplyButton post={post} color="$color11" bg="$color3" bgHover="$color4" />
+            <LikeButton post={post} variant="conversation" />
+            <ReplyButton post={post} variant="conversation" />
             <PostActions post={post} />
           </XStack>
         </YStack>

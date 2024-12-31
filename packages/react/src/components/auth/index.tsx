@@ -1,15 +1,15 @@
 import { View } from '@anonworld/ui'
 import { Dialog } from '@anonworld/ui'
-import { useSDK } from '../../providers'
+import { useAuth } from '../../providers'
 import { AuthActions } from './actions'
 import { AuthLogin } from './login'
 import { UserCircle } from '@tamagui/lucide-icons'
 
 export function Auth() {
-  const { auth } = useSDK()
+  const { passkeyId } = useAuth()
 
-  if (auth.passkeyId) {
-    return <AuthActions passkeyId={auth.passkeyId} />
+  if (passkeyId) {
+    return <AuthActions />
   }
 
   return (

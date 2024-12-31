@@ -8,8 +8,8 @@ import { useVaults } from '../../../hooks/use-vaults'
 
 export function CredentialActions({ credential }: { credential: Credential }) {
   const [viewProof, setViewProof] = useState(false)
-  const { credentials, auth } = useSDK()
-  const { data: vaults } = useVaults(auth.passkeyId)
+  const { credentials } = useSDK()
+  const { data: vaults } = useVaults()
 
   return (
     <>

@@ -1,32 +1,29 @@
-import { createElysia, encodeJson, formatHexId } from '../utils'
+import { createElysia } from '../utils'
 import { t } from 'elysia'
 import { redis } from '../services/redis'
-import { neynar } from '../services/neynar'
 import { Cast } from '../services/neynar/types'
-import {
-  getPostCredentials,
-  getPostRelationships,
-  getPosts,
-  Post,
-  getTokens,
-  getFarcasterAccounts,
-  getTwitterAccounts,
-  getComunnitiesForAccounts,
-} from '@anonworld/db'
+import { getPosts, Post } from '@anonworld/db'
+import { feed } from '../services/feed'
 
 export const feedsRoutes = createElysia({ prefix: '/feeds' })
   .get(
     '/:fid/trending',
-    async ({ params }) => {
+    async ({ params, passkeyId }) => {
+      let posts: Array<Cast> = []
+
       const cached = await redis.getTrendingFeed(params.fid)
       if (cached) {
-        return { data: JSON.parse(cached) }
+        posts = JSON.parse(cached)
+      } else {
+        const response = await getFormattedPosts(params.fid)
+        posts = await buildTrendingFeed(params.fid, response)
       }
 
-      const posts = await getFormattedPosts(params.fid)
-      const feed = await buildTrendingFeed(params.fid, posts)
+      if (passkeyId) {
+        posts = await feed.addUserData(passkeyId, posts)
+      }
 
-      return { data: feed }
+      return { data: posts }
     },
     {
       params: t.Object({
@@ -36,16 +33,22 @@ export const feedsRoutes = createElysia({ prefix: '/feeds' })
   )
   .get(
     '/:fid/new',
-    async ({ params, query }) => {
+    async ({ params, query, passkeyId }) => {
+      let posts: Array<Cast> = []
+
       const cached = await redis.getNewFeed(params.fid)
       if (cached) {
-        return { data: JSON.parse(cached) }
+        posts = JSON.parse(cached)
+      } else {
+        const response = await getFormattedPosts(params.fid)
+        posts = await buildNewFeed(params.fid, response)
       }
 
-      const posts = await getFormattedPosts(params.fid)
-      const feed = await buildNewFeed(params.fid, posts)
+      if (passkeyId) {
+        posts = await feed.addUserData(passkeyId, posts)
+      }
 
-      return { data: feed }
+      return { data: posts }
     },
     {
       params: t.Object({ fid: t.Number() }),
@@ -63,7 +66,7 @@ const getFormattedPosts = async (fid: number) => {
 
   const posts = response.map((p) => p.parent_posts ?? p.posts) as Array<Post>
 
-  const result = await formatPosts(posts)
+  const result = await feed.getFeed(posts)
   return result.filter((p) => !p.parent_hash)
 }
 
@@ -102,122 +105,4 @@ export const buildFeeds = async (fid: number) => {
   await buildTrendingFeed(fid, posts)
   await buildNewFeed(fid, posts)
   await redis.setPosts(posts)
-}
-
-export async function formatPosts(posts: Array<Post>): Promise<Array<Cast>> {
-  if (posts.length === 0) return []
-
-  const [relationships, credentials] = await Promise.all([
-    getPostRelationships(posts.map((p) => p.hash)),
-    getPostCredentials(posts.map((p) => p.hash)),
-  ])
-
-  const tokenIds = [
-    ...new Set(
-      credentials
-        .filter((c) => c.credential_instances.credential_id.startsWith('ERC20_BALANCE'))
-        .map(
-          (c) =>
-            `${c.credential_instances.metadata.chainId}:${c.credential_instances.metadata.tokenAddress}`
-        )
-    ),
-  ]
-  const fids = [
-    ...new Set(
-      relationships
-        .filter((r) => r.target === 'farcaster')
-        .map((r) => Number(r.target_account))
-    ),
-  ]
-  const usernames = [
-    ...new Set(
-      relationships.filter((r) => r.target === 'twitter').map((r) => r.target_account)
-    ),
-  ]
-
-  const [tokens, farcasterAccounts, twitterAccounts, communities] = await Promise.all([
-    getTokens(tokenIds),
-    getFarcasterAccounts(fids),
-    getTwitterAccounts(usernames),
-    getComunnitiesForAccounts(fids, usernames),
-  ])
-
-  const hashes = posts.map((p) => p.hash)
-  for (const relationship of relationships) {
-    if (relationship.target === 'farcaster') {
-      hashes.push(relationship.target_id)
-    }
-  }
-
-  const response = await neynar.getBulkCasts(hashes)
-
-  const augmentedPosts: Array<any> = []
-  for (const post of posts) {
-    const postRelationships = relationships.filter((r) => r.post_hash === post.hash)
-    const postCredentials = credentials.filter(
-      (c) => c.post_credentials.post_hash === post.hash
-    )
-
-    const primaryCast = response.result.casts.find((cast) => cast.hash === post.hash)
-    if (!primaryCast) continue
-
-    const relatedCasts = response.result.casts.filter((cast) =>
-      postRelationships.some((r) => r.target_id === cast.hash)
-    )
-
-    augmentedPosts.push({
-      ...primaryCast,
-      reveal: post.reveal_hash
-        ? {
-            ...(post.reveal_metadata || {}),
-            revealHash: post.reveal_hash,
-            input: encodeJson(post.data),
-            revealedAt: post.updated_at.toISOString(),
-          }
-        : undefined,
-      credentials: postCredentials.map((c) => ({
-        ...c.credential_instances,
-        displayId: formatHexId(c.credential_instances.id),
-        token: tokens.find(
-          (t) =>
-            t.chain_id === Number(c.credential_instances.metadata.chainId) &&
-            t.address.toLowerCase() ===
-              c.credential_instances.metadata.tokenAddress.toLowerCase()
-        ),
-        id: undefined,
-        proof: undefined,
-      })),
-      relationships: postRelationships.map((r) => {
-        const twitterAccount = twitterAccounts.find(
-          (t) => t.username === r.target_account
-        )
-        const farcasterAccount = farcasterAccounts.find(
-          (f) => f.fid === Number(r.target_account)
-        )
-        const community = communities.find(
-          (c) =>
-            c.fid === Number(r.target_account) || c.twitter_username === r.target_account
-        )
-
-        return {
-          target: r.target,
-          targetAccount: r.target_account,
-          targetId: r.target_id,
-          twitter: twitterAccount?.metadata,
-          farcaster: farcasterAccount?.metadata,
-          community: community,
-        }
-      }),
-      aggregate: {
-        likes:
-          primaryCast.reactions.likes_count +
-          relatedCasts.reduce((acc, c) => acc + c.reactions.likes_count, 0),
-        replies:
-          primaryCast.replies.count +
-          relatedCasts.reduce((acc, c) => acc + c.replies.count, 0),
-      },
-    })
-  }
-
-  return augmentedPosts
 }

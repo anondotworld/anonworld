@@ -3,7 +3,7 @@ import { t } from 'elysia'
 import { toHex } from 'viem'
 import { redis } from '../services/redis'
 import { WebAuthnP256 } from 'ox'
-import { createPasskey, getPasskey, getVaults } from '@anonworld/db'
+import { createPasskey, getPasskey, getVaults, likePost, unlikePost } from '@anonworld/db'
 
 export const authRoutes = createElysia({ prefix: '/auth' })
   .post(
@@ -112,3 +112,34 @@ export const authRoutes = createElysia({ prefix: '/auth' })
     const data = await getVaults(passkeyId)
     return { data }
   })
+  .post(
+    '/posts/like',
+    async ({ body, passkeyId, error }) => {
+      if (!passkeyId) {
+        return error(401, 'Unauthorized')
+      }
+      await likePost(passkeyId, body.hash)
+      return { success: true }
+    },
+    {
+      body: t.Object({
+        hash: t.String(),
+      }),
+    }
+  )
+
+  .post(
+    '/posts/unlike',
+    async ({ body, passkeyId, error }) => {
+      if (!passkeyId) {
+        return error(401, 'Unauthorized')
+      }
+      await unlikePost(passkeyId, body.hash)
+      return { success: true }
+    },
+    {
+      body: t.Object({
+        hash: t.String(),
+      }),
+    }
+  )

@@ -6,36 +6,36 @@ import {
   getAllFarcasterAccounts,
   getBulkPosts,
   getPost,
-  getPostParent,
   getPostRelationships,
-  Post,
   revealPost,
 } from '@anonworld/db'
-import { formatPosts } from './feeds'
 import { Cast, ConversationCast } from '../services/neynar/types'
 import { redis } from '../services/redis'
+import { feed } from '../services/feed'
 
 export const postsRoutes = createElysia({ prefix: '/posts' })
   .get(
     '/:hash',
-    async ({ params }) => {
+    async ({ params, passkeyId }) => {
+      let post: Cast | null = null
       const cached = await redis.getPost(params.hash)
       if (cached) {
-        return JSON.parse(cached)
-      }
-
-      const relationship = await getPostParent(params.hash)
-
-      let post: Post | null = null
-      if (relationship) {
-        post = await getPost(relationship.post_hash)
+        post = JSON.parse(cached)
       } else {
-        post = await getPost(params.hash)
+        post = await feed.getFeedPost(params.hash)
       }
+
       if (!post) {
         throw new Error('Post not found')
       }
-      return (await formatPosts([post]))[0]
+
+      await redis.setPost(params.hash, JSON.stringify(post))
+
+      if (passkeyId) {
+        post = (await feed.addUserData(passkeyId, [post]))[0]
+      }
+
+      return post
     },
     {
       params: t.Object({
@@ -65,7 +65,7 @@ export const postsRoutes = createElysia({ prefix: '/posts' })
       const farcasterAccounts = await getAllFarcasterAccounts()
       const relevantHashes = getRelevantPosts(farcasterAccounts, conversations)
       const posts = await getBulkPosts(relevantHashes)
-      const formattedPosts = await formatPosts(posts)
+      const formattedPosts = await feed.getFeed(posts)
 
       return {
         data: formatConversations(conversations, formattedPosts),

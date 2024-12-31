@@ -1,3 +1,5 @@
+import { Token } from '@anonworld/db'
+
 export type CreateCastResponse =
   | { success: false }
   | {
@@ -422,10 +424,23 @@ export type Cast = {
   }
   reveal?: Reveal
   relationships: Array<Relationship>
-  credentials: Array<Credential>
+  credentials: Array<{
+    credential_id: string
+    metadata: {
+      chainId: string
+      tokenAddress: string
+      balance: string
+    }
+    verified_at: string
+    displayId: string
+    token: Token
+  }>
   aggregate: {
     likes: number
     replies: number
+  }
+  user: {
+    liked: boolean
   }
 }
 

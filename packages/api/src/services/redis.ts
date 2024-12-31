@@ -24,6 +24,10 @@ export class RedisService {
     return this.client.get(`post:${hash}`)
   }
 
+  async setPost(hash: string, post: string) {
+    return this.client.set(`post:${hash}`, post)
+  }
+
   async setPosts(posts: Cast[]) {
     const args = posts.flatMap((post) => [`post:${post.hash}`, JSON.stringify(post)])
     return this.client.mset(args)
@@ -69,7 +73,7 @@ export class RedisService {
     return this.client.set(`token:${chainId}:${tokenAddress}`, token, 'EX', 60 * 60 * 24)
   }
 
-  async getVaultChallenge(nonce: string): Promise<`0x${string}` | null> {
+  async getVaultChallenge(nonce: string): Promise<string | null> {
     return this.client.get(`vault:challenge:${nonce}`)
   }
 

@@ -8,7 +8,7 @@ import {
   Post,
   removeCredentialFromVault,
 } from '@anonworld/db'
-import { formatPosts } from './feeds'
+import { feed } from '../services/feed'
 
 export const vaultsRoutes = createElysia({ prefix: '/vaults' })
   .put(
@@ -74,7 +74,7 @@ export const vaultsRoutes = createElysia({ prefix: '/vaults' })
       if (response.length === 0) return { data: [] }
 
       const posts = response.map((p) => p.posts) as Array<Post>
-      const data = await formatPosts(posts)
+      const data = await feed.getFeed(posts)
 
       return {
         data,

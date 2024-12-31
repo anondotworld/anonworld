@@ -20,9 +20,14 @@ import {
 
 export class Api {
   private baseUrl: string
+  private token: string | null
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl
+  }
+
+  public setToken(token: string) {
+    this.token = token
   }
 
   private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
@@ -62,6 +67,10 @@ export class Api {
     const finalHeaders = {
       ...defaultHeaders,
       ...headers,
+    }
+
+    if (this.token) {
+      finalHeaders.Authorization = `Bearer ${this.token}`
     }
 
     let attempt = 1
@@ -260,15 +269,6 @@ export class Api {
       body: JSON.stringify(args),
     })
   }
-
-  async getVaults(token: string) {
-    return await this.request<{ data: { id: string }[] }>(`/auth/vaults`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-  }
-
   async addToVault(vaultId: string, credentialId: string) {
     return await this.request<{ success: boolean }>(`/vaults/${vaultId}/credentials`, {
       method: 'PUT',
@@ -289,5 +289,32 @@ export class Api {
 
   async getVaultPosts(vaultId: string) {
     return await this.request<{ data: Array<Cast> }>(`/vaults/${vaultId}/posts`)
+  }
+
+  async getVaults() {
+    if (!this.token) {
+      return { error: { message: 'No token', status: 401 } }
+    }
+    return await this.request<{ data: { id: string }[] }>(`/auth/vaults`)
+  }
+
+  async likePost(hash: string) {
+    if (!this.token) {
+      return { error: { message: 'No token', status: 401 } }
+    }
+    return await this.request<{ success: boolean }>(`/auth/posts/like`, {
+      method: 'POST',
+      body: JSON.stringify({ hash }),
+    })
+  }
+
+  async unlikePost(hash: string) {
+    if (!this.token) {
+      return { error: { message: 'No token', status: 401 } }
+    }
+    return await this.request<{ success: boolean }>(`/auth/posts/unlike`, {
+      method: 'POST',
+      body: JSON.stringify({ hash }),
+    })
   }
 }

@@ -1,15 +1,15 @@
 import { LogOut } from '@tamagui/lucide-icons'
 import { Popover, Text, View, YGroup } from '@anonworld/ui'
 import { NamedExoticComponent, ReactNode } from 'react'
-import { useSDK } from '../../providers'
+import { useAuth } from '../../providers'
 import { formatHexId } from '../../utils'
 import { useVaults } from '../../hooks/use-vaults'
 import { VaultAvatar } from '../vaults/avatar'
 import { Link } from 'solito/link'
 
-export function AuthActions({ passkeyId }: { passkeyId: string }) {
-  const { auth } = useSDK()
-  const { data: vaults } = useVaults(passkeyId)
+export function AuthActions() {
+  const { logout } = useAuth()
+  const { data: vaults } = useVaults()
   const id = formatHexId(vaults?.[0]?.id ?? '')
 
   return (
@@ -50,7 +50,7 @@ export function AuthActions({ passkeyId }: { passkeyId: string }) {
               </Link>
             )
           })}
-          <ActionItem label="Logout" onPress={auth.logout} Icon={LogOut} destructive />
+          <ActionItem label="Logout" onPress={logout} Icon={LogOut} destructive />
         </YGroup>
       </Popover.Content>
     </Popover>
