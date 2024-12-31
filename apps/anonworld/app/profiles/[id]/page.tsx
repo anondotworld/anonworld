@@ -14,8 +14,8 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
     <View maxWidth={700} mx="auto" my="$4" gap="$4">
       <VaultDisplay vault={vault} />
       <XStack gap="$2">
-        <View bg="$background" py="$2" px="$3" br="$12" themeInverse>
-          <Text fow="600" fos="$2">
+        <View bg="$color12" py="$2" px="$3" br="$12">
+          <Text fow="600" fos="$2" color="$color1">
             Posts
           </Text>
         </View>

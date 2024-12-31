@@ -9,15 +9,16 @@ export function NewPostButton() {
     <Dialog.Trigger asChild>
       <Button
         size="$3"
-        themeInverse
-        bg="$background"
+        bg="$color12"
         br="$12"
         bw="$0"
-        hoverStyle={{ opacity: 0.9 }}
+        disabledStyle={{ opacity: 0.5, bg: '$color12' }}
+        hoverStyle={{ opacity: 0.9, bg: '$color12' }}
+        pressStyle={{ opacity: 0.9, bg: '$color12' }}
       >
         <XStack ai="center" gap="$2">
-          <Plus size={16} strokeWidth={2.5} />
-          <Text fos="$2" fow="600">
+          <Plus size={16} strokeWidth={2.5} color="$color1" />
+          <Text fos="$2" fow="600" color="$color1">
             Create Post
           </Text>
         </XStack>

@@ -97,11 +97,11 @@ export function AuthLogin({ children }: { children: ReactNode }) {
             </Text>
           </YStack>
           <Button
-            themeInverse
-            bg="$background"
+            bg="$color12"
             br="$4"
-            disabledStyle={{ opacity: 0.5 }}
-            hoverStyle={{ opacity: 0.9 }}
+            disabledStyle={{ opacity: 0.5, bg: '$color12' }}
+            hoverStyle={{ opacity: 0.9, bg: '$color12' }}
+            pressStyle={{ opacity: 0.9, bg: '$color12' }}
             onPress={async () => {
               await authenticate()
               setIsOpen(false)
@@ -111,7 +111,7 @@ export function AuthLogin({ children }: { children: ReactNode }) {
             {isLoading ? (
               <Spinner color="$color12" />
             ) : (
-              <Text fos="$3" fow="600">
+              <Text fos="$3" fow="600" color="$color1">
                 Login
               </Text>
             )}

@@ -47,32 +47,70 @@ export function Header() {
         <View fd="row" gap="$2" ai="center">
           <Link href="/" style={{ textDecoration: 'none' }}>
             <View
-              bg="$background"
-              py="$2"
-              px="$3"
-              br="$12"
-              themeInverse={
+              bg={
                 pathname === Pathname.HOME ||
                 pathname === Pathname.NEW ||
                 pathname.startsWith(Pathname.POST)
+                  ? '$color12'
+                  : '$color1'
               }
-              hoverStyle={{ bg: '$color5' }}
+              py="$2"
+              px="$3"
+              br="$12"
+              disabledStyle={{
+                opacity: 0.5,
+                bg:
+                  pathname === Pathname.HOME ||
+                  pathname === Pathname.NEW ||
+                  pathname.startsWith(Pathname.POST)
+                    ? '$color12'
+                    : '$color1',
+              }}
+              hoverStyle={{
+                opacity: 0.9,
+                bg:
+                  pathname === Pathname.HOME ||
+                  pathname === Pathname.NEW ||
+                  pathname.startsWith(Pathname.POST)
+                    ? '$color12'
+                    : '$color5',
+              }}
             >
-              <Text fow="600" fos="$2">
+              <Text
+                fow="600"
+                fos="$2"
+                color={
+                  pathname === Pathname.HOME ||
+                  pathname === Pathname.NEW ||
+                  pathname.startsWith(Pathname.POST)
+                    ? '$color1'
+                    : '$color12'
+                }
+              >
                 Posts
               </Text>
             </View>
           </Link>
           <Link href="/communities" style={{ textDecoration: 'none' }}>
             <View
-              bg="$background"
+              bg={pathname.startsWith(Pathname.COMMUNITIES) ? '$color12' : '$color1'}
               py="$2"
               px="$3"
               br="$12"
-              themeInverse={pathname.startsWith(Pathname.COMMUNITIES)}
-              hoverStyle={{ bg: '$color5' }}
+              disabledStyle={{
+                opacity: 0.5,
+                bg: pathname.startsWith(Pathname.COMMUNITIES) ? '$color12' : '$color1',
+              }}
+              hoverStyle={{
+                opacity: 0.9,
+                bg: pathname.startsWith(Pathname.COMMUNITIES) ? '$color12' : '$color5',
+              }}
             >
-              <Text fow="600" fos="$2">
+              <Text
+                fow="600"
+                fos="$2"
+                color={pathname.startsWith(Pathname.COMMUNITIES) ? '$color1' : '$color12'}
+              >
                 Communities
               </Text>
             </View>
@@ -86,16 +124,26 @@ export function Header() {
           style={{ textDecoration: 'none' }}
         >
           <View
-            bg="$background"
+            bg={pathname === Pathname.CREDENTIALS ? '$color12' : '$color1'}
             br="$12"
-            themeInverse={pathname === Pathname.CREDENTIALS}
-            hoverStyle={{ bg: '$color5' }}
+            disabledStyle={{
+              opacity: 0.5,
+              bg: pathname === Pathname.CREDENTIALS ? '$color12' : '$color1',
+            }}
+            hoverStyle={{
+              opacity: 0.9,
+              bg: pathname === Pathname.CREDENTIALS ? '$color12' : '$color5',
+            }}
             w={32}
             h={32}
             jc="center"
             ai="center"
           >
-            <WalletMinimal size={20} strokeWidth={2.5} />
+            <WalletMinimal
+              size={20}
+              strokeWidth={2.5}
+              color={pathname === Pathname.CREDENTIALS ? '$color1' : '$color12'}
+            />
           </View>
         </Link>
         <Auth />

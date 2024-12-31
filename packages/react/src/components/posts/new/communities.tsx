@@ -61,7 +61,9 @@ export function NewPostCommunities() {
 function CopyActionSelector({ actions }: { actions: Action[] }) {
   const [isOpen, setIsOpen] = useState(false)
   const { copyActions, setCopyActions } = useNewPost()
-  const copyAction = copyActions.find((action) => action.community)
+  const copyAction = copyActions.find((action) =>
+    actions.some((a) => a.community?.id === action.community?.id)
+  )
   if (!copyAction?.community) return null
 
   return (

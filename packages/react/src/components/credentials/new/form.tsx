@@ -78,11 +78,12 @@ function WalletField() {
         </XStack>
         <Button
           size="$2.5"
-          themeInverse
-          bg="$background"
+          bg="$color12"
           br="$4"
           bw="$0"
-          hoverStyle={{ opacity: 0.9 }}
+          disabledStyle={{ opacity: 0.5, bg: '$color12' }}
+          hoverStyle={{ opacity: 0.9, bg: '$color12' }}
+          pressStyle={{ opacity: 0.9, bg: '$color12' }}
           onPress={() => {
             if (address) {
               disconnect()
@@ -91,7 +92,7 @@ function WalletField() {
             }
           }}
         >
-          <Text fos="$2" fow="600">
+          <Text fos="$2" fow="600" color="$color1">
             {address ? 'Disconnect' : 'Connect'}
           </Text>
         </Button>
@@ -347,16 +348,16 @@ function AddCredentialButton() {
         </Text>
       )}
       <Button
-        themeInverse
-        bg="$background"
+        bg="$color12"
         br="$4"
         disabled={!address || isLoading}
-        disabledStyle={{ opacity: 0.5 }}
-        hoverStyle={{ opacity: 0.9 }}
+        disabledStyle={{ opacity: 0.5, bg: '$color12' }}
+        hoverStyle={{ opacity: 0.9, bg: '$color12' }}
+        pressStyle={{ opacity: 0.9, bg: '$color12' }}
         onPress={handleAddCredential}
       >
         {!isLoading ? (
-          <Text fos="$3" fow="600">
+          <Text fos="$3" fow="600" color="$color1">
             {address ? 'Add Credential' : 'Connect Wallet'}
           </Text>
         ) : (

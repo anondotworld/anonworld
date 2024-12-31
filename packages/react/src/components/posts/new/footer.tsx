@@ -190,20 +190,20 @@ function NewPostSubmit({ disabled }: { disabled: boolean }) {
   return (
     <Button
       size="$3"
-      themeInverse
-      bg="$background"
+      bg="$color12"
       br="$12"
       px="$4"
       bw="$0"
-      hoverStyle={{ opacity: 0.9 }}
+      disabledStyle={{ opacity: 0.5, bg: '$color12' }}
+      hoverStyle={{ opacity: 0.9, bg: '$color12' }}
+      pressStyle={{ opacity: 0.9, bg: '$color12' }}
       disabled={disabled || credentials.length === 0 || status === 'pending'}
-      disabledStyle={{ opacity: 0.5 }}
       onPress={post}
     >
       {status === 'pending' ? (
         <Spinner color="$color12" />
       ) : (
-        <Text fos="$2" fow="600">
+        <Text fos="$2" fow="600" color="$color1">
           Post
         </Text>
       )}
