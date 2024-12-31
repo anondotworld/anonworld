@@ -41,7 +41,7 @@ export function CredentialProof({
           w={600}
         >
           <XStack ai="center" jc="space-between">
-            <Dialog.Title>Proof</Dialog.Title>
+            <Dialog.Title fos="$5">Proof</Dialog.Title>
           </XStack>
           <TextArea
             value={JSON.stringify(data?.proof)}

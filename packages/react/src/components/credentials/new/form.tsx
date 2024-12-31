@@ -1,11 +1,7 @@
 import {
   Adapt,
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
   Button,
   Circle,
-  Image,
   Input,
   Label,
   Select,
@@ -20,17 +16,12 @@ import {
 import { useNewCredential } from './context'
 import { CredentialType, FungiblePosition } from '../../../types'
 import { useAccount, useDisconnect } from 'wagmi'
-import {
-  chainIdToZerion,
-  formatAddress,
-  toHslColors,
-  zerionToChainId,
-} from '../../../utils'
+import { chainIdToZerion, formatAddress, zerionToChainId } from '../../../utils'
 import { useEffect, useMemo, useState } from 'react'
 import { useSDK } from '../../../providers'
 import { parseUnits } from 'viem'
-import { LinearGradient } from '@tamagui/linear-gradient'
 import { useWalletFungibles } from '../../../hooks/use-wallet-fungibles'
+import { TokenImage } from '../../tokens/image'
 
 export function NewCredentialForm() {
   const { credentialType } = useNewCredential()
@@ -111,6 +102,7 @@ function WalletField() {
 function TokenField() {
   const { tokenId, setTokenId, setBalance, setMaxBalance, setDecimals } =
     useNewCredential()
+  const [token, setToken] = useState<FungiblePosition | null>(null)
 
   const { data } = useWalletFungibles()
 
@@ -124,27 +116,32 @@ function TokenField() {
     })
   }, [data])
 
-  const token = useMemo(() => {
-    if (!tokenId) return
-    const chainId = chainIdToZerion[tokenId.chainId]
-    const token = fungibles.find((t) => {
-      if (t.relationships.chain.data.id !== chainId) return false
-      const impl = t.attributes.fungible_info.implementations.find(
-        (i) =>
-          i.address !== null &&
-          i.address.toLowerCase() === tokenId.address.toLowerCase() &&
-          i.chain_id === chainId
-      )
-      return impl
-    })
-    return token
-  }, [fungibles, tokenId])
-
   useEffect(() => {
-    if (token) {
-      setBalance(Math.floor(token.attributes.quantity.float / 2))
+    if (fungibles.length === 0) return
+
+    let token = fungibles[0]
+
+    if (tokenId) {
+      const chainId = chainIdToZerion[tokenId.chainId]
+      const foundToken = fungibles.find((t) => {
+        if (t.relationships.chain.data.id !== chainId) return false
+        const impl = t.attributes.fungible_info.implementations.find(
+          (i) =>
+            i.address !== null &&
+            i.address.toLowerCase() === tokenId.address.toLowerCase() &&
+            i.chain_id === chainId
+        )
+        return impl
+      })
+      if (foundToken) {
+        token = foundToken
+      }
     }
-  }, [token])
+
+    setToken(token)
+    setBalance(Math.floor(token.attributes.quantity.float / 2))
+    setMaxBalance(Math.floor(token.attributes.quantity.float))
+  }, [fungibles, tokenId])
 
   const handleSelect = (id: string) => {
     const token = fungibles.find((t) => t.id === id)
@@ -172,21 +169,13 @@ function TokenField() {
     return null
   }
 
-  const selectedToken = token ?? fungibles[0]
-
   return (
     <YStack>
       <Label fos="$1" fow="400" color="$color11" textTransform="uppercase">
         Token
       </Label>
-      <Select
-        value={selectedToken.id}
-        onValueChange={handleSelect}
-        disablePreventBodyScroll
-      >
-        <Select.Trigger>
-          <TokenValue token={selectedToken} />
-        </Select.Trigger>
+      <Select value={token?.id} onValueChange={handleSelect} disablePreventBodyScroll>
+        <Select.Trigger>{token && <TokenValue token={token} />}</Select.Trigger>
 
         <Adapt when="sm" platform="touch">
           <Sheet
@@ -234,28 +223,25 @@ function TokenValue({ token }: { token: FungiblePosition }) {
   const impl = token.attributes.fungible_info.implementations.find(
     (impl) => impl.chain_id === token.relationships.chain.data.id
   )
-  const { background, secondary } = toHslColors(token.id)
+
+  if (!impl?.address) return null
 
   return (
     <XStack ai="center" jc="space-between" w="100%">
       <XStack gap="$3" ai="center">
-        <Avatar circular size={28}>
-          <AvatarImage src={token.attributes.fungible_info.icon?.url} />
-          <AvatarFallback>
-            <LinearGradient
-              colors={[secondary, background]}
-              start={[1, 1]}
-              end={[0, 0]}
-              fg={1}
-            />
-          </AvatarFallback>
-        </Avatar>
+        <TokenImage
+          size={28}
+          token={{
+            address: impl.address,
+            image_url: token.attributes.fungible_info.icon?.url,
+          }}
+        />
         <YStack>
           <Text fos="$2" fow="500">
             {token.attributes.fungible_info.name}
           </Text>
           <Text fos="$1" fow="400" color="$color11">
-            {formatAddress(impl?.address ?? '')}
+            {formatAddress(impl.address)}
           </Text>
         </YStack>
       </XStack>
@@ -329,7 +315,7 @@ function BalanceField() {
 function AddCredentialButton() {
   const { address } = useAccount()
   const { tokenId, balance, setIsOpen, decimals } = useNewCredential()
-  const { credentials } = useSDK()
+  const { credentials, vault } = useSDK()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
 
@@ -341,6 +327,7 @@ function AddCredentialButton() {
         chainId: tokenId.chainId,
         tokenAddress: tokenId.address as `0x${string}`,
         verifiedBalance: parseUnits(balance.toString(), decimals),
+        vaultId: vault.vault?.id,
       })
       setIsLoading(false)
       setIsOpen(false)

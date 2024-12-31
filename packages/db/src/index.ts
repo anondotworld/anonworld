@@ -12,7 +12,18 @@ import {
   postsTable,
   twitterAccountsTable,
   tokensTable,
+  vaultsTable,
+  passkeysTable,
 } from './db/schema'
+import { alias } from 'drizzle-orm/pg-core'
+
+export type Passkey = typeof passkeysTable.$inferSelect & {
+  public_key: {
+    prefix: number
+    x: bigint
+    y: bigint
+  }
+}
 
 export type PostCredential = typeof postCredentialsTable.$inferSelect
 export type CredentialInstance = typeof credentialInstancesTable.$inferSelect & {
@@ -106,25 +117,28 @@ export const getSignerForFid = async (fid: number) => {
   return signer
 }
 
-export const getPosts = async (
-  fid: number,
-  opts: { limit: number; offset: number }
-): Promise<Post[]> => {
+export const getPosts = async (fid: number, opts: { limit: number; offset: number }) => {
+  const parentPosts = alias(postsTable, 'parent_posts')
   const posts = await db
     .select()
     .from(postsTable)
+    .leftJoin(
+      postRelationshipsTable,
+      eq(postsTable.hash, postRelationshipsTable.target_id)
+    )
+    .leftJoin(parentPosts, eq(parentPosts.hash, postRelationshipsTable.post_hash))
     .where(
       and(
         isNull(postsTable.deleted_at),
         eq(postsTable.fid, fid),
-        sql`data->>'reply' IS NULL`
+        sql`${postsTable.data}->>'reply' IS NULL`
       )
     )
     .orderBy(desc(postsTable.created_at))
     .limit(opts.limit)
     .offset(opts.offset)
 
-  return posts as Post[]
+  return posts
 }
 
 export const createPost = async (params: {
@@ -282,11 +296,13 @@ export const getPostCredentials = async (hashes: string[]) => {
       credentialInstancesTable,
       eq(postCredentialsTable.credential_id, credentialInstancesTable.id)
     )
+    .leftJoin(vaultsTable, eq(credentialInstancesTable.vault_id, vaultsTable.id))
     .where(inArray(postCredentialsTable.post_hash, hashes))
 
   return credentials as {
     credential_instances: CredentialInstance
     post_credentials: PostCredential
+    vaults: typeof vaultsTable.$inferSelect | null
   }[]
 }
 
@@ -302,6 +318,7 @@ export const getCredentialInstance = async (id: string) => {
   const [credential] = await db
     .select()
     .from(credentialInstancesTable)
+    .leftJoin(vaultsTable, eq(credentialInstancesTable.id, vaultsTable.id))
     .where(eq(credentialInstancesTable.id, id))
     .limit(1)
 
@@ -464,4 +481,57 @@ export const getComunnitiesForAccounts = async (fids: number[], usernames: strin
         inArray(communitiesTable.twitter_username, usernames)
       )
     )
+}
+
+export const createPasskey = async (
+  params: Omit<typeof passkeysTable.$inferInsert, 'created_at' | 'updated_at'>
+) => {
+  const [passkey] = await db.insert(passkeysTable).values(params).returning()
+  await createVault({
+    passkey_id: passkey.id,
+  })
+  return passkey
+}
+
+export const getPasskey = async (passkeyId: string): Promise<Passkey | null> => {
+  const [passkey] = await db
+    .select()
+    .from(passkeysTable)
+    .where(eq(passkeysTable.id, passkeyId))
+    .limit(1)
+  return passkey as Passkey | null
+}
+
+export const createVault = async (
+  params: Omit<typeof vaultsTable.$inferInsert, 'created_at' | 'updated_at'>
+) => {
+  const [vault] = await db.insert(vaultsTable).values(params).returning()
+  return vault
+}
+
+export const getVault = async (id: string) => {
+  const [vault] = await db
+    .select()
+    .from(vaultsTable)
+    .where(eq(vaultsTable.id, id))
+    .limit(1)
+  return vault
+}
+
+export const getVaults = async (passkeyId: string) => {
+  return await db.select().from(vaultsTable).where(eq(vaultsTable.passkey_id, passkeyId))
+}
+
+export const addCredentialToVault = async (vaultId: string, credentialId: string) => {
+  await db
+    .update(credentialInstancesTable)
+    .set({ vault_id: vaultId })
+    .where(eq(credentialInstancesTable.id, credentialId))
+}
+
+export const removeCredentialFromVault = async (credentialId: string) => {
+  await db
+    .update(credentialInstancesTable)
+    .set({ vault_id: null })
+    .where(eq(credentialInstancesTable.id, credentialId))
 }

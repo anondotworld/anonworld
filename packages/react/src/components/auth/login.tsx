@@ -1,12 +1,23 @@
-import { HelpCircle } from '@tamagui/lucide-icons'
-
+import { CircleCheck, UserCircle } from '@tamagui/lucide-icons'
 import { X } from '@tamagui/lucide-icons'
-import { Adapt, Dialog, Sheet, Text, View, XStack, YStack } from '@anonworld/ui'
-import { AnonWorld } from './svg/anonworld'
-
-export function About() {
+import {
+  Adapt,
+  Button,
+  Dialog,
+  Sheet,
+  Spinner,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from '@anonworld/ui'
+import { useSDK } from '../../providers'
+import { useState } from 'react'
+export function AuthLogin() {
+  const { auth } = useSDK()
+  const [isOpen, setIsOpen] = useState(false)
   return (
-    <Dialog modal>
+    <Dialog modal open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger asChild>
         <View
           bg="$background"
@@ -18,7 +29,7 @@ export function About() {
           jc="center"
           ai="center"
         >
-          <HelpCircle size={20} strokeWidth={2.5} />
+          <UserCircle size={20} strokeWidth={2.5} />
         </View>
       </Dialog.Trigger>
       <Adapt when="sm">
@@ -60,62 +71,63 @@ export function About() {
           w={600}
           gap="$4"
         >
-          <XStack gap="$2" ai="center">
-            <AnonWorld size={44} />
-            <YStack>
-              <Dialog.Title fow="600" fos="$4">
-                ANON.WORLD
-              </Dialog.Title>
-              <Dialog.Description color="$color11" fos="$1">
-                An anonymous social network.
-              </Dialog.Description>
-            </YStack>
-          </XStack>
+          <Dialog.Title fos="$5">Login</Dialog.Title>
           <YStack gap="$2">
             <Text fos="$2" fow="400" col="$color11">
-              What is anon.world?
+              Why login?
+            </Text>
+            <XStack gap="$2">
+              <CircleCheck size={16} color="$green11" />
+              <Text>Create a public, anonymous profile to link together your posts</Text>
+            </XStack>
+            <XStack gap="$2">
+              <CircleCheck size={16} color="$green11" />
+              <Text>Backup your credentials to share between devices</Text>
+            </XStack>
+            <XStack gap="$2">
+              <CircleCheck size={16} color="$green11" />
+              <Text>Like posts and more coming soon</Text>
+            </XStack>
+          </YStack>
+          <YStack gap="$2">
+            <Text fos="$2" fow="400" col="$color11">
+              Is it anonymous?
             </Text>
             <Text>
-              An anonymous social network for browsing and creating anonymous posts with
-              verified credentials.
+              Passkeys are used to anonymously authenticate you. There is no personal
+              information stored that can be used to identify you. This is completely
+              optional, you can always post without logging in.
             </Text>
           </YStack>
           <YStack gap="$2">
             <Text fos="$2" fow="400" col="$color11">
-              How does it work?
+              Do I have to login?
             </Text>
             <Text>
-              We use zero-knowledge (zk) proofs to generate anonymous credentials. These
-              credentials are stored locally in your browser. When you create a post, you
-              can attach as many credentials as you'd like to your post.
+              Logging in is completely optional. You can always use the app without
+              logging in.
             </Text>
           </YStack>
-          <YStack gap="$2">
-            <Text fos="$2" fow="400" col="$color11">
-              What is a community?
-            </Text>
-            <Text>
-              A community is a group of users with shared credentials. Communities can
-              anonymously post to a shared social media account (currently Farcaster or
-              X). Anyone can create a community with any token requirements.
-            </Text>
-          </YStack>
-          <YStack gap="$2">
-            <Text fos="$2" fow="400" col="$color11">
-              Support
-            </Text>
-            <Text>
-              If you run into any issues or have questions, DM @slokh on{' '}
-              <a href="https://warpcast.com/slokh" target="_blank" rel="noreferrer">
-                Farcaster
-              </a>{' '}
-              or{' '}
-              <a href="https://twitter.com/slokh" target="_blank" rel="noreferrer">
-                Twitter
-              </a>
-              .
-            </Text>
-          </YStack>
+          <Button
+            themeInverse
+            bg="$background"
+            br="$4"
+            disabledStyle={{ opacity: 0.5 }}
+            hoverStyle={{ opacity: 0.9 }}
+            onPress={async () => {
+              await auth.authenticate()
+              setIsOpen(false)
+            }}
+            disabled={auth.isLoading}
+          >
+            {auth.isLoading ? (
+              <Spinner color="$color12" />
+            ) : (
+              <Text fos="$3" fow="600">
+                Login
+              </Text>
+            )}
+          </Button>
           <Dialog.Close asChild>
             <View
               bg="$background"

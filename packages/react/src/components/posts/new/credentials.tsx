@@ -1,14 +1,14 @@
-import { Image, Popover, ScrollView, Text, View, XStack } from '@anonworld/ui'
+import { Popover, ScrollView, Text, View, XStack } from '@anonworld/ui'
 import { Check, Plus } from '@tamagui/lucide-icons'
 import { useSDK } from '../../../providers'
-import { CredentialAvatar } from '../../credentials/display/id'
 import { Badge } from '../../badge'
 import { useToken } from '../../../hooks/use-token'
 import { Credential } from '../../../types'
 import { formatUnits } from 'viem'
 import { useNewPost } from './context'
 import { CredentialBadge } from '../../credentials/badge'
-import { formatHexId } from '../../../utils'
+import { TokenImage } from '../../tokens/image'
+import { VaultBadge } from '../../auth/vault'
 
 export function NewPostCredentials() {
   const { credentials, removeCredential } = useNewPost()
@@ -81,7 +81,7 @@ function CredentialSelector() {
               btw="$0.5"
               onPress={() => handlePress(credential)}
             >
-              <CredentialAvatar id={formatHexId(credential.id)} size="$1" />
+              <VaultBadge vault={credential.vault} />
               <Badge>ERC20 Balance</Badge>
               <ERC20Credential credential={credential} />
               <View w={16}>
@@ -111,7 +111,12 @@ function ERC20Credential({ credential }: { credential: Credential }) {
   return (
     <XStack gap="$4" ai="center" jc="space-between" f={1}>
       <XStack gap="$2" ai="center">
-        {data?.image_url && <Image src={data.image_url} w={16} h={16} />}
+        <TokenImage
+          token={{
+            address: credential.metadata.tokenAddress,
+            image_url: data?.image_url,
+          }}
+        />
         <Text fos="$1" fow="500" color="$color11" textTransform="uppercase">
           {symbol}
         </Text>

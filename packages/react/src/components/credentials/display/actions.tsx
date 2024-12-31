@@ -1,13 +1,15 @@
-import { FileText, MoreHorizontal, Trash } from '@tamagui/lucide-icons'
+import { FileText, Minus, MoreHorizontal, Plus, Trash } from '@tamagui/lucide-icons'
 import { Popover, Text, View, YGroup } from '@anonworld/ui'
 import { NamedExoticComponent, useState } from 'react'
 import { Credential } from '../../../types'
 import { useSDK } from '../../../providers'
 import { CredentialProof } from './proof'
+import { useVaults } from '../../../hooks/use-vaults'
 
 export function CredentialActions({ credential }: { credential: Credential }) {
   const [viewProof, setViewProof] = useState(false)
-  const { credentials } = useSDK()
+  const { credentials, auth } = useSDK()
+  const { data: vaults } = useVaults(auth.passkeyId)
 
   return (
     <>
@@ -44,6 +46,26 @@ export function CredentialActions({ credential }: { credential: Credential }) {
               onPress={() => setViewProof(true)}
               Icon={FileText}
             />
+            {!credential.vault && (
+              <ActionButton
+                label="Add to profile"
+                onPress={async () => {
+                  if (!vaults || vaults.length === 0) return
+                  await credentials.addToVault(vaults[0].id, credential.id)
+                }}
+                Icon={Plus}
+              />
+            )}
+            {credential.vault && (
+              <ActionButton
+                label="Remove from profile"
+                onPress={async () => {
+                  if (!credential.vault) return
+                  await credentials.removeFromVault(credential.vault.id, credential.id)
+                }}
+                Icon={Minus}
+              />
+            )}
             <ActionButton
               label="Delete"
               onPress={() => credentials.delete(credential.id)}

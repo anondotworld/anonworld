@@ -10,14 +10,13 @@ import {
   YStack,
 } from '@anonworld/ui'
 import { Heart, MessageSquare } from '@tamagui/lucide-icons'
-import { CredentialBadge } from '../../credentials/badge'
-import { PostRelationships } from './relationships'
 import { PostEmbed } from './embeds'
 import { Badge } from '../../badge'
 import { useFarcasterIdentity } from '../../../hooks/use-farcaster-identity'
-import { CredentialAvatar } from '../../credentials/display/id'
 import { PostActions } from './actions'
 import { PostCommunities } from './communities'
+import { PostCredential } from './credential'
+import { VaultBadge } from '../../auth/vault'
 
 export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
   let text = post.text
@@ -47,12 +46,12 @@ export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
       cursor={onPress ? 'pointer' : undefined}
       f={1}
     >
-      <XStack gap="$2" ai="center">
-        {post.credentials && post.credentials.length > 0 && (
-          <CredentialAvatar id={post.credentials[0].displayId} size="$1" />
+      <XStack gap="$2" ai="center" onPress={(e) => e.stopPropagation()}>
+        {post.credentials?.[0]?.vault && (
+          <VaultBadge vault={post.credentials?.[0]?.vault} />
         )}
         {post.credentials?.map((credential, index) => (
-          <CredentialBadge key={index} credential={credential} />
+          <PostCredential key={index} credential={credential} />
         ))}
       </XStack>
       <Text lineHeight={22}>{text}</Text>

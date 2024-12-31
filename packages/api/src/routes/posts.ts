@@ -96,16 +96,6 @@ export const postsRoutes = createElysia({ prefix: '/posts' })
         }
       }
 
-      const address = body.address.toLowerCase()
-      let username: string | undefined
-
-      try {
-        const users = await neynar.getBulkUsersByAddresses([address])
-        username = users?.[address]?.[0]?.username
-      } catch (error) {
-        console.error(error)
-      }
-
       const inputHash = hashMessage(encodeJson(post.data) + body.phrase)
       if (inputHash !== post.reveal_hash) {
         return {

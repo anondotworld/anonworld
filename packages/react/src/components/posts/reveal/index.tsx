@@ -120,7 +120,7 @@ export function PostReveal({
           gap="$2"
           w={600}
         >
-          <Dialog.Title>Reveal Post</Dialog.Title>
+          <Dialog.Title fos="$5">Reveal Post</Dialog.Title>
           <WalletField />
           <YStack>
             <Label fos="$1" fow="400" color="$color11" textTransform="uppercase">

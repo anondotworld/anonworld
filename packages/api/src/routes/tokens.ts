@@ -133,11 +133,13 @@ export const syncToken = async (chainId: number, tokenAddress: string) => {
       })
     )
   } else {
-    const impl = zerionToken.attributes.implementations.find(
-      (i) =>
-        i.chain_id === zerionToken.relationships.chain.data.id &&
-        i.address === tokenAddress
-    )
+    const impl = zerionToken.relationships.chain
+      ? zerionToken.attributes.implementations.find(
+          (i) =>
+            i.chain_id === zerionToken.relationships.chain.data.id &&
+            i.address === tokenAddress
+        )
+      : zerionToken.attributes.implementations[0]
 
     const token = {
       id,
@@ -146,7 +148,7 @@ export const syncToken = async (chainId: number, tokenAddress: string) => {
       symbol: zerionToken.attributes.symbol,
       name: zerionToken.attributes.name,
       decimals: impl?.decimals ?? simpleHashToken?.decimals ?? 18,
-      image_url: zerionToken.attributes.icon.url,
+      image_url: zerionToken.attributes.icon?.url,
       price_usd: zerionToken.attributes.market_data.price.toFixed(8),
       market_cap: Math.round(zerionToken.attributes.market_data.market_cap),
       total_supply: Math.round(zerionToken.attributes.market_data.total_supply),

@@ -1,12 +1,12 @@
 import { Credential } from '../../../types'
 import { View, XStack, YStack } from '@anonworld/ui'
-import { chains, formatHexId, timeAgo } from '../../../utils'
+import { chains, timeAgo } from '../../../utils'
 import { Badge } from '../../badge'
 import { CredentialActions } from './actions'
 import { useToken } from '../../../hooks'
 import { extractChain, formatUnits } from 'viem/utils'
-import { CredentialAvatar } from './id'
 import { Field } from '../../field'
+import { VaultBadge } from '../../auth/vault'
 
 export function CredentialDisplay({
   credential,
@@ -31,7 +31,7 @@ export function CredentialDisplay({
       f={1}
     >
       <XStack ai="center" gap="$2">
-        <CredentialAvatar id={formatHexId(credential.id)} size="$1" />
+        <VaultBadge vault={credential.vault} />
         <Badge>ERC20 Balance</Badge>
         <Badge>{timeAgo(credential.verified_at)}</Badge>
       </XStack>
@@ -57,15 +57,26 @@ function ERC20CredentialDisplay({ credential }: { credential: Credential }) {
   return (
     <XStack>
       {[
-        { label: 'Token', value: symbol, image: data?.image_url },
+        {
+          label: 'Token',
+          value: symbol,
+          image: data?.image_url,
+          imageFallbackText: credential.metadata.tokenAddress,
+        },
         { label: 'Balance', value: amount.toLocaleString() },
         {
           label: 'Chain',
           value: extractChain({ chains, id: Number(credential.metadata.chainId) as any })
             .name,
         },
-      ].map(({ label, value, image }) => (
-        <Field key={label} label={label} value={value} image={image} />
+      ].map(({ label, value, image, imageFallbackText }) => (
+        <Field
+          key={label}
+          label={label}
+          value={value}
+          image={image}
+          imageFallbackText={imageFallbackText}
+        />
       ))}
     </XStack>
   )

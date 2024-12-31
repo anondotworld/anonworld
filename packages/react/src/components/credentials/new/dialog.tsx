@@ -50,7 +50,7 @@ export function NewCredentialDialog({ children }: { children?: ReactNode }) {
           gap="$2"
           w={600}
         >
-          <Dialog.Title>Add Credential</Dialog.Title>
+          <Dialog.Title fos="$5">Add Credential</Dialog.Title>
           <YStack>
             <Label fos="$1" fow="400" color="$color11" textTransform="uppercase">
               Credential Type

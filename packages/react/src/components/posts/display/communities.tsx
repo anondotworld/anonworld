@@ -35,7 +35,7 @@ function CommunitySelector({ relationships }: { relationships: Relationship[] })
   return (
     <Popover size="$5" placement="bottom" open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger>
-        <Badge icon={<Image src={community.image_url} w={12} h={12} br="$12" />}>
+        <Badge icon={<Image src={community.image_url} w={16} h={16} br="$12" />}>
           {community.name}
         </Badge>
       </Popover.Trigger>
@@ -63,7 +63,7 @@ function CommunitySelector({ relationships }: { relationships: Relationship[] })
               return (
                 <CommunityItem
                   key={relationship.farcaster?.username}
-                  icon={<Farcaster size={12} />}
+                  icon={<Farcaster size={16} />}
                   username={relationship.farcaster?.username}
                   onPress={() => {
                     window.open(
@@ -78,7 +78,7 @@ function CommunitySelector({ relationships }: { relationships: Relationship[] })
               return (
                 <CommunityItem
                   key={relationship.twitter?.screen_name}
-                  icon={<X size={12} />}
+                  icon={<X size={16} />}
                   username={relationship.twitter?.screen_name}
                   onPress={() => {
                     window.open(

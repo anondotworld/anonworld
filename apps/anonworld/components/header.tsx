@@ -1,6 +1,6 @@
 'use client'
 
-import { About } from '@anonworld/react'
+import { About, Auth } from '@anonworld/react'
 import { Image, Text, View } from '@anonworld/ui'
 import { WalletMinimal } from '@tamagui/lucide-icons'
 import Link from 'next/link'
@@ -80,21 +80,25 @@ export function Header() {
         </View>
       </View>
       <View fd="row" gap="$3" ai="center">
+        <About />
         <Link
           href={pathname === Pathname.CREDENTIALS ? Pathname.HOME : Pathname.CREDENTIALS}
           style={{ textDecoration: 'none' }}
         >
           <View
             bg="$background"
-            p="$2"
             br="$12"
             themeInverse={pathname === Pathname.CREDENTIALS}
             hoverStyle={{ bg: '$color5' }}
+            w={32}
+            h={32}
+            jc="center"
+            ai="center"
           >
             <WalletMinimal size={20} strokeWidth={2.5} />
           </View>
         </Link>
-        <About />
+        <Auth />
       </View>
     </View>
   )

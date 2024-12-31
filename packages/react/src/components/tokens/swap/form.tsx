@@ -1,19 +1,9 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Input,
-  Text,
-  View,
-  XStack,
-  YStack,
-} from '@anonworld/ui'
+import { Input, Text, View, XStack, YStack } from '@anonworld/ui'
 import { Token } from './context'
 import { useSwapTokens } from './context'
 import { useToken } from '../../../hooks'
 import { ChevronDown } from '@tamagui/lucide-icons'
-import { toHslColors } from '../../../utils'
-import { LinearGradient } from '@tamagui/linear-gradient'
+import { TokenImage } from '../image'
 
 export function SwapForm() {
   const { sellToken, buyToken } = useSwapTokens()
@@ -41,7 +31,7 @@ export function SwapForm() {
 
 function TokenField({ token, disabled }: { token: Token; disabled?: boolean }) {
   const { data } = useToken(token)
-  const { background, secondary } = toHslColors(token.address)
+  if (!data) return null
   return (
     <XStack
       ai="center"
@@ -62,19 +52,9 @@ function TokenField({ token, disabled }: { token: Token; disabled?: boolean }) {
         autoFocus={!disabled}
       />
       <XStack gap="$2" ai="center">
-        <Avatar circular size={28}>
-          <AvatarImage src={data?.image_url} />
-          <AvatarFallback>
-            <LinearGradient
-              colors={[secondary, background]}
-              start={[1, 1]}
-              end={[0, 0]}
-              fg={1}
-            />
-          </AvatarFallback>
-        </Avatar>
+        <TokenImage token={data} />
         <Text fow="600" fos="$4">
-          {data?.symbol}
+          {data.symbol}
         </Text>
       </XStack>
     </XStack>

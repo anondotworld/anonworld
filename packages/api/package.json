@@ -16,10 +16,11 @@
     "@anonworld/db": "*",
     "@anonworld/zk": "*",
     "@elysiajs/cors": "^1.1.1",
-    "elysia": "^1.1.25",
+    "elysia": "1.1.25",
     "https": "^1.0.0",
     "ioredis": "^5.4.1",
     "logestic": "^1.2.4",
+    "ox": "^0.5.0",
     "twitter-api-v2": "^1.18.2",
     "viem": "^2.21.48"
   },

@@ -54,12 +54,14 @@ export const feedsRoutes = createElysia({ prefix: '/feeds' })
   )
 
 const getFormattedPosts = async (fid: number) => {
-  const posts = await getPosts(fid, {
+  const response = await getPosts(fid, {
     limit: 100,
     offset: 0,
   })
 
-  if (posts.length === 0) return []
+  if (response.length === 0) return []
+
+  const posts = response.map((p) => p.parent_posts ?? p.posts) as Array<Post>
 
   const result = await formatPosts(posts)
   return result.filter((p) => !p.parent_hash)
@@ -184,6 +186,7 @@ export async function formatPosts(posts: Array<Post>): Promise<Array<Cast>> {
         ),
         id: undefined,
         proof: undefined,
+        vault: c.vaults,
       })),
       relationships: postRelationships.map((r) => {
         const twitterAccount = twitterAccounts.find(

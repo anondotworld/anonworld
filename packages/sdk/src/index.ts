@@ -16,6 +16,7 @@ export type VerifyERC20Balance = {
   balanceSlot: `0x${string}`
   verifiedBalance: bigint
   blockTimestamp: bigint
+  vaultId?: string
 }
 
 export class AnonWorldSDK extends Api {
@@ -64,6 +65,9 @@ export class AnonWorldSDK extends Api {
     return await this.createCredential({
       proof: Array.from(proof.proof),
       publicInputs: proof.publicInputs,
+      vaultId: args.vaultId,
+      type: 'ERC20_BALANCE',
+      version: '0.1.5',
     })
   }
 }

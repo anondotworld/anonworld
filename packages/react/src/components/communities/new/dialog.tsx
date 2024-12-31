@@ -46,7 +46,7 @@ export function NewCommunityDialog({ children }: { children?: React.ReactNode })
           w={600}
           gap="$3"
         >
-          <Dialog.Title>New Community</Dialog.Title>
+          <Dialog.Title fos="$5">New Community</Dialog.Title>
           <Dialog.Close asChild>
             <View
               bg="$background"

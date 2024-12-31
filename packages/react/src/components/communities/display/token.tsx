@@ -1,4 +1,4 @@
-import { Image, Separator, Text, XStack, YStack } from '@anonworld/ui'
+import { Separator, Text, XStack, YStack } from '@anonworld/ui'
 import { Field } from '../../field'
 import { chains, formatAddress, formatAmount } from '../../../utils'
 import { extractChain } from 'viem'
@@ -8,6 +8,7 @@ import { Action, ActionType, Community } from '../../../types'
 import { useSDK } from '../../../providers'
 import { getUsableCredential } from '../../../utils'
 import { CircleCheck, CircleX } from '@tamagui/lucide-icons'
+import { TokenImage } from '../../tokens/image'
 
 export function CommunityToken({ community }: { community: Community }) {
   const chain = extractChain({ chains, id: Number(community.token.chain_id) as any })
@@ -22,7 +23,7 @@ export function CommunityToken({ community }: { community: Community }) {
       <XStack ai="center" jc="space-between">
         <YStack gap="$1" minWidth="$10">
           <XStack ai="center" gap="$2">
-            <Image src={community.token.image_url} w={16} h={16} />
+            <TokenImage token={community.token} />
             <Text fow="600">{community.token.symbol}</Text>
           </XStack>
           <Text fos="$1" fow="400" color="$color11" textTransform="uppercase">

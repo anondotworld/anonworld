@@ -35,6 +35,7 @@ export function useCredentials(sdk: AnonWorldSDK) {
     chainId: number
     tokenAddress: `0x${string}`
     verifiedBalance: bigint
+    vaultId?: string
   }) => {
     if (!address) {
       throw new Error('No address connected')
@@ -78,6 +79,7 @@ export function useCredentials(sdk: AnonWorldSDK) {
       balanceSlot: balanceSlotHex,
       verifiedBalance: args.verifiedBalance,
       blockTimestamp: block.timestamp,
+      vaultId: args.vaultId,
     })
 
     if (credential.error) {
@@ -97,10 +99,28 @@ export function useCredentials(sdk: AnonWorldSDK) {
     return credentials.find((cred) => cred.id === id)
   }
 
+  const addToVault = async (vaultId: string, credentialId: string) => {
+    await sdk.addToVault(vaultId, credentialId)
+    setCredentials((prev) =>
+      prev.map((cred) =>
+        cred.id === credentialId ? { ...cred, vault: { id: vaultId } } : cred
+      )
+    )
+  }
+
+  const removeFromVault = async (vaultId: string, credentialId: string) => {
+    await sdk.removeFromVault(vaultId, credentialId)
+    setCredentials((prev) =>
+      prev.map((cred) => (cred.id === credentialId ? { ...cred, vault: null } : cred))
+    )
+  }
+
   return {
     credentials,
     delete: deleteCredential,
     get: getCredential,
     addERC20Balance,
+    addToVault,
+    removeFromVault,
   }
 }

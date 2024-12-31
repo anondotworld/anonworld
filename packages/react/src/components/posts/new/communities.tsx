@@ -5,6 +5,7 @@ import { Badge } from '../../badge'
 import { useEffect, useMemo, useState } from 'react'
 import { useActions } from '../../../hooks/use-actions'
 import { formatAmount, getUsableCredential } from '../../../utils'
+import { VaultBadge } from '../../auth/vault'
 
 export function NewPostCommunities() {
   const { credentials, setCopyActions } = useNewPost()
@@ -22,8 +23,6 @@ export function NewPostCommunities() {
     setCopyActions(actions)
   }, [actions])
 
-  if (actions.length === 0) return null
-
   const actionsByToken = actions.reduce(
     (acc, action) => {
       if (!action.community?.token || action.type !== ActionType.COPY_POST_FARCASTER)
@@ -37,14 +36,24 @@ export function NewPostCommunities() {
     {} as Record<string, Action[]>
   )
 
+  const vault = credentials.find((cred) => cred.vault)?.vault ?? null
+
   return (
     <XStack gap="$2" jc="flex-end" ai="center">
       <Text fos="$1" fow="500" col="$color11">
-        Sharing to:
+        Posting as
       </Text>
-      {Object.values(actionsByToken).map((tokenActions, index) => {
-        return <CopyActionSelector key={index} actions={tokenActions} />
-      })}
+      <VaultBadge vault={vault} />
+      {actions.length > 0 && (
+        <>
+          <Text fos="$1" fow="500" col="$color11">
+            to
+          </Text>
+          {Object.values(actionsByToken).map((tokenActions, index) => {
+            return <CopyActionSelector key={index} actions={tokenActions} />
+          })}
+        </>
+      )}
     </XStack>
   )
 }

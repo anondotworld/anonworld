@@ -323,6 +323,7 @@ export type Credential = {
   }
   verified_at: string
   token?: Token
+  vault: Vault | null
 }
 
 export enum CredentialType {
@@ -662,7 +663,7 @@ export type Token = {
   name: string
   symbol: string
   decimals: number
-  image_url: string
+  image_url?: string
   price_usd: string
   market_cap: number
   total_supply: number
@@ -749,4 +750,8 @@ export type FarcasterAccount = {
     blocking: boolean
     blocked_by: boolean
   }
+}
+
+export type Vault = {
+  id: string
 }

@@ -15,6 +15,7 @@ import {
   SwapQuote,
   SwapQuoteError,
   Token,
+  Vault,
 } from './types'
 
 export class Api {
@@ -156,13 +157,19 @@ export class Api {
   async createCredential({
     proof,
     publicInputs,
+    vaultId,
+    type,
+    version,
   }: {
     proof: number[]
     publicInputs: string[]
+    vaultId?: string
+    type: 'ERC20_BALANCE'
+    version: '0.1.5'
   }) {
     return await this.request<Credential>('/credentials', {
       method: 'POST',
-      body: JSON.stringify({ proof, publicInputs }),
+      body: JSON.stringify({ proof, publicInputs, vaultId, type, version }),
     })
   }
 
@@ -204,6 +211,65 @@ export class Api {
     return await this.request<{ data: SwapQuote | SwapQuoteError }>('/swap/quote', {
       method: 'POST',
       body: JSON.stringify(args),
+    })
+  }
+
+  async getPasskeyChallenge(nonce: string) {
+    return await this.request<{ challenge: `0x${string}` }>(`/passkeys/challenge`, {
+      method: 'POST',
+      body: JSON.stringify({ nonce }),
+    })
+  }
+
+  async createPasskey(args: {
+    nonce: string
+    id: string
+    publicKey: {
+      prefix: number
+      x: string
+      y: string
+    }
+  }) {
+    return await this.request<{ success: boolean }>(`/passkeys/create`, {
+      method: 'POST',
+      body: JSON.stringify(args),
+    })
+  }
+
+  async authenticatePasskey(args: {
+    nonce: string
+    raw: {
+      id: string
+      type: string
+    }
+    signature: {
+      r: string
+      s: string
+      yParity?: number
+    }
+    metadata: any
+  }) {
+    return await this.request<{ success: boolean }>(`/passkeys/authenticate`, {
+      method: 'POST',
+      body: JSON.stringify(args),
+    })
+  }
+
+  async getVaults(passkeyId: string) {
+    return await this.request<{ data: Vault[] }>(`/passkeys/${passkeyId}/vaults`)
+  }
+
+  async addToVault(vaultId: string, credentialId: string) {
+    return await this.request<{ success: boolean }>(`/vaults/${vaultId}/credentials`, {
+      method: 'PUT',
+      body: JSON.stringify({ credentialId }),
+    })
+  }
+
+  async removeFromVault(vaultId: string, credentialId: string) {
+    return await this.request<{ success: boolean }>(`/vaults/${vaultId}/credentials`, {
+      method: 'DELETE',
+      body: JSON.stringify({ credentialId }),
     })
   }
 }

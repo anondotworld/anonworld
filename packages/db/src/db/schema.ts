@@ -95,9 +95,11 @@ export const actionExecutionsTable = pgTable('action_executions', {
 export const credentialInstancesTable = pgTable('credential_instances', {
   id: varchar({ length: 255 }).primaryKey(),
   credential_id: varchar({ length: 255 }).notNull(),
+  version: varchar({ length: 255 }),
   metadata: jsonb('metadata').notNull(),
   proof: jsonb('proof').notNull(),
   verified_at: timestamp().notNull(),
+  vault_id: uuid('vault_id').references(() => vaultsTable.id),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 })
@@ -129,12 +131,28 @@ export const tokensTable = pgTable('tokens', {
   name: varchar({ length: 255 }).notNull(),
   symbol: varchar({ length: 255 }).notNull(),
   decimals: integer('decimals').notNull(),
-  image_url: varchar({ length: 255 }).notNull(),
+  image_url: varchar({ length: 255 }),
   price_usd: decimal('price_usd', { precision: 18, scale: 8 }).notNull().default('0'),
   market_cap: bigint('market_cap', { mode: 'number' }).notNull().default(0),
   total_supply: bigint('total_supply', { mode: 'number' }).notNull().default(0),
   holders: bigint('holders', { mode: 'number' }).notNull().default(0),
   balance_slot: integer('balance_slot'),
+  created_at: timestamp().notNull().defaultNow(),
+  updated_at: timestamp().notNull().defaultNow(),
+})
+
+export const vaultsTable = pgTable('vaults', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  passkey_id: varchar({ length: 255 })
+    .references(() => passkeysTable.id)
+    .notNull(),
+  created_at: timestamp().notNull().defaultNow(),
+  updated_at: timestamp().notNull().defaultNow(),
+})
+
+export const passkeysTable = pgTable('passkeys', {
+  id: varchar({ length: 255 }).primaryKey(),
+  public_key: jsonb('public_key').notNull(),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 })

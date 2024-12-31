@@ -68,6 +68,14 @@ export class RedisService {
   async setToken(chainId: number, tokenAddress: string, token: string) {
     return this.client.set(`token:${chainId}:${tokenAddress}`, token, 'EX', 60 * 60 * 24)
   }
+
+  async getVaultChallenge(nonce: string): Promise<`0x${string}` | null> {
+    return this.client.get(`vault:challenge:${nonce}`)
+  }
+
+  async setVaultChallenge(nonce: string, challenge: string) {
+    return this.client.set(`vault:challenge:${nonce}`, challenge, 'EX', 60 * 5)
+  }
 }
 
 export const redis = RedisService.getInstance()

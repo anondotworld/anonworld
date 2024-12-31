@@ -1,10 +1,9 @@
 import { Credential, Token } from '../../../types'
 import { formatAmount } from '../../../utils'
-import { Coins } from '@tamagui/lucide-icons'
 import { Badge } from '../../badge'
 import { formatUnits } from 'viem/utils'
-import { Image } from '@anonworld/ui'
 import { useToken } from '../../../hooks'
+import { TokenImage } from '../../tokens/image'
 
 export function CredentialBadge({ credential }: { credential: Credential }) {
   if (!credential.metadata?.balance) return null
@@ -38,13 +37,7 @@ function ERC20CredentialBadge({ balance, token }: { balance: string; token: Toke
 
   return (
     <Badge
-      icon={
-        token?.image_url ? (
-          <Image src={token.image_url} w={16} h={16} />
-        ) : (
-          <Coins size={12} />
-        )
-      }
+      icon={<TokenImage token={token} />}
     >{`${formatAmount(amount)} ${symbol}`}</Badge>
   )
 }
