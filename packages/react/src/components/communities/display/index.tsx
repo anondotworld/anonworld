@@ -3,7 +3,7 @@ import { Badge } from '../../badge'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
 import { Community, FarcasterAccount, TwitterAccount } from '../../../types'
-import { MessageSquare } from '@tamagui/lucide-icons'
+import { MessageCircle } from '@tamagui/lucide-icons'
 import { CommunityToken } from './token'
 import { formatAmount } from '../../../utils'
 import { timeAgo } from '../../../utils'
@@ -38,7 +38,7 @@ export function CommunityDisplay({ community }: { community: Community }) {
           </Text>
           <XStack gap="$2">
             <Badge>{timeAgo(community.created_at)}</Badge>
-            <Badge icon={<MessageSquare size={12} />}>
+            <Badge icon={<MessageCircle size={12} />}>
               {formatAmount(community.posts)}
             </Badge>
             {community.farcaster && <FarcasterBadge farcaster={community.farcaster} />}

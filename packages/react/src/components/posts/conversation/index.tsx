@@ -5,9 +5,10 @@ import { PostEmbed } from '../display/embeds'
 import { timeAgo } from '../../../utils'
 import { Heart } from '@tamagui/lucide-icons'
 import { PostActions } from './actions'
-import { ReplyButton } from './reply'
+import { ReplyButton } from '../actions/reply'
 import { VaultAvatar } from '../../vaults/avatar'
 import { TextLink } from 'solito/link'
+import { LikeButton } from '../actions/like'
 
 export function PostConversation({
   conversation,
@@ -140,22 +141,9 @@ function Post({
           {post.embeds?.map((embed) => (
             <PostEmbed key={embed.url} embed={embed} />
           ))}
-          <XStack ai="center" ml="$-3">
-            <XStack
-              py="$2"
-              px="$2.5"
-              br="$12"
-              hoverStyle={{ bg: '$color4' }}
-              gap="$1.5"
-              ai="center"
-              cursor="pointer"
-            >
-              <Heart size={16} col="$color11" />
-              <Text fos="$2" col="$color11">
-                {formatAmount(post.aggregate?.likes ?? post.reactions.likes_count)}
-              </Text>
-            </XStack>
-            <ReplyButton post={post} />
+          <XStack ai="center" ml="$-3" gap="$2">
+            <LikeButton post={post} color="$color11" bg="$color3" bgHover="$color4" />
+            <ReplyButton post={post} color="$color11" bg="$color3" bgHover="$color4" />
             <PostActions post={post} />
           </XStack>
         </YStack>

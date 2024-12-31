@@ -14,13 +14,13 @@ export function PostActions({ post }: { post: Cast }) {
         }}
       >
         <View
-          bg="$background"
+          bg="$color3"
           p="$2"
           br="$12"
-          hoverStyle={{ bg: '$color5' }}
+          hoverStyle={{ bg: '$color4' }}
           cursor="pointer"
         >
-          <MoreHorizontal size={16} col="$color11" />
+          <MoreHorizontal size={14} col="$color11" />
         </View>
       </Popover.Trigger>
       <Popover.Content

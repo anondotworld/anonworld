@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/lib/hooks/use-toast'
-import { Coins, Heart, Loader2, MessageSquare, RefreshCcw } from 'lucide-react'
+import { Coins, Heart, Loader2, MessageCircle, RefreshCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useCreatePost } from '../create-post/context'
 import { useAccount, useSignMessage } from 'wagmi'
@@ -257,7 +257,7 @@ export function Post({
           <div className="flex flex-col gap-4 sm:flex-row justify-between">
             <div className="flex flex-row items-center gap-2 mt-2">
               <div className="flex flex-row items-center gap-1.5 ">
-                <MessageSquare size={16} className="text-zinc-400" />
+                <MessageCircle size={16} className="text-zinc-400" />
                 <p className="text-sm font-medium">{formatNumber(cast.replies.count)}</p>
               </div>
               <div className="flex flex-row items-center gap-1.5 ">

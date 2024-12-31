@@ -1,6 +1,6 @@
 import { Text, XStack, YStack } from '@anonworld/ui'
 import { Badge } from '../../badge'
-import { MessageSquare } from '@tamagui/lucide-icons'
+import { MessageCircle } from '@tamagui/lucide-icons'
 import { formatAmount, formatHexId } from '../../../utils'
 import { timeAgo } from '../../../utils'
 import { Vault } from '../../../types'
@@ -29,7 +29,7 @@ export function VaultDisplay({ vault }: { vault: Vault }) {
           </Text>
           <XStack gap="$2">
             <Badge>{timeAgo(vault.created_at)}</Badge>
-            <Badge icon={<MessageSquare size={12} />}>{formatAmount(vault.posts)}</Badge>
+            <Badge icon={<MessageCircle size={12} />}>{formatAmount(vault.posts)}</Badge>
             {vault.credentials.map((credential) => (
               <CredentialBadge key={credential.id} credential={credential} />
             ))}

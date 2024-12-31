@@ -66,7 +66,7 @@ export function PostEmbed({ embed }: { embed: Embed }) {
 
   return (
     <TextLink href={embed.url} target="_blank">
-      <Text col="$color11" hoverStyle={{ textDecorationLine: 'underline' }}>
+      <Text fos="$3" col="$color11" hoverStyle={{ textDecorationLine: 'underline' }}>
         {embed.url}
       </Text>
     </TextLink>

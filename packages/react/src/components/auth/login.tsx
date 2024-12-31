@@ -12,26 +12,14 @@ import {
   YStack,
 } from '@anonworld/ui'
 import { useSDK } from '../../providers'
-import { useState } from 'react'
-export function AuthLogin() {
+import { ReactNode, useState } from 'react'
+
+export function AuthLogin({ children }: { children: ReactNode }) {
   const { auth } = useSDK()
   const [isOpen, setIsOpen] = useState(false)
   return (
     <Dialog modal open={isOpen} onOpenChange={setIsOpen}>
-      <Dialog.Trigger asChild>
-        <View
-          bg="$background"
-          br="$12"
-          hoverStyle={{ bg: '$color5' }}
-          cursor="pointer"
-          w={32}
-          h={32}
-          jc="center"
-          ai="center"
-        >
-          <UserCircle size={20} strokeWidth={2.5} />
-        </View>
-      </Dialog.Trigger>
+      {children}
       <Adapt when="sm">
         <Sheet animation="quicker" zIndex={200000} modal dismissOnSnapToBottom>
           <Sheet.Frame padding="$4" gap="$2">

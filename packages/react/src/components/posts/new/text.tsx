@@ -21,6 +21,7 @@ export function NewPostText() {
       onContentSizeChange={(e) => {
         setHeight(Math.max(100, e.nativeEvent.contentSize.height))
       }}
+      autoFocus
     />
   )
 }

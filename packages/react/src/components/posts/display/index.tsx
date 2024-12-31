@@ -4,12 +4,13 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
+  Dialog,
   Text,
   View,
   XStack,
   YStack,
 } from '@anonworld/ui'
-import { Heart, MessageSquare } from '@tamagui/lucide-icons'
+import { Heart, MessageCircle } from '@tamagui/lucide-icons'
 import { PostEmbed } from './embeds'
 import { Badge } from '../../badge'
 import { useFarcasterIdentity } from '../../../hooks/use-farcaster-identity'
@@ -17,6 +18,10 @@ import { PostActions } from './actions'
 import { PostCommunities } from './communities'
 import { PostCredential } from './credential'
 import { VaultBadge } from '../../vaults/badge'
+import { NewPostProvider } from '../new/context'
+import { NewPostDialog } from '../new/dialog'
+import { ReplyButton } from '../actions/reply'
+import { LikeButton } from '../actions/like'
 
 export function Post({ post, hoverable }: { post: Cast; hoverable?: boolean }) {
   let text = post.text
@@ -57,22 +62,20 @@ export function Post({ post, hoverable }: { post: Cast; hoverable?: boolean }) {
       {post.embeds?.map((embed, index) => (
         <PostEmbed key={index} embed={embed} />
       ))}
-      <XStack jc="space-between" ai="center">
+      <XStack jc="space-between" ai="flex-end">
         <XStack ai="center" gap="$2">
-          <Badge>{timeAgo(post.timestamp)}</Badge>
-          <Badge icon={<Heart size={12} />}>
-            {formatAmount(post.aggregate?.likes ?? post.reactions.likes_count)}
-          </Badge>
-          <Badge icon={<MessageSquare size={12} />}>
-            {formatAmount(post.aggregate?.replies ?? post.replies.count)}
-          </Badge>
+          <LikeButton post={post} />
+          <ReplyButton post={post} showCount />
           {post.reveal?.phrase && <RevealBadge reveal={post.reveal} />}
         </XStack>
-        {post.relationships.length > 0 && (
-          <View onPress={(e) => e.stopPropagation()}>
-            <PostCommunities post={post} />
-          </View>
-        )}
+        <XStack ai="center" gap="$2">
+          {post.relationships.length > 0 && (
+            <View onPress={(e) => e.stopPropagation()}>
+              <PostCommunities post={post} />
+            </View>
+          )}
+          <Badge>{timeAgo(post.timestamp)}</Badge>
+        </XStack>
       </XStack>
       <View position="absolute" top="$2" right="$3" onPress={(e) => e.stopPropagation()}>
         <PostActions post={post} />
