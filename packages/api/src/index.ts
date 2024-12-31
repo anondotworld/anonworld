@@ -8,7 +8,7 @@ import { credentialsRoutes } from './routes/credentials'
 import { walletRoutes } from './routes/wallet'
 import { tokenRoutes } from './routes/tokens'
 import { communitiesRoutes } from './routes/communities'
-import { passkeysRoutes } from './routes/passkeys'
+import { authRoutes } from './routes/auth'
 import { vaultsRoutes } from './routes/vaults'
 
 const app = createElysia()
@@ -21,7 +21,7 @@ const app = createElysia()
   .use(walletRoutes)
   .use(tokenRoutes)
   .use(communitiesRoutes)
-  .use(passkeysRoutes)
+  .use(authRoutes)
   .use(vaultsRoutes)
 
 app.listen(3001)

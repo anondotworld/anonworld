@@ -5,7 +5,7 @@ import { redis } from '../services/redis'
 import { WebAuthnP256 } from 'ox'
 import { createPasskey, getPasskey, getVaults } from '@anonworld/db'
 
-export const passkeysRoutes = createElysia({ prefix: '/passkeys' })
+export const authRoutes = createElysia({ prefix: '/auth' })
   .post(
     '/challenge',
     async ({ body }) => {
@@ -23,7 +23,7 @@ export const passkeysRoutes = createElysia({ prefix: '/passkeys' })
   )
   .post(
     '/create',
-    async ({ body }) => {
+    async ({ jwt, body }) => {
       const challenge = await redis.getVaultChallenge(body.nonce)
       if (!challenge) {
         return { success: false }
@@ -37,7 +37,9 @@ export const passkeysRoutes = createElysia({ prefix: '/passkeys' })
         return { success: false }
       }
 
-      return { success: true }
+      const token = await jwt.sign({ passkeyId: passkey.id })
+
+      return { success: true, token }
     },
     {
       body: t.Object({
@@ -53,7 +55,7 @@ export const passkeysRoutes = createElysia({ prefix: '/passkeys' })
   )
   .post(
     '/authenticate',
-    async ({ body }) => {
+    async ({ jwt, body }) => {
       const challenge = await redis.getVaultChallenge(body.nonce)
       if (!challenge) {
         return { success: false }
@@ -83,7 +85,9 @@ export const passkeysRoutes = createElysia({ prefix: '/passkeys' })
         return { success: false }
       }
 
-      return { success: true }
+      const token = await jwt.sign({ passkeyId: passkey.id })
+
+      return { success: true, token }
     },
     {
       body: t.Object({
@@ -101,15 +105,10 @@ export const passkeysRoutes = createElysia({ prefix: '/passkeys' })
       }),
     }
   )
-  .get(
-    '/:passkeyId/vaults',
-    async ({ params }) => {
-      const data = await getVaults(params.passkeyId)
-      return { data }
-    },
-    {
-      params: t.Object({
-        passkeyId: t.String(),
-      }),
+  .get('/vaults', async ({ passkeyId }) => {
+    if (!passkeyId) {
+      return { data: [] }
     }
-  )
+    const data = await getVaults(passkeyId)
+    return { data }
+  })

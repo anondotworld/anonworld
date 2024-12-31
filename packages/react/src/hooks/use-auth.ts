@@ -2,12 +2,11 @@ import { AnonWorldSDK } from '@anonworld/sdk'
 import { WebAuthnP256 } from 'ox'
 import { useEffect, useMemo, useState } from 'react'
 import { hexToBytes } from 'viem'
-import { useVaults } from './use-vaults'
 
 const LOCAL_STORAGE_KEY = 'anon:auth:v1'
 
 export const useAuth = (sdk: AnonWorldSDK) => {
-  const [passkeyId, setPasskeyId] = useState<string | null>(null)
+  const [auth, setAuth] = useState<{ passkeyId: string; token: string } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const nonce = useMemo(() => crypto.randomUUID(), [])
@@ -15,7 +14,11 @@ export const useAuth = (sdk: AnonWorldSDK) => {
   useEffect(() => {
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY)
     if (stored) {
-      setPasskeyId(stored)
+      try {
+        setAuth(JSON.parse(stored))
+      } catch (error) {
+        logout()
+      }
     }
   }, [])
 
@@ -44,7 +47,7 @@ export const useAuth = (sdk: AnonWorldSDK) => {
       if (!response.data) {
         throw new Error('Failed to authenticate passkey')
       }
-      return raw.id
+      return { passkeyId: raw.id, token: response.data.token }
     } catch (error) {
       if ((error as Error).name === 'WebAuthnP256.CredentialRequestFailedError') {
         return null
@@ -71,20 +74,20 @@ export const useAuth = (sdk: AnonWorldSDK) => {
     if (!response.data) {
       throw new Error('Failed to create passkey')
     }
-    return id
+    return { passkeyId: id, token: response.data.token }
   }
 
   const authenticate = async () => {
-    if (passkeyId) return
+    if (auth) return
 
     setIsLoading(true)
     try {
-      let passkeyId = await loginFromPasskey()
-      if (!passkeyId) {
-        passkeyId = await createPasskey()
+      let auth = await loginFromPasskey()
+      if (!auth) {
+        auth = await createPasskey()
       }
-      localStorage.setItem(LOCAL_STORAGE_KEY, passkeyId)
-      setPasskeyId(passkeyId)
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(auth))
+      setAuth(auth)
     } catch (error) {
       console.error('Failed to login:', error)
     } finally {
@@ -94,8 +97,14 @@ export const useAuth = (sdk: AnonWorldSDK) => {
 
   const logout = () => {
     localStorage.removeItem(LOCAL_STORAGE_KEY)
-    setPasskeyId(null)
+    setAuth(null)
   }
 
-  return { authenticate, logout, passkeyId, isLoading }
+  return {
+    authenticate,
+    logout,
+    passkeyId: auth?.passkeyId,
+    token: auth?.token,
+    isLoading,
+  }
 }

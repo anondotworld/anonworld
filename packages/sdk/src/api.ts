@@ -221,7 +221,7 @@ export class Api {
   }
 
   async getPasskeyChallenge(nonce: string) {
-    return await this.request<{ challenge: `0x${string}` }>(`/passkeys/challenge`, {
+    return await this.request<{ challenge: `0x${string}` }>(`/auth/challenge`, {
       method: 'POST',
       body: JSON.stringify({ nonce }),
     })
@@ -236,7 +236,7 @@ export class Api {
       y: string
     }
   }) {
-    return await this.request<{ success: boolean }>(`/passkeys/create`, {
+    return await this.request<{ success: boolean; token: string }>(`/auth/create`, {
       method: 'POST',
       body: JSON.stringify(args),
     })
@@ -255,14 +255,18 @@ export class Api {
     }
     metadata: any
   }) {
-    return await this.request<{ success: boolean }>(`/passkeys/authenticate`, {
+    return await this.request<{ success: boolean; token: string }>(`/auth/authenticate`, {
       method: 'POST',
       body: JSON.stringify(args),
     })
   }
 
-  async getVaults(passkeyId: string) {
-    return await this.request<{ data: { id: string }[] }>(`/passkeys/${passkeyId}/vaults`)
+  async getVaults(token: string) {
+    return await this.request<{ data: { id: string }[] }>(`/auth/vaults`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
   }
 
   async addToVault(vaultId: string, credentialId: string) {

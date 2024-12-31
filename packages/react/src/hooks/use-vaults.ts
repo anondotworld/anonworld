@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSDK } from '../providers/sdk'
 
-export function useVaults(passkeyId: string | null) {
-  const { sdk } = useSDK()
+export function useVaults() {
+  const { sdk, auth } = useSDK()
   return useQuery({
-    queryKey: ['vaults', passkeyId],
+    queryKey: ['vaults', auth?.passkeyId],
     queryFn: async () => {
-      if (!passkeyId) return []
-      const data = await sdk.getVaults(passkeyId)
+      if (!auth?.token) return []
+      const data = await sdk.getVaults(auth.token)
       return data.data?.data ?? []
     },
-    enabled: !!passkeyId,
+    enabled: !!auth?.token,
   })
 }
