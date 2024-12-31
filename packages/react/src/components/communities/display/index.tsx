@@ -8,6 +8,7 @@ import { CommunityToken } from './token'
 import { formatAmount } from '../../../utils'
 import { timeAgo } from '../../../utils'
 import { CommunityActions } from './actions'
+import { Link } from 'solito/link'
 
 export function CommunityDisplay({ community }: { community: Community }) {
   return (
@@ -58,28 +59,22 @@ export function CommunityDisplay({ community }: { community: Community }) {
 
 function FarcasterBadge({ farcaster }: { farcaster: FarcasterAccount }) {
   return (
-    <Badge
-      onPress={() => {
-        window.open(`https://warpcast.com/~/${farcaster.username}`, '_blank')
-      }}
-      icon={<Farcaster size={12} />}
-    >
-      {`${farcaster.username} `}
-      <Text col="$color11">{formatAmount(farcaster.follower_count)}</Text>
-    </Badge>
+    <Link href={`https://warpcast.com/~/${farcaster.username}`} target="_blank">
+      <Badge icon={<Farcaster size={12} />}>
+        {`${farcaster.username} `}
+        <Text col="$color11">{formatAmount(farcaster.follower_count)}</Text>
+      </Badge>
+    </Link>
   )
 }
 
 function TwitterBadge({ twitter }: { twitter: TwitterAccount }) {
   return (
-    <Badge
-      onPress={() => {
-        window.open(`https://x.com/${twitter.screen_name}`, '_blank')
-      }}
-      icon={<X size={10} />}
-    >
-      {`${twitter.screen_name} `}
-      <Text col="$color11">{formatAmount(twitter.followers)}</Text>
-    </Badge>
+    <Link href={`https://x.com/${twitter.screen_name}`} target="_blank">
+      <Badge icon={<X size={10} />}>
+        {`${twitter.screen_name} `}
+        <Text col="$color11">{formatAmount(twitter.followers)}</Text>
+      </Badge>
+    </Link>
   )
 }

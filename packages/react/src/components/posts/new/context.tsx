@@ -10,8 +10,8 @@ import { Action, Credential } from '../../../types'
 import { useExecuteActions } from '../../../hooks/use-execute-actions'
 import { useToastController } from '@anonworld/ui'
 import { hashMessage } from 'viem'
-import { encodeJson, getUsableCredential } from '../../../utils'
-import { useActions } from '../../../hooks/use-actions'
+import { encodeJson } from '../../../utils'
+import { useRouter } from 'solito/navigation'
 
 const ACTION_ID = 'b6ec8ee8-f8bf-474f-8b28-f788f37e4066'
 
@@ -34,7 +34,6 @@ interface NewPostContextValue {
   setLink: (link: string | null) => void
   image: Content | null
   setImage: (image: string | null) => void
-  onSuccess: (hash: string) => void
   post: () => void
   status: 'idle' | 'pending' | 'success' | 'error'
   error: Error | null
@@ -48,12 +47,10 @@ const NewPostContext = createContext<NewPostContextValue | null>(null)
 
 export function NewPostProvider({
   children,
-  onSuccess,
   initialReply,
   initialCredentials,
 }: {
   children: React.ReactNode
-  onSuccess: (hash: string) => void
   initialReply?: Content
   initialCredentials?: Credential[]
 }) {
@@ -66,6 +63,7 @@ export function NewPostProvider({
   const [revealPhrase, setRevealPhrase] = useState<string | null>(null)
   const [copyActions, setCopyActions] = useState<Action[]>([])
   const toast = useToastController()
+  const router = useRouter()
 
   useEffect(() => {
     if (isOpen) {
@@ -118,7 +116,7 @@ export function NewPostProvider({
       })
       const hash = response.findLast((r) => r.hash)?.hash
       if (hash) {
-        onSuccess(hash)
+        router.push(`/posts/${hash}`)
       }
     },
   })
@@ -224,7 +222,6 @@ export function NewPostProvider({
         setLink: handleSetLink,
         image,
         setImage: handleSetImage,
-        onSuccess,
         post,
         status,
         error,

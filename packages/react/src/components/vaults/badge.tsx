@@ -2,6 +2,7 @@ import { formatHexId } from '../../utils'
 import { Badge } from '../badge'
 import { LinearGradient } from '@tamagui/linear-gradient'
 import { VaultAvatar } from './avatar'
+import { Link } from 'solito/link'
 
 export function VaultBadge({ vaultId }: { vaultId: string | null }) {
   if (!vaultId)
@@ -25,13 +26,8 @@ export function VaultBadge({ vaultId }: { vaultId: string | null }) {
   const id = formatHexId(vaultId)
 
   return (
-    <Badge
-      icon={<VaultAvatar id={id} />}
-      onPress={() => {
-        window.location.href = `/profiles/${vaultId}`
-      }}
-    >
-      {id}
-    </Badge>
+    <Link href={`/profiles/${vaultId}`}>
+      <Badge icon={<VaultAvatar id={id} />}>{id}</Badge>
+    </Link>
   )
 }

@@ -1,4 +1,4 @@
-import { ConversationCast, CredentialBadge } from '@anonworld/react'
+import { ConversationCast, CredentialBadge, VaultBadge } from '@anonworld/react'
 import { Avatar, Text, View, XStack, YStack } from '@anonworld/ui'
 import { formatAmount } from '../../../utils'
 import { PostEmbed } from '../display/embeds'
@@ -7,6 +7,7 @@ import { Heart } from '@tamagui/lucide-icons'
 import { PostActions } from './actions'
 import { ReplyButton } from './reply'
 import { VaultAvatar } from '../../vaults/avatar'
+import { TextLink } from 'solito/link'
 
 export function PostConversation({
   conversation,
@@ -76,11 +77,20 @@ function Post({
               <View w={32} ai="center">
                 <VaultAvatar
                   id={post.credentials[0].vault_id ?? post.credentials[0].displayId}
+                  size="$2.5"
                 />
               </View>
-              {post.credentials.map((credential, index) => (
-                <CredentialBadge key={index} credential={credential} />
-              ))}
+              <XStack gap="$2" ai="center">
+                {post.credentials[0].vault_id && (
+                  <VaultBadge vaultId={post.credentials[0].vault_id} />
+                )}
+                {post.credentials.map((credential, index) => (
+                  <CredentialBadge key={index} credential={credential} />
+                ))}
+                <Text fos="$2" fow="400" col="$color11">
+                  {timeAgo(post.timestamp)}
+                </Text>
+              </XStack>
             </>
           )}
           {(!post.credentials || post.credentials.length === 0) && (
@@ -91,22 +101,26 @@ function Post({
                   <Avatar.Fallback />
                 </Avatar>
               </View>
-              <Text
-                fow="600"
-                fos="$2"
-                cursor="pointer"
-                onPress={() =>
-                  window.open(`https://warpcast.com/${post.author.username}`, '_blank')
-                }
-                hoverStyle={{ textDecorationLine: 'underline' }}
-              >
-                {post.author.username}
-              </Text>
+              <XStack gap="$2" ai="center">
+                <TextLink
+                  href={`https://warpcast.com/${post.author.username}`}
+                  target="_blank"
+                >
+                  <Text
+                    fow="600"
+                    fos="$2"
+                    cursor="pointer"
+                    hoverStyle={{ textDecorationLine: 'underline' }}
+                  >
+                    {post.author.username}
+                  </Text>
+                </TextLink>
+                <Text fos="$2" fow="400" col="$color11">
+                  {timeAgo(post.timestamp)}
+                </Text>
+              </XStack>
             </>
           )}
-          <Text fos="$2" fow="400" col="$color11">
-            {timeAgo(post.timestamp)}
-          </Text>
         </XStack>
       </XStack>
       <XStack gap="$2.5">

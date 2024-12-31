@@ -4,6 +4,7 @@ import { Badge } from '../../badge'
 import { ReactNode, useState } from 'react'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
+import { Link } from 'solito/link'
 
 export function PostCommunities({ post }: { post: Cast }) {
   const relationshipsByCommunity = post.relationships.reduce(
@@ -61,42 +62,39 @@ function CommunitySelector({ relationships }: { relationships: Relationship[] })
           {relationships.map((relationship) => {
             if (relationship.target === 'farcaster' && relationship.farcaster?.username) {
               return (
-                <CommunityItem
+                <Link
                   key={relationship.farcaster?.username}
-                  icon={<Farcaster size={16} />}
-                  username={relationship.farcaster?.username}
-                  onPress={() => {
-                    window.open(
-                      `https://warpcast.com/${relationship.farcaster?.username}/${relationship.targetId.slice(0, 10)}`,
-                      '_blank'
-                    )
-                  }}
-                />
+                  href={`https://warpcast.com/${relationship.farcaster?.username}/${relationship.targetId.slice(0, 10)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <CommunityItem
+                    icon={<Farcaster size={16} />}
+                    username={relationship.farcaster?.username}
+                  />
+                </Link>
               )
             }
             if (relationship.target === 'twitter' && relationship.twitter?.screen_name) {
               return (
-                <CommunityItem
+                <Link
                   key={relationship.twitter?.screen_name}
-                  icon={<X size={16} />}
-                  username={relationship.twitter?.screen_name}
-                  onPress={() => {
-                    window.open(
-                      `https://x.com/${relationship.twitter?.screen_name}/status/${relationship.targetId}`,
-                      '_blank'
-                    )
-                  }}
-                />
+                  href={`https://x.com/${relationship.twitter?.screen_name}/status/${relationship.targetId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <CommunityItem
+                    icon={<X size={16} />}
+                    username={relationship.twitter?.screen_name}
+                  />
+                </Link>
               )
             }
             return null
           })}
-          <CommunityItem
-            username="View community"
-            onPress={() => {
-              window.location.href = `/communities/${community.id}`
-            }}
-          />
+          <Link href={`/communities/${community.id}`}>
+            <CommunityItem username="View community" bordered />
+          </Link>
         </ScrollView>
       </Popover.Content>
     </Popover>
@@ -106,17 +104,16 @@ function CommunitySelector({ relationships }: { relationships: Relationship[] })
 function CommunityItem({
   icon,
   username,
-  onPress,
-}: { icon?: ReactNode; username: string; onPress: () => void }) {
+  bordered,
+}: { icon?: ReactNode; username: string; bordered?: boolean }) {
   return (
     <XStack
       gap="$2"
       p="$2"
       hoverStyle={{ bg: '$color5' }}
-      bc="$borderColor"
-      btw="$0.5"
+      bc={bordered ? '$borderColor' : 'transparent'}
+      btw={bordered ? '$0.5' : '0'}
       ai="center"
-      onPress={onPress}
     >
       {icon}
       <Text fos="$1" fow="500">

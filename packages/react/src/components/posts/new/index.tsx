@@ -26,9 +26,9 @@ export function NewPostButton() {
   )
 }
 
-export function NewPost({ onSuccess }: { onSuccess: (hash: string) => void }) {
+export function NewPost() {
   return (
-    <NewPostProvider onSuccess={onSuccess}>
+    <NewPostProvider>
       <NewPostDialog>
         <NewPostButton />
       </NewPostDialog>

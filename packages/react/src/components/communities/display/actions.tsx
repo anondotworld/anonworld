@@ -6,6 +6,7 @@ import { chains } from '../../../utils'
 import { DexScreener } from '../../svg/dexscreener'
 import { Etherscan } from '../../svg/etherscan'
 import { Uniswap } from '../../svg/uniswap'
+import { Link } from 'solito/link'
 
 export function CommunityActions({ community }: { community: Community }) {
   const chain = extractChain({ chains, id: Number(community.token.chain_id) as any })
@@ -36,64 +37,43 @@ export function CommunityActions({ community }: { community: Community }) {
       >
         <YGroup>
           <YGroup.Item>
-            <View
-              fd="row"
-              gap="$2"
-              px="$3.5"
-              py="$2.5"
-              hoverStyle={{ bg: '$color5' }}
-              onPress={() =>
-                window.open(
-                  `https://app.uniswap.org/swap?outputCurrency=${community.token.address}&chain=${chain.id}&inputCurrency=ETH`,
-                  '_blank'
-                )
-              }
+            <Link
+              href={`https://app.uniswap.org/swap?outputCurrency=${community.token.address}&chain=${chain.id}&inputCurrency=ETH`}
+              target="_blank"
             >
-              <Uniswap size={16} />
-              <Text fos="$2" fow="400">
-                Uniswap
-              </Text>
-            </View>
+              <View fd="row" gap="$2" px="$3.5" py="$2.5" hoverStyle={{ bg: '$color5' }}>
+                <Uniswap size={16} />
+                <Text fos="$2" fow="400">
+                  Uniswap
+                </Text>
+              </View>
+            </Link>
           </YGroup.Item>
           <YGroup.Item>
-            <View
-              fd="row"
-              gap="$2"
-              px="$3.5"
-              py="$2.5"
-              hoverStyle={{ bg: '$color5' }}
-              onPress={() =>
-                window.open(
-                  `https://dexscreener.com/${chain.name.toLowerCase()}/${community.token.address}`,
-                  '_blank'
-                )
-              }
+            <Link
+              href={`https://dexscreener.com/${chain.name.toLowerCase()}/${community.token.address}`}
+              target="_blank"
             >
-              <DexScreener size={16} />
-              <Text fos="$2" fow="400">
-                DexScreener
-              </Text>
-            </View>
+              <View fd="row" gap="$2" px="$3.5" py="$2.5" hoverStyle={{ bg: '$color5' }}>
+                <DexScreener size={16} />
+                <Text fos="$2" fow="400">
+                  DexScreener
+                </Text>
+              </View>
+            </Link>
           </YGroup.Item>
           <YGroup.Item>
-            <View
-              fd="row"
-              gap="$2"
-              px="$3.5"
-              py="$2.5"
-              hoverStyle={{ bg: '$color5' }}
-              onPress={() =>
-                window.open(
-                  `https://basescan.org/token/${community.token.address}`,
-                  '_blank'
-                )
-              }
+            <Link
+              href={`https://basescan.org/token/${community.token.address}`}
+              target="_blank"
             >
-              <Etherscan size={16} />
-              <Text fos="$2" fow="400">
-                BaseScan
-              </Text>
-            </View>
+              <View fd="row" gap="$2" px="$3.5" py="$2.5" hoverStyle={{ bg: '$color5' }}>
+                <Etherscan size={16} />
+                <Text fos="$2" fow="400">
+                  BaseScan
+                </Text>
+              </View>
+            </Link>
           </YGroup.Item>
         </YGroup>
       </Popover.Content>

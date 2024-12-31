@@ -1,13 +1,13 @@
 import { Button, Popover, Text, View, XStack, YGroup } from '@anonworld/ui'
 import { ChevronDown } from '@tamagui/lucide-icons'
+import { useRouter } from 'solito/navigation'
 
 export function PostFeedSelector({
   selected,
-  onSelect,
 }: {
   selected: 'new' | 'trending'
-  onSelect: (feedType: 'new' | 'trending') => void
 }) {
+  const router = useRouter()
   return (
     <View ai="flex-end">
       <Popover size="$5" placement="bottom">
@@ -45,8 +45,8 @@ export function PostFeedSelector({
         >
           <YGroup>
             <ActionButton label="Sort by" fow="600" bbw="$0.5" />
-            <ActionButton label="Trending" onPress={() => onSelect('trending')} />
-            <ActionButton label="New" onPress={() => onSelect('new')} />
+            <ActionButton label="Trending" onPress={() => router.push('/')} />
+            <ActionButton label="New" onPress={() => router.push('/new')} />
           </YGroup>
         </Popover.Content>
       </Popover>

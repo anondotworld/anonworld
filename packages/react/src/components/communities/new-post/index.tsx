@@ -8,9 +8,9 @@ import { NewPostButton } from '../../posts/new'
 import { NewCredential } from '../../credentials'
 import { formatUnits } from 'viem'
 
-export function NewPost({ onSuccess }: { onSuccess: (hash: string) => void }) {
+export function NewPost() {
   return (
-    <NewPostProvider onSuccess={onSuccess}>
+    <NewPostProvider>
       <NewPostDialog>
         <NewPostButton />
       </NewPostDialog>
@@ -19,10 +19,8 @@ export function NewPost({ onSuccess }: { onSuccess: (hash: string) => void }) {
 }
 
 export function NewCommunityPost({
-  onSuccess,
   community,
 }: {
-  onSuccess: (hash: string) => void
   community: Community
 }) {
   const { data: actions } = useActions()
@@ -74,10 +72,7 @@ export function NewCommunityPost({
   }
 
   return (
-    <NewPostProvider
-      onSuccess={onSuccess}
-      initialCredentials={credential ? [credential] : undefined}
-    >
+    <NewPostProvider initialCredentials={credential ? [credential] : undefined}>
       <NewPostDialog>
         <NewPostButton />
       </NewPostDialog>

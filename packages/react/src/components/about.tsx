@@ -3,6 +3,7 @@ import { HelpCircle } from '@tamagui/lucide-icons'
 import { X } from '@tamagui/lucide-icons'
 import { Adapt, Dialog, Sheet, Text, View, XStack, YStack } from '@anonworld/ui'
 import { AnonWorld } from './svg/anonworld'
+import { Link, TextLink } from 'solito/link'
 
 export function About() {
   return (
@@ -67,7 +68,7 @@ export function About() {
                 ANON.WORLD
               </Dialog.Title>
               <Dialog.Description color="$color11" fos="$1">
-                An anonymous social network.
+                An anonymous social network
               </Dialog.Description>
             </YStack>
           </XStack>
@@ -106,13 +107,21 @@ export function About() {
             </Text>
             <Text>
               If you run into any issues or have questions, DM @slokh on{' '}
-              <a href="https://warpcast.com/slokh" target="_blank" rel="noreferrer">
-                Farcaster
-              </a>{' '}
+              <TextLink
+                href="https://warpcast.com/slokh"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Text fos="$3" textDecorationLine="underline" col="$color11">
+                  Farcaster
+                </Text>
+              </TextLink>{' '}
               or{' '}
-              <a href="https://twitter.com/slokh" target="_blank" rel="noreferrer">
-                Twitter
-              </a>
+              <TextLink href="https://twitter.com/slokh" target="_blank" rel="noreferrer">
+                <Text fos="$3" textDecorationLine="underline" col="$color11">
+                  Twitter
+                </Text>
+              </TextLink>
               .
             </Text>
           </YStack>

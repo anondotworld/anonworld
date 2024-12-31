@@ -18,7 +18,7 @@ import { PostCommunities } from './communities'
 import { PostCredential } from './credential'
 import { VaultBadge } from '../../vaults/badge'
 
-export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
+export function Post({ post, hoverable }: { post: Cast; hoverable?: boolean }) {
   let text = post.text
   if (post.embeds) {
     for (const embed of post.embeds) {
@@ -43,9 +43,8 @@ export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
         br: '$4',
         bw: '$0.5',
       }}
-      onPress={onPress}
-      hoverStyle={onPress ? { bg: '$color3' } : {}}
-      cursor={onPress ? 'pointer' : undefined}
+      hoverStyle={hoverable ? { bg: '$color3' } : {}}
+      cursor={hoverable ? 'pointer' : undefined}
       f={1}
     >
       <XStack gap="$2" ai="center" onPress={(e) => e.stopPropagation()}>

@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function CommunitiesPage() {
-  const router = useRouter()
   const [sort, setSort] = useState('popular')
 
   return (
@@ -16,7 +15,7 @@ export default function CommunitiesPage() {
         <CommunityFeedSelector selected={sort} onSelect={setSort} />
         <NewCommunity />
       </XStack>
-      <CommunityFeed onPress={(id) => router.push(`/communities/${id}`)} sort={sort} />
+      <CommunityFeed sort={sort} />
     </View>
   )
 }

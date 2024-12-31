@@ -3,6 +3,7 @@ import { Popover, Text, View, YGroup } from '@anonworld/ui'
 import { Cast } from '../../../types'
 import { Farcaster } from '../../svg/farcaster'
 import { NamedExoticComponent } from 'react'
+import { Link } from 'solito/link'
 
 export function PostActions({ post }: { post: Cast }) {
   return (
@@ -40,13 +41,12 @@ export function PostActions({ post }: { post: Cast }) {
         overflow="hidden"
       >
         <YGroup>
-          <ActionButton
-            label="View on Farcaster"
-            onPress={() =>
-              window.open(`https://warpcast.com/~/conversations/${post.hash}`, '_blank')
-            }
-            Icon={Farcaster}
-          />
+          <Link
+            href={`https://warpcast.com/~/conversations/${post.hash}`}
+            target="_blank"
+          >
+            <ActionButton label="View on Farcaster" Icon={Farcaster} />
+          </Link>
         </YGroup>
       </Popover.Content>
     </Popover>
@@ -55,19 +55,16 @@ export function PostActions({ post }: { post: Cast }) {
 
 function ActionButton({
   label,
-  onPress,
   Icon,
   destructive = false,
 }: {
   label: string
-  onPress: () => void
   Icon?: NamedExoticComponent<any>
   destructive?: boolean
 }) {
   return (
     <YGroup.Item>
       <View
-        onPress={onPress}
         fd="row"
         ai="center"
         gap="$2"

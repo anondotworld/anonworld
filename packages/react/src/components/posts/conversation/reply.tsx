@@ -7,13 +7,8 @@ import { NewPostDialog } from '../new/dialog'
 import { MessageCircle, MessageSquare } from '@tamagui/lucide-icons'
 
 export function ReplyButton({ post }: { post: Cast }) {
-  const handleSuccess = (hash: string) => {
-    window.location.reload()
-  }
-
   return (
     <NewPostProvider
-      onSuccess={handleSuccess}
       initialReply={{
         url: `https://warpcast.com/${post.author.username}/${post.hash.slice(0, 10)}`,
         type: 'farcaster',
@@ -42,13 +37,8 @@ export function ReplyButton({ post }: { post: Cast }) {
 }
 
 export function ReplyBar({ post }: { post: Cast }) {
-  const handleSuccess = (hash: string) => {
-    window.location.reload()
-  }
-
   return (
     <NewPostProvider
-      onSuccess={handleSuccess}
       initialReply={{
         url: `https://warpcast.com/${post.author.username}/${post.hash.slice(0, 10)}`,
         type: 'farcaster',

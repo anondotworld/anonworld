@@ -3,6 +3,7 @@ import { timeAgo } from '../../../utils'
 import { Avatar, Image, Text, View, XStack, YStack } from '@anonworld/ui'
 import { X } from '../../svg/x'
 import { useTwitterPost } from '../../../hooks/use-twitter-post'
+import { TextLink } from 'solito/link'
 
 export function PostEmbed({ embed }: { embed: Embed }) {
   if (embed.cast) {
@@ -52,7 +53,9 @@ export function PostEmbed({ embed }: { embed: Embed }) {
     )
   }
 
-  if (embed.url?.includes('x.com') || embed.url?.includes('twitter.com')) {
+  if (!embed.url) return null
+
+  if (embed.url.includes('x.com') || embed.url.includes('twitter.com')) {
     const cleaned = embed.url.split('?')[0]
     const tweetId = cleaned.split('/').pop()
     const username = cleaned.split('/').slice(-3, -2).pop()
@@ -62,13 +65,11 @@ export function PostEmbed({ embed }: { embed: Embed }) {
   }
 
   return (
-    <Text
-      col="$color11"
-      onPress={() => window.open(embed.url, '_blank')}
-      hoverStyle={{ textDecorationLine: 'underline' }}
-    >
-      {embed.url}
-    </Text>
+    <TextLink href={embed.url} target="_blank">
+      <Text col="$color11" hoverStyle={{ textDecorationLine: 'underline' }}>
+        {embed.url}
+      </Text>
+    </TextLink>
   )
 }
 

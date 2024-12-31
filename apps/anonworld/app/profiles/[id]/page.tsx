@@ -2,10 +2,8 @@
 
 import { VaultDisplay, VaultPosts, useVault } from '@anonworld/react'
 import { Text, View, XStack } from '@anonworld/ui'
-import { useRouter } from 'next/navigation'
 
 export default function ProfilePage({ params }: { params: { id: string } }) {
-  const router = useRouter()
   const { data: vault } = useVault(params.id)
 
   if (!vault) {
@@ -22,7 +20,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
           </Text>
         </View>
       </XStack>
-      <VaultPosts id={vault.id} onPress={(hash) => router.push(`/posts/${hash}`)} />
+      <VaultPosts id={vault.id} />
     </View>
   )
 }

@@ -5,6 +5,7 @@ import { useSDK } from '../../providers'
 import { formatHexId } from '../../utils'
 import { useVaults } from '../../hooks/use-vaults'
 import { VaultAvatar } from '../vaults/avatar'
+import { Link } from 'solito/link'
 
 export function AuthActions({ passkeyId }: { passkeyId: string }) {
   const { auth } = useSDK()
@@ -41,14 +42,12 @@ export function AuthActions({ passkeyId }: { passkeyId: string }) {
           {vaults?.map((vault) => {
             const displayId = formatHexId(vault.id)
             return (
-              <ActionItem
-                key={vault.id}
-                label={displayId}
-                image={<VaultAvatar id={displayId} size={16} />}
-                onPress={() => {
-                  window.location.href = `/profiles/${vault.id}`
-                }}
-              />
+              <Link key={vault.id} href={`/profiles/${vault.id}`}>
+                <ActionItem
+                  label={displayId}
+                  image={<VaultAvatar id={displayId} size={16} />}
+                />
+              </Link>
             )
           })}
           <ActionItem label="Logout" onPress={auth.logout} Icon={LogOut} destructive />

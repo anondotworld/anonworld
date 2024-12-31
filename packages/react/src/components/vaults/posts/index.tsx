@@ -1,11 +1,9 @@
 import { Spinner, Text, YStack } from '@anonworld/ui'
 import { useVaultPosts } from '../../../hooks/use-vault-posts'
 import { Post } from '../../posts'
+import { Link } from 'solito/link'
 
-export function VaultPosts({
-  id,
-  onPress,
-}: { id: string; onPress: (hash: string) => void }) {
+export function VaultPosts({ id }: { id: string }) {
   const { data, isLoading } = useVaultPosts(id)
 
   if (isLoading) {
@@ -23,7 +21,9 @@ export function VaultPosts({
   return (
     <YStack $gtXs={{ gap: '$4' }}>
       {data?.map((post) => (
-        <Post key={post.hash} post={post} onPress={() => onPress(post.hash)} />
+        <Link key={post.hash} href={`/posts/${post.hash}`}>
+          <Post post={post} hoverable />
+        </Link>
       ))}
     </YStack>
   )

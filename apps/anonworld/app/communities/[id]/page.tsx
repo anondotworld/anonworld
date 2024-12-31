@@ -12,7 +12,6 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function CommunityPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
   const { data: community } = useCommunity({ id: params.id })
   const [feedType, setFeedType] = useState<'new' | 'trending'>('trending')
 
@@ -27,16 +26,9 @@ export default function CommunityPage({ params }: { params: { id: string } }) {
       </YStack>
       <XStack ai="center" jc="space-between">
         <PostFeedSelector selected={feedType} onSelect={setFeedType} />
-        <NewCommunityPost
-          onSuccess={(hash) => router.push(`/posts/${hash}`)}
-          community={community}
-        />
+        <NewCommunityPost community={community} />
       </XStack>
-      <PostFeed
-        fid={community.fid}
-        type={feedType}
-        onPress={(hash) => router.push(`/posts/${hash}`)}
-      />
+      <PostFeed fid={community.fid} type={feedType} />
     </View>
   )
 }

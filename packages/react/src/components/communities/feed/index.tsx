@@ -1,11 +1,9 @@
 import { Spinner, YStack } from '@anonworld/ui'
 import { CommunityDisplay } from './display'
 import { useCommunities } from '../../../hooks/use-communities'
+import { Link } from 'solito/link'
 
-export function CommunityFeed({
-  onPress,
-  sort,
-}: { onPress: (id: string) => void; sort: string }) {
+export function CommunityFeed({ sort }: { sort: string }) {
   const { data: communities, isLoading } = useCommunities()
 
   if (isLoading) {
@@ -22,11 +20,9 @@ export function CommunityFeed({
   return (
     <YStack $gtXs={{ gap: '$4' }}>
       {sortedCommunities?.map((community) => (
-        <CommunityDisplay
-          key={community.id}
-          community={community}
-          onPress={() => onPress(community.id)}
-        />
+        <Link key={community.id} href={`/communities/${community.id}`}>
+          <CommunityDisplay community={community} hoverable />
+        </Link>
       ))}
     </YStack>
   )

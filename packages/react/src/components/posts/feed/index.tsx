@@ -1,15 +1,14 @@
 import { usePosts } from '../../../hooks/use-posts'
 import { Spinner, Text, YStack } from '@anonworld/ui'
 import { Post } from '../display'
+import { Link } from 'solito/link'
 
 export function PostFeed({
   fid,
   type,
-  onPress,
 }: {
   fid: number
   type: 'new' | 'trending'
-  onPress: (hash: string) => void
 }) {
   const { data, isLoading } = usePosts({
     fid,
@@ -31,7 +30,9 @@ export function PostFeed({
   return (
     <YStack $gtXs={{ gap: '$4' }}>
       {data?.map((post) => (
-        <Post key={post.hash} post={post} onPress={() => onPress(post.hash)} />
+        <Link key={post.hash} href={`/posts/${post.hash}`}>
+          <Post post={post} hoverable />
+        </Link>
       ))}
     </YStack>
   )
