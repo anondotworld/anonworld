@@ -1,10 +1,9 @@
-import { Vault } from '../../types'
 import { formatHexId, toHslColors } from '../../utils'
 import { Badge } from '../badge'
 import { LinearGradient } from '@tamagui/linear-gradient'
 
-export function VaultBadge({ vault }: { vault: Vault | null }) {
-  if (!vault)
+export function VaultBadge({ vaultId }: { vaultId: string | null }) {
+  if (!vaultId)
     return (
       <Badge
         icon={
@@ -22,7 +21,7 @@ export function VaultBadge({ vault }: { vault: Vault | null }) {
       </Badge>
     )
 
-  const id = formatHexId(vault.id)
+  const id = formatHexId(vaultId)
   const { background, secondary } = toHslColors(id)
 
   return (

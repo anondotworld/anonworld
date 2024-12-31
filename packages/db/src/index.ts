@@ -296,7 +296,6 @@ export const getPostCredentials = async (hashes: string[]) => {
       credentialInstancesTable,
       eq(postCredentialsTable.credential_id, credentialInstancesTable.id)
     )
-    .leftJoin(vaultsTable, eq(credentialInstancesTable.vault_id, vaultsTable.id))
     .where(inArray(postCredentialsTable.post_hash, hashes))
 
   return credentials as {
@@ -318,7 +317,6 @@ export const getCredentialInstance = async (id: string) => {
   const [credential] = await db
     .select()
     .from(credentialInstancesTable)
-    .leftJoin(vaultsTable, eq(credentialInstancesTable.id, vaultsTable.id))
     .where(eq(credentialInstancesTable.id, id))
     .limit(1)
 
@@ -509,15 +507,6 @@ export const createVault = async (
   return vault
 }
 
-export const getVault = async (id: string) => {
-  const [vault] = await db
-    .select()
-    .from(vaultsTable)
-    .where(eq(vaultsTable.id, id))
-    .limit(1)
-  return vault
-}
-
 export const getVaults = async (passkeyId: string) => {
   return await db.select().from(vaultsTable).where(eq(vaultsTable.passkey_id, passkeyId))
 }
@@ -534,4 +523,11 @@ export const removeCredentialFromVault = async (credentialId: string) => {
     .update(credentialInstancesTable)
     .set({ vault_id: null })
     .where(eq(credentialInstancesTable.id, credentialId))
+}
+
+export const getCredentialsFromVault = async (vaultId: string) => {
+  return await db
+    .select()
+    .from(credentialInstancesTable)
+    .where(eq(credentialInstancesTable.vault_id, vaultId))
 }

@@ -186,7 +186,6 @@ export async function formatPosts(posts: Array<Post>): Promise<Array<Cast>> {
         ),
         id: undefined,
         proof: undefined,
-        vault: c.vaults,
       })),
       relationships: postRelationships.map((r) => {
         const twitterAccount = twitterAccounts.find(

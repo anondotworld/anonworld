@@ -31,7 +31,7 @@ export function CredentialDisplay({
       f={1}
     >
       <XStack ai="center" gap="$2">
-        <VaultBadge vault={credential.vault} />
+        <VaultBadge vaultId={credential.vault_id} />
         <Badge>ERC20 Balance</Badge>
         <Badge>{timeAgo(credential.verified_at)}</Badge>
       </XStack>

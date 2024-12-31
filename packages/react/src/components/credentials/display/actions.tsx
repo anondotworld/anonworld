@@ -46,7 +46,7 @@ export function CredentialActions({ credential }: { credential: Credential }) {
               onPress={() => setViewProof(true)}
               Icon={FileText}
             />
-            {!credential.vault && (
+            {!credential.vault_id && (
               <ActionButton
                 label="Add to profile"
                 onPress={async () => {
@@ -56,12 +56,12 @@ export function CredentialActions({ credential }: { credential: Credential }) {
                 Icon={Plus}
               />
             )}
-            {credential.vault && (
+            {credential.vault_id && (
               <ActionButton
                 label="Remove from profile"
                 onPress={async () => {
-                  if (!credential.vault) return
-                  await credentials.removeFromVault(credential.vault.id, credential.id)
+                  if (!credential.vault_id) return
+                  await credentials.removeFromVault(credential.vault_id, credential.id)
                 }}
                 Icon={Minus}
               />

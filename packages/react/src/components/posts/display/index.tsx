@@ -28,6 +28,8 @@ export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
     }
   }
 
+  const vaultId = post.credentials?.[0]?.vault_id
+
   return (
     <YStack
       theme="surface1"
@@ -47,9 +49,7 @@ export function Post({ post, onPress }: { post: Cast; onPress?: () => void }) {
       f={1}
     >
       <XStack gap="$2" ai="center" onPress={(e) => e.stopPropagation()}>
-        {post.credentials?.[0]?.vault && (
-          <VaultBadge vault={post.credentials?.[0]?.vault} />
-        )}
+        {vaultId && <VaultBadge vaultId={vaultId} />}
         {post.credentials?.map((credential, index) => (
           <PostCredential key={index} credential={credential} />
         ))}

@@ -22,6 +22,7 @@ import { useSDK } from '../../../providers'
 import { parseUnits } from 'viem'
 import { useWalletFungibles } from '../../../hooks/use-wallet-fungibles'
 import { TokenImage } from '../../tokens/image'
+import { useVaults } from '../../../hooks/use-vaults'
 
 export function NewCredentialForm() {
   const { credentialType } = useNewCredential()
@@ -315,9 +316,10 @@ function BalanceField() {
 function AddCredentialButton() {
   const { address } = useAccount()
   const { tokenId, balance, setIsOpen, decimals } = useNewCredential()
-  const { credentials, vault } = useSDK()
+  const { credentials, auth } = useSDK()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
+  const { data: vaults } = useVaults(auth.passkeyId)
 
   const handleAddCredential = async () => {
     if (!tokenId) return
@@ -327,7 +329,7 @@ function AddCredentialButton() {
         chainId: tokenId.chainId,
         tokenAddress: tokenId.address as `0x${string}`,
         verifiedBalance: parseUnits(balance.toString(), decimals),
-        vaultId: vault.vault?.id,
+        vaultId: vaults?.[0]?.id,
       })
       setIsLoading(false)
       setIsOpen(false)

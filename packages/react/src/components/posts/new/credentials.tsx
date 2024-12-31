@@ -81,7 +81,7 @@ function CredentialSelector() {
               btw="$0.5"
               onPress={() => handlePress(credential)}
             >
-              <VaultBadge vault={credential.vault} />
+              <VaultBadge vaultId={credential.vault_id} />
               <Badge>ERC20 Balance</Badge>
               <ERC20Credential credential={credential} />
               <View w={16}>

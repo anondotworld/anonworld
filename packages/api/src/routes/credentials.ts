@@ -1,6 +1,6 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import { createCredentialInstance, getCredentialInstance, getVault } from '@anonworld/db'
+import { createCredentialInstance, getCredentialInstance } from '@anonworld/db'
 import { erc20Balance } from '@anonworld/zk'
 import {
   createPublicClient,
@@ -40,8 +40,7 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
       const existingCredential = await getCredentialInstance(id)
       if (existingCredential) {
         return {
-          ...existingCredential.credential_instances,
-          vault: existingCredential.vaults,
+          ...existingCredential,
           proof: undefined,
         }
       }
@@ -59,11 +58,6 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
         throw new Error('Invalid storage hash')
       }
 
-      let vault: { id: string } | null = null
-      if (body.vaultId) {
-        vault = await getVault(body.vaultId)
-      }
-
       const credential = await createCredentialInstance({
         id,
         credential_id: credentialId,
@@ -74,13 +68,12 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
           publicInputs: body.publicInputs,
         },
         verified_at: new Date(Number(block.timestamp) * 1000),
-        vault_id: vault?.id,
+        vault_id: body.vaultId,
       })
 
       return {
         ...credential,
         proof: undefined,
-        vault,
       }
     },
     {
@@ -96,7 +89,6 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
   .get('/:id', async ({ params }) => {
     const credential = await getCredentialInstance(params.id)
     return {
-      ...credential.credential_instances,
-      vault: credential?.vaults,
+      ...credential,
     }
   })

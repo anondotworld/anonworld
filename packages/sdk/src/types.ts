@@ -323,7 +323,7 @@ export type Credential = {
   }
   verified_at: string
   token?: Token
-  vault: Vault | null
+  vault_id: string | null
 }
 
 export enum CredentialType {
@@ -750,8 +750,4 @@ export type FarcasterAccount = {
     blocking: boolean
     blocked_by: boolean
   }
-}
-
-export type Vault = {
-  id: string
 }

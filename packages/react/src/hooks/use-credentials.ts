@@ -103,7 +103,7 @@ export function useCredentials(sdk: AnonWorldSDK) {
     await sdk.addToVault(vaultId, credentialId)
     setCredentials((prev) =>
       prev.map((cred) =>
-        cred.id === credentialId ? { ...cred, vault: { id: vaultId } } : cred
+        cred.id === credentialId ? { ...cred, vault_id: vaultId } : cred
       )
     )
   }
@@ -111,7 +111,7 @@ export function useCredentials(sdk: AnonWorldSDK) {
   const removeFromVault = async (vaultId: string, credentialId: string) => {
     await sdk.removeFromVault(vaultId, credentialId)
     setCredentials((prev) =>
-      prev.map((cred) => (cred.id === credentialId ? { ...cred, vault: null } : cred))
+      prev.map((cred) => (cred.id === credentialId ? { ...cred, vault_id: null } : cred))
     )
   }
 

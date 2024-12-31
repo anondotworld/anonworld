@@ -1,6 +1,10 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import { addCredentialToVault, removeCredentialFromVault } from '@anonworld/db'
+import {
+  addCredentialToVault,
+  getCredentialsFromVault,
+  removeCredentialFromVault,
+} from '@anonworld/db'
 
 export const vaultsRoutes = createElysia({ prefix: '/vaults' })
   .put(
@@ -36,4 +40,21 @@ export const vaultsRoutes = createElysia({ prefix: '/vaults' })
         vaultId: t.String(),
       }),
     }
+  )
+  .get(
+    '/:vaultId/credentials',
+    async ({ params }) => {
+      const credentials = await getCredentialsFromVault(params.vaultId)
+      return {
+        data: credentials.map((c) => ({
+          ...c,
+          id: undefined,
+          proof: undefined,
+          vault: {
+            id: c.vault_id,
+          },
+        })),
+      }
+    },
+    { params: t.Object({ vaultId: t.String() }) }
   )
