@@ -1,6 +1,6 @@
 'use client'
 
-import { Cast, usePosts } from '@anonworld/react'
+import { Cast, useTrendingPosts, useNewPosts } from '@anonworld/react'
 import { useState } from 'react'
 import AnimatedTabs from './animated-tabs'
 import { Skeleton } from '../ui/skeleton'
@@ -17,14 +17,12 @@ export function PostFeed({
   const [selected, setSelected] = useState<'new' | 'trending'>(defaultTab)
   const router = useRouter()
 
-  const { data: trendingPosts, isLoading: isTrendingLoading } = usePosts({
+  const { data: trendingPosts, isLoading: isTrendingLoading } = useTrendingPosts({
     fid: BEST_OF_FID,
-    type: 'trending',
   })
 
-  const { data: newPosts, isLoading: isNewLoading } = usePosts({
+  const { data: newPosts, isLoading: isNewLoading } = useNewPosts({
     fid: BEST_OF_FID,
-    type: 'new',
     filter: ({ text }) => !text.match(/.*@clanker.*(launch|deploy|make).*/is),
   })
 
@@ -67,14 +65,12 @@ export function PromotedFeed({
 }) {
   const [selected, setSelected] = useState<'new' | 'promoted'>(defaultTab)
   const router = useRouter()
-  const { data: promotedLaunches, isLoading: isPromotedLoading } = usePosts({
+  const { data: promotedLaunches, isLoading: isPromotedLoading } = useNewPosts({
     fid: LAUNCH_FID,
-    type: 'new',
   })
 
-  const { data: newLaunches, isLoading: isNewLoading } = usePosts({
+  const { data: newLaunches, isLoading: isNewLoading } = useNewPosts({
     fid: BEST_OF_FID,
-    type: 'new',
     filter: ({ text }) =>
       !!text.toLowerCase().match(/.*@clanker.*(launch|deploy|make).*/is),
   })

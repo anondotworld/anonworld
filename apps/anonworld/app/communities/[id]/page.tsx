@@ -3,7 +3,7 @@
 import {
   CommunityDisplay,
   NewCommunityPost,
-  PostFeed,
+  NewFeed,
   useCommunity,
 } from '@anonworld/react'
 import { View, XStack, YStack } from '@anonworld/ui'
@@ -24,7 +24,7 @@ export default function CommunityPage({ params }: { params: { id: string } }) {
         <View />
         <NewCommunityPost community={community} />
       </XStack>
-      <PostFeed fid={community.fid} type="new" />
+      <NewFeed fid={community.fid} />
     </View>
   )
 }

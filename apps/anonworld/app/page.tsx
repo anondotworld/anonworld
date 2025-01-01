@@ -1,6 +1,6 @@
 'use client'
 
-import { NewPost, PostFeed, PostFeedSelector } from '@anonworld/react'
+import { NewPost, PostFeedSelector, TrendingFeed } from '@anonworld/react'
 import { View, XStack } from '@anonworld/ui'
 
 export default function Home() {
@@ -10,7 +10,7 @@ export default function Home() {
         <PostFeedSelector selected="trending" />
         <NewPost />
       </XStack>
-      <PostFeed fid={899289} type="trending" />
+      <TrendingFeed fid={899289} />
     </View>
   )
 }

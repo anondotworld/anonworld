@@ -1,5 +1,6 @@
 export { useExecuteActions } from './use-execute-actions'
-export { usePosts } from './use-posts'
+export { useNewPosts } from './use-new-posts'
+export { useTrendingPosts } from './use-trending-posts'
 export { usePost } from './use-post'
 export { usePostConversation } from './use-post-conversation'
 export { useToken } from './use-token'
