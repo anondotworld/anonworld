@@ -126,9 +126,11 @@ export const authRoutes = createElysia({ prefix: '/auth' })
             credentials: [],
           }
         }
-        acc[vault.vaults.id].credentials.push(
-          vault.credential_instances as CredentialInstance
-        )
+        if (vault.credential_instances) {
+          acc[vault.vaults.id].credentials.push(
+            vault.credential_instances as CredentialInstance
+          )
+        }
         return acc
       },
       {} as Record<string, Vault & { credentials: CredentialInstance[] }>
