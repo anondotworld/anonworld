@@ -86,13 +86,17 @@ export function formatHexId(hex: string) {
   for (let i = 2; i < hex.length - 1; i += 2) {
     const num = Number.parseInt(hex.slice(i, i + 2), 16)
     if (!Number.isNaN(num)) {
-      const code = num % 62
-      if (code < 26) {
-        str += String.fromCharCode(97 + code)
-      } else if (code < 52) {
-        str += String.fromCharCode(65 + (code - 26))
+      // Ensure we only get values 0-61
+      const code = Math.abs(num) % 62
+      // 0-9: 48-57 in ASCII
+      // A-Z: 65-90 in ASCII
+      // a-z: 97-122 in ASCII
+      if (code < 10) {
+        str += String.fromCharCode(48 + code) // 0-9
+      } else if (code < 36) {
+        str += String.fromCharCode(65 + (code - 10)) // A-Z
       } else {
-        str += String.fromCharCode(48 + (code - 52))
+        str += String.fromCharCode(97 + (code - 36)) // a-z
       }
     }
   }
