@@ -9,6 +9,7 @@ import { hexToBytes } from 'viem'
 export const LOCAL_AUTH_KEY = 'anon:auth:v1'
 
 const getInitialAuth = () => {
+  if (typeof window === 'undefined') return null
   const stored = localStorage.getItem(LOCAL_AUTH_KEY)
   if (stored) {
     try {

@@ -10,16 +10,17 @@ import { useSDK } from './sdk'
 const LOCAL_STORAGE_KEY = 'anon:credentials:v1'
 
 const getInitialCredentials = () => {
+  if (typeof window === 'undefined') return []
   const stored = localStorage.getItem(LOCAL_STORAGE_KEY)
   if (stored) {
     try {
       return JSON.parse(stored)
     } catch (error) {
       localStorage.removeItem(LOCAL_STORAGE_KEY)
-      return null
+      return []
     }
   }
-  return null
+  return []
 }
 
 type CredentialsContextType = {
