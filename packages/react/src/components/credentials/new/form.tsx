@@ -140,12 +140,14 @@ function TokenField() {
     }
 
     setToken(token)
-    setBalance(Math.floor(token.attributes.quantity.float / 2))
-    setMaxBalance(Math.floor(token.attributes.quantity.float))
   }, [fungibles, tokenId])
 
   const handleSelect = (id: string) => {
     const token = fungibles.find((t) => t.id === id)
+    setToken(token ?? null)
+  }
+
+  useEffect(() => {
     if (!token) {
       setTokenId(undefined)
       setBalance(0)
@@ -164,7 +166,7 @@ function TokenField() {
     setBalance(Math.floor(token.attributes.quantity.float / 2))
     setMaxBalance(Math.floor(token.attributes.quantity.float))
     setDecimals(impl.decimals)
-  }
+  }, [token])
 
   if (fungibles.length === 0) {
     return null
