@@ -24,7 +24,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
         <style
           dangerouslySetInnerHTML={{
-            __html: config.getNewCSS({
+            __html: config.getCSS({
               exclude: process.env.NODE_ENV === 'production' ? 'design-system' : null,
             }),
           }}
