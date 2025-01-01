@@ -1,3 +1,5 @@
+import '../public/tamagui.css'
+
 import type { Metadata } from 'next'
 import { Header } from '@/components/header'
 import { GeistSans } from 'geist/font/sans'

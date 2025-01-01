@@ -96,9 +96,9 @@ export function About() {
               What is a community?
             </Text>
             <Text>
-              A community is a group of users with shared credentials. Communities can
-              anonymously post to a shared social media account (currently Farcaster or
-              X). Anyone can create a community with any token requirements.
+              A community is a group of users with shared credentials, backed by a token.
+              Communities can anonymously post to a shared social media account (currently
+              Farcaster or X).
             </Text>
           </YStack>
           <YStack gap="$2">

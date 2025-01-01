@@ -20,7 +20,7 @@ export function CommunityDisplay({
       bc="$borderColor"
       bw="$0.5"
       p="$3"
-      gap="$4"
+      gap="$3"
       br="$4"
       $xs={{
         br: '$0',
