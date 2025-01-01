@@ -3,7 +3,15 @@ import { t } from 'elysia'
 import { toHex } from 'viem'
 import { redis } from '../services/redis'
 import { WebAuthnP256 } from 'ox'
-import { createPasskey, getPasskey, getVaults, likePost, unlikePost } from '@anonworld/db'
+import {
+  createPasskey,
+  CredentialInstance,
+  getPasskey,
+  getVaults,
+  likePost,
+  unlikePost,
+  Vault,
+} from '@anonworld/db'
 
 export const authRoutes = createElysia({ prefix: '/auth' })
   .post(
@@ -109,8 +117,23 @@ export const authRoutes = createElysia({ prefix: '/auth' })
     if (!passkeyId) {
       return { data: [] }
     }
-    const data = await getVaults(passkeyId)
-    return { data }
+    const response = await getVaults(passkeyId)
+    const credentialsByVault = response.reduce(
+      (acc, vault) => {
+        if (!acc[vault.vaults.id]) {
+          acc[vault.vaults.id] = {
+            ...vault.vaults,
+            credentials: [],
+          }
+        }
+        acc[vault.vaults.id].credentials.push(
+          vault.credential_instances as CredentialInstance
+        )
+        return acc
+      },
+      {} as Record<string, Vault & { credentials: CredentialInstance[] }>
+    )
+    return { data: Object.values(credentialsByVault) }
   })
   .post(
     '/posts/like',

@@ -104,12 +104,6 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
       }),
     }
   )
-  .delete('/:id', async ({ params }) => {
-    await deleteCredentialInstance(params.id)
-    return {
-      success: true,
-    }
-  })
   .get('/:id', async ({ params }) => {
     const credential = await getCredentialInstance(params.id)
     return {

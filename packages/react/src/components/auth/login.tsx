@@ -89,8 +89,7 @@ export function AuthLogin({ children }: { children: ReactNode }) {
             </Text>
             <Text>
               Passkeys are used to anonymously authenticate you. There is no personal
-              information stored that can be used to identify you. This is completely
-              optional, you can always post without logging in.
+              information stored that can be used to identify you.
             </Text>
           </YStack>
           <YStack gap="$2">

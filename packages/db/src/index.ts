@@ -56,6 +56,8 @@ export type Community = typeof communitiesTable.$inferSelect & {
   twitter: TwitterAccount | null
 }
 
+export type Vault = typeof vaultsTable.$inferSelect
+
 export type PostDataV0 = {
   text?: string
   embeds?: string[]
@@ -531,7 +533,20 @@ export const createVault = async (
 }
 
 export const getVaults = async (passkeyId: string) => {
-  return await db.select().from(vaultsTable).where(eq(vaultsTable.passkey_id, passkeyId))
+  return await db
+    .select()
+    .from(vaultsTable)
+    .leftJoin(
+      credentialInstancesTable,
+      eq(vaultsTable.id, credentialInstancesTable.vault_id)
+    )
+    .where(
+      and(
+        eq(vaultsTable.passkey_id, passkeyId),
+        isNull(credentialInstancesTable.deleted_at),
+        isNull(credentialInstancesTable.reverified_id)
+      )
+    )
 }
 
 export const getVault = async (vaultId: string) => {

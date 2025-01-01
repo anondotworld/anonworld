@@ -6,6 +6,7 @@ import { concat, hashMessage, keccak256, pad, toHex } from 'viem'
 import { Credential } from '@anonworld/sdk/types'
 import { getBlock, getProof } from 'wagmi/actions'
 import { useSDK } from './sdk'
+import { useVaults } from '../hooks/use-vaults'
 
 const LOCAL_STORAGE_KEY = 'anon:credentials:v1'
 
@@ -49,6 +50,16 @@ export const CredentialsProvider = ({
   const { signMessageAsync } = useSignMessage()
   const { address } = useAccount()
   const config = useConfig()
+  const { data: vaults } = useVaults()
+
+  useEffect(() => {
+    if (vaults) {
+      const missingCredentials = vaults.flatMap((vault) =>
+        vault.credentials.filter((cred) => !credentials.some((c) => c.id === cred.id))
+      )
+      setCredentials((prev) => [...prev, ...missingCredentials])
+    }
+  }, [vaults])
 
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(credentials))
@@ -131,7 +142,10 @@ export const CredentialsProvider = ({
   }
 
   const deleteCredential = async (id: string) => {
-    await sdk.deleteCredential(id)
+    const credential = credentials.find((cred) => cred.id === id)
+    if (credential?.vault_id) {
+      await sdk.removeFromVault(credential.vault_id, credential.id)
+    }
     setCredentials((prev) => prev.filter((cred) => cred.id !== id))
   }
 

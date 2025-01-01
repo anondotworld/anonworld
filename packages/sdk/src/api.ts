@@ -182,12 +182,6 @@ export class Api {
     })
   }
 
-  async deleteCredential(id: string) {
-    return await this.request<{ success: boolean }>(`/credentials/${id}`, {
-      method: 'DELETE',
-    })
-  }
-
   async getCredential(id: string) {
     return await this.request<Credential>(`/credentials/${id}`)
   }
@@ -295,7 +289,7 @@ export class Api {
     if (!this.token) {
       return { error: { message: 'No token', status: 401 } }
     }
-    return await this.request<{ data: { id: string }[] }>(`/auth/vaults`)
+    return await this.request<{ data: Vault[] }>(`/auth/vaults`)
   }
 
   async likePost(hash: string) {
