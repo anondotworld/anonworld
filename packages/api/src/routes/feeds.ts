@@ -33,7 +33,7 @@ export const feedsRoutes = createElysia({ prefix: '/feeds' })
   )
   .get(
     '/:fid/new',
-    async ({ params, query, passkeyId }) => {
+    async ({ params, passkeyId }) => {
       let posts: Array<Cast> = []
 
       const cached = await redis.getNewFeed(params.fid)

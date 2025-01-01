@@ -4,8 +4,6 @@ import { PostReveal } from '../../reveal'
 import { PostActionsContent } from './content'
 import { useState } from 'react'
 import { Popover } from '@tamagui/popover'
-import { NewCredentialProvider } from '../../../credentials/new/context'
-import { NewCredentialDialog } from '../../../credentials/new/dialog'
 import { Cast } from '../../../../types'
 
 export function PostActions({ post }: { post: Cast }) {
@@ -13,7 +11,7 @@ export function PostActions({ post }: { post: Cast }) {
   const [postRevealOpen, setPostRevealOpen] = useState(false)
 
   return (
-    <NewCredentialProvider>
+    <>
       <Popover size="$5" placement="bottom" open={isOpen} onOpenChange={setIsOpen}>
         <Popover.Trigger>
           <View p="$2" br="$12" hoverStyle={{ bg: '$color5' }} cursor="pointer">
@@ -43,8 +41,9 @@ export function PostActions({ post }: { post: Cast }) {
           )}
         </Popover.Content>
       </Popover>
-      <PostReveal post={post} open={postRevealOpen} onOpenChange={setPostRevealOpen} />
-      <NewCredentialDialog />
-    </NewCredentialProvider>
+      {isOpen && (
+        <PostReveal post={post} open={postRevealOpen} onOpenChange={setPostRevealOpen} />
+      )}
+    </>
   )
 }
