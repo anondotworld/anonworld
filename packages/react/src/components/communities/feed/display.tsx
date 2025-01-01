@@ -84,7 +84,7 @@ export function CommunityDisplay({
 
 function FarcasterBadge({ farcaster }: { farcaster: FarcasterAccount }) {
   return (
-    <Link href={`https://warpcast.com/~/${farcaster.username}`} target="_blank">
+    <Link href={`https://warpcast.com/${farcaster.username}`} target="_blank">
       <Badge icon={<Farcaster size={12} />}>
         {`${farcaster.username} `}
         <Text col="$color11">{formatAmount(farcaster.follower_count)}</Text>

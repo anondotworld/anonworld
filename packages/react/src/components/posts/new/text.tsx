@@ -11,7 +11,7 @@ export function NewPostText() {
       placeholder="What's happening, anon?"
       theme="surface2"
       placeholderTextColor="$color11"
-      fos="$2"
+      fos="$3"
       width="100%"
       wordWrap="break-word"
       height={height}
@@ -21,7 +21,6 @@ export function NewPostText() {
       onContentSizeChange={(e) => {
         setHeight(Math.max(100, e.nativeEvent.contentSize.height))
       }}
-      autoFocus
     />
   )
 }

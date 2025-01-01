@@ -71,7 +71,10 @@ export const AuthProvider = ({
       const { raw, signature, metadata } = await WebAuthnP256.sign({ challenge })
       const response = await sdk.authenticatePasskey({
         nonce,
-        raw,
+        raw: {
+          id: raw.id,
+          type: raw.type,
+        },
         signature: {
           r: `0x${signature.r.toString(16)}`,
           s: `0x${signature.s.toString(16)}`,

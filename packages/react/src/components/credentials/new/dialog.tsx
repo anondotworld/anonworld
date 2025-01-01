@@ -19,9 +19,11 @@ export function NewCredentialDialog({ children }: { children?: ReactNode }) {
           dismissOnSnapToBottom
           snapPointsMode="fit"
         >
-          <Sheet.Frame padding="$3" pb="$5" gap="$3" bg="$color2">
-            <Adapt.Contents />
-          </Sheet.Frame>
+          {isOpen && (
+            <Sheet.Frame padding="$3" pb="$5" gap="$3" bg="$color2">
+              <Adapt.Contents />
+            </Sheet.Frame>
+          )}
           <Sheet.Overlay
             animation="quicker"
             enterStyle={{ opacity: 0 }}

@@ -3,7 +3,7 @@ import { HelpCircle } from '@tamagui/lucide-icons'
 import { X } from '@tamagui/lucide-icons'
 import { Adapt, Dialog, Sheet, Text, View, XStack, YStack } from '@anonworld/ui'
 import { AnonWorld } from './svg/anonworld'
-import { Link, TextLink } from 'solito/link'
+import { TextLink } from 'solito/link'
 
 export function About() {
   return (

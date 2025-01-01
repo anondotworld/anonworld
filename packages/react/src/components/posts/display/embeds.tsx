@@ -3,9 +3,10 @@ import { timeAgo } from '../../../utils'
 import { Avatar, Image, Text, View, XStack, YStack } from '@anonworld/ui'
 import { X } from '../../svg/x'
 import { useTwitterPost } from '../../../hooks/use-twitter-post'
-import { TextLink } from 'solito/link'
+import { useRouter } from 'solito/navigation'
 
 export function PostEmbed({ embed }: { embed: Embed }) {
+  const router = useRouter()
   if (embed.cast) {
     const filteredEmbeds = embed.cast.embeds?.filter((e) => !e.cast)
     let text = embed.cast.text
@@ -65,11 +66,14 @@ export function PostEmbed({ embed }: { embed: Embed }) {
   }
 
   return (
-    <TextLink href={embed.url} target="_blank">
-      <Text fos="$3" col="$color11" hoverStyle={{ textDecorationLine: 'underline' }}>
-        {embed.url}
-      </Text>
-    </TextLink>
+    <Text
+      fos="$3"
+      col="$color11"
+      hoverStyle={{ textDecorationLine: 'underline' }}
+      onPress={() => router.push(embed.url ?? '')}
+    >
+      {embed.url}
+    </Text>
   )
 }
 

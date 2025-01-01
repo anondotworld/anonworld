@@ -9,9 +9,11 @@ export function NewCommunityDialog({ children }: { children?: React.ReactNode })
       {children}
       <Adapt when="sm">
         <Sheet animation="quicker" zIndex={200000} modal dismissOnSnapToBottom>
-          <Sheet.Frame padding="$4" gap="$2">
-            <Adapt.Contents />
-          </Sheet.Frame>
+          {isOpen && (
+            <Sheet.Frame padding="$4" gap="$2">
+              <Adapt.Contents />
+            </Sheet.Frame>
+          )}
           <Sheet.Overlay
             animation="quicker"
             enterStyle={{ opacity: 0 }}
