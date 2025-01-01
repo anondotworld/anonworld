@@ -93,12 +93,13 @@ export function About() {
           </YStack>
           <YStack gap="$2">
             <Text fos="$2" fow="400" col="$color11">
-              What is a community?
+              What are communities?
             </Text>
             <Text>
-              A community is a group of users with shared credentials, backed by a token.
-              Communities can anonymously post to a shared social media account (currently
-              Farcaster or X).
+              Communities are groups of users with shared credentials. Every community is
+              backed by a token, a shared Farcaster account, and a shared wallet. Members
+              of a community can take anonymous actions on behalf of the community, such
+              as posting to Farcaster and X/Twitter.
             </Text>
           </YStack>
           <YStack gap="$2">

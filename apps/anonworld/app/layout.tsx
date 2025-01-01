@@ -10,6 +10,13 @@ export const metadata: Metadata = {
   title: 'anon.world',
   description: 'anon.world',
   icons: '/favicon.ico',
+  openGraph: {
+    title: 'anon.world',
+    description: 'An anonymous social network',
+    url: 'https://anon.world',
+    siteName: 'anon.world',
+    images: [{ url: '/banner.png', width: 1080, height: 566 }],
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

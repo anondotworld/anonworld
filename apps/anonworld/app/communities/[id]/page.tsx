@@ -16,7 +16,7 @@ export default function CommunityPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <View maxWidth={700} mx="auto" my="$4" gap="$4">
+    <View maxWidth={700} mx="auto" my="$3" gap="$3">
       <YStack gap="$3">
         <CommunityDisplay community={community} />
       </YStack>

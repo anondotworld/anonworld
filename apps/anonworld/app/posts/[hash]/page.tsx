@@ -16,7 +16,7 @@ export default function PostPage({ params }: { params: { hash: string } }) {
   })
 
   return (
-    <View maxWidth={700} mx="auto" my="$4" gap="$6">
+    <View maxWidth={700} mx="auto" my="$3" gap="$6">
       <YStack gap="$3">
         {post && (
           <View $xs={{ bbw: '$0.5', bc: '$borderColor' }}>
