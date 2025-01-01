@@ -133,14 +133,18 @@ export class FeedService {
   }
 
   private async getCasts(hashes: string[]) {
-    const response = await neynar.getBulkCasts(hashes)
-    const casts = response.result.casts.reduce(
-      (acc, c) => {
-        acc[c.hash] = c
-        return acc
-      },
-      {} as Record<string, Cast>
-    )
+    const BATCH_SIZE = 100
+    const casts: Record<string, Cast> = {}
+
+    for (let i = 0; i < hashes.length; i += BATCH_SIZE) {
+      const batchHashes = hashes.slice(i, i + BATCH_SIZE)
+      const response = await neynar.getBulkCasts(batchHashes)
+
+      response.result.casts.forEach((cast) => {
+        casts[cast.hash] = cast
+      })
+    }
+
     return casts
   }
 

@@ -114,8 +114,8 @@ export class Api {
     return await this.request<{ data: Array<Cast> }>(`/feeds/${fid}/trending`)
   }
 
-  async getNewFeed(fid: number) {
-    return await this.request<{ data: Array<Cast> }>(`/feeds/${fid}/new`)
+  async getNewFeed(fid: number, page = 1) {
+    return await this.request<{ data: Array<Cast> }>(`/feeds/${fid}/new?page=${page}`)
   }
 
   async getPost(hash: string) {
