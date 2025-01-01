@@ -6,6 +6,7 @@ import { ToastProvider } from './toast'
 import { ReactNode } from 'react'
 export { SDKProvider, useSDK } from './sdk'
 export { AuthProvider, useAuth } from './auth'
+export { CredentialsProvider, useCredentials } from './credentials'
 
 const queryClient = new QueryClient({
   defaultOptions: {

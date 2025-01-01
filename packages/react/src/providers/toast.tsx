@@ -36,11 +36,11 @@ const Toast = () => {
       scale={1}
       animation="quick"
       themeInverse
-      bg="$background"
-      px="$4"
-      py="$3"
+      backgroundColor="$color12"
+      paddingHorizontal="$4"
+      paddingVertical="$3"
     >
-      <TamaguiToast.Title lh="$1" fos="$3" fow="600">
+      <TamaguiToast.Title lineHeight="$1" fontSize="$3" fontWeight="600" color="$color1">
         {currentToast.title}
       </TamaguiToast.Title>
     </TamaguiToast>

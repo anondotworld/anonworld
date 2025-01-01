@@ -1,33 +1,55 @@
-import { useEffect, useState } from 'react'
+'use client'
+
+import { createContext, useContext, useEffect, useState } from 'react'
 import { useAccount, useConfig, useSignMessage } from 'wagmi'
 import { concat, hashMessage, keccak256, pad, toHex } from 'viem'
-import { AnonWorldSDK } from '@anonworld/sdk'
 import { Credential } from '@anonworld/sdk/types'
 import { getBlock, getProof } from 'wagmi/actions'
+import { useSDK } from './sdk'
 
 const LOCAL_STORAGE_KEY = 'anon:credentials:v1'
 
-export function useCredentials(sdk: AnonWorldSDK) {
-  const [isInitializing, setIsInitializing] = useState(true)
-  const [credentials, setCredentials] = useState<Credential[]>([])
+const getInitialCredentials = () => {
+  const stored = localStorage.getItem(LOCAL_STORAGE_KEY)
+  if (stored) {
+    try {
+      return JSON.parse(stored)
+    } catch (error) {
+      localStorage.removeItem(LOCAL_STORAGE_KEY)
+      return null
+    }
+  }
+  return null
+}
+
+type CredentialsContextType = {
+  credentials: Credential[]
+  delete: (id: string) => Promise<void>
+  get: (id: string) => Credential | undefined
+  add: (args: {
+    chainId: number
+    tokenAddress: `0x${string}`
+    verifiedBalance: bigint
+    parentId?: string
+  }) => Promise<Credential>
+  addToVault: (vaultId: string, credentialId: string) => Promise<void>
+  removeFromVault: (vaultId: string, credentialId: string) => Promise<void>
+}
+
+const CredentialsContext = createContext<CredentialsContextType | null>(null)
+
+export const CredentialsProvider = ({
+  children,
+}: {
+  children: React.ReactNode
+}) => {
+  const { sdk, connectWallet } = useSDK()
+  const [credentials, setCredentials] = useState<Credential[]>(getInitialCredentials())
   const { signMessageAsync } = useSignMessage()
   const { address } = useAccount()
   const config = useConfig()
 
   useEffect(() => {
-    const stored = localStorage.getItem(LOCAL_STORAGE_KEY)
-    if (stored) {
-      try {
-        setCredentials(JSON.parse(stored))
-      } catch (e) {
-        console.error('Failed to parse stored credentials:', e)
-      }
-    }
-    setIsInitializing(false)
-  }, [])
-
-  useEffect(() => {
-    if (isInitializing) return
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(credentials))
   }, [credentials])
 
@@ -35,9 +57,10 @@ export function useCredentials(sdk: AnonWorldSDK) {
     chainId: number
     tokenAddress: `0x${string}`
     verifiedBalance: bigint
-    vaultId?: string
+    parentId?: string
   }) => {
     if (!address) {
+      connectWallet?.()
       throw new Error('No address connected')
     }
 
@@ -49,7 +72,7 @@ export function useCredentials(sdk: AnonWorldSDK) {
     const balanceSlot = response.data.slot
     const balanceSlotHex = pad(toHex(balanceSlot))
     const storageKey = keccak256(concat([pad(address), balanceSlotHex]))
-    const block = await getBlock(config, { chainId: args.chainId })
+    const block = await getBlock(config, { chainId: Number(args.chainId) })
     const proof = await getProof(config, {
       address: args.tokenAddress,
       storageKeys: [storageKey],
@@ -57,7 +80,7 @@ export function useCredentials(sdk: AnonWorldSDK) {
     })
 
     const message = JSON.stringify({
-      chainId: args.chainId.toString(),
+      chainId: args.chainId,
       blockNumber: block.number.toString(),
       storageHash: proof.storageHash,
       tokenAddress: args.tokenAddress,
@@ -79,16 +102,31 @@ export function useCredentials(sdk: AnonWorldSDK) {
       balanceSlot: balanceSlotHex,
       verifiedBalance: args.verifiedBalance,
       blockTimestamp: block.timestamp,
-      vaultId: args.vaultId,
+      parentId: args.parentId,
     })
 
     if (credential.error) {
       throw new Error(credential.error.message)
     }
 
-    setCredentials((prev) => [...prev, credential.data])
-
     return credential.data
+  }
+
+  const addCredential = async (args: {
+    chainId: number
+    tokenAddress: `0x${string}`
+    verifiedBalance: bigint
+    parentId?: string
+  }) => {
+    const credential = await addERC20Balance(args)
+    if (args.parentId) {
+      setCredentials((prev) =>
+        prev.map((cred) => (cred.id === args.parentId ? credential : cred))
+      )
+    } else {
+      setCredentials((prev) => [...prev, credential])
+    }
+    return credential
   }
 
   const deleteCredential = async (id: string) => {
@@ -116,12 +154,26 @@ export function useCredentials(sdk: AnonWorldSDK) {
     )
   }
 
-  return {
-    credentials,
-    delete: deleteCredential,
-    get: getCredential,
-    addERC20Balance,
-    addToVault,
-    removeFromVault,
+  return (
+    <CredentialsContext.Provider
+      value={{
+        credentials,
+        delete: deleteCredential,
+        get: getCredential,
+        add: addCredential,
+        addToVault,
+        removeFromVault,
+      }}
+    >
+      {children}
+    </CredentialsContext.Provider>
+  )
+}
+
+export const useCredentials = () => {
+  const context = useContext(CredentialsContext)
+  if (!context) {
+    throw new Error('useCredentials must be used within an CredentialsProvider')
   }
+  return context
 }

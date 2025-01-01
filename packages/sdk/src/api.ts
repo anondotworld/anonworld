@@ -166,19 +166,19 @@ export class Api {
   async createCredential({
     proof,
     publicInputs,
-    vaultId,
+    parentId,
     type,
     version,
   }: {
     proof: number[]
     publicInputs: string[]
-    vaultId?: string
-    type: 'ERC20_BALANCE'
-    version: '0.1.5'
+    parentId?: string
+    type: string
+    version: string
   }) {
     return await this.request<Credential>('/credentials', {
       method: 'POST',
-      body: JSON.stringify({ proof, publicInputs, vaultId, type, version }),
+      body: JSON.stringify({ proof, publicInputs, parentId, type, version }),
     })
   }
 

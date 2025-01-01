@@ -1,6 +1,6 @@
 import { ActionType, Community } from '../../../types'
 import { useActions } from '../../../hooks/use-actions'
-import { useSDK } from '../../../providers'
+import { useCredentials } from '../../../providers'
 import { getUsableCredential } from '../../../utils'
 import { NewPostProvider } from '../../posts/new/context'
 import { NewPostDialog } from '../../posts/new/dialog'
@@ -24,7 +24,7 @@ export function NewCommunityPost({
   community: Community
 }) {
   const { data: actions } = useActions()
-  const { credentials } = useSDK()
+  const { credentials } = useCredentials()
   const relevantAction = actions?.find((action) => {
     if (
       action.type === ActionType.COPY_POST_FARCASTER &&
@@ -37,7 +37,7 @@ export function NewCommunityPost({
   })
 
   const credential = relevantAction
-    ? getUsableCredential(credentials.credentials, relevantAction)
+    ? getUsableCredential(credentials, relevantAction)
     : null
 
   if (!actions) return null

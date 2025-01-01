@@ -18,11 +18,10 @@ import { CredentialType, FungiblePosition } from '../../../types'
 import { useAccount, useDisconnect } from 'wagmi'
 import { chainIdToZerion, formatAddress, zerionToChainId } from '../../../utils'
 import { useEffect, useMemo, useState } from 'react'
-import { useSDK } from '../../../providers'
+import { useCredentials } from '../../../providers'
 import { parseUnits } from 'viem'
 import { useWalletFungibles } from '../../../hooks/use-wallet-fungibles'
 import { TokenImage } from '../../tokens/image'
-import { useVaults } from '../../../hooks/use-vaults'
 
 export function NewCredentialForm() {
   const { credentialType } = useNewCredential()
@@ -317,20 +316,18 @@ function BalanceField() {
 function AddCredentialButton() {
   const { address } = useAccount()
   const { tokenId, balance, setIsOpen, decimals } = useNewCredential()
-  const { credentials } = useSDK()
+  const { add } = useCredentials()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
-  const { data: vaults } = useVaults()
 
   const handleAddCredential = async () => {
     if (!tokenId) return
     try {
       setIsLoading(true)
-      await credentials.addERC20Balance({
+      await add({
         chainId: tokenId.chainId,
         tokenAddress: tokenId.address as `0x${string}`,
         verifiedBalance: parseUnits(balance.toString(), decimals),
-        vaultId: vaults?.[0]?.id,
       })
       setIsLoading(false)
       setIsOpen(false)

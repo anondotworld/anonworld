@@ -1,6 +1,6 @@
 import { Credential } from '../../../types'
 import { View, XStack, YStack } from '@anonworld/ui'
-import { chains, timeAgo } from '../../../utils'
+import { chains, CREDENTIAL_EXPIRATION_TIME, timeAgo } from '../../../utils'
 import { Badge } from '../../badge'
 import { CredentialActions } from './actions'
 import { useToken } from '../../../hooks'
@@ -12,6 +12,9 @@ export function CredentialDisplay({
   credential,
   onPress,
 }: { credential: Credential; onPress?: () => void }) {
+  const isExpired =
+    credential.verified_at &&
+    new Date(credential.verified_at).getTime() + CREDENTIAL_EXPIRATION_TIME < Date.now()
   return (
     <YStack
       theme="surface1"
@@ -34,6 +37,7 @@ export function CredentialDisplay({
         <VaultBadge vaultId={credential.vault_id} />
         <Badge>ERC20 Balance</Badge>
         <Badge>{timeAgo(credential.verified_at)}</Badge>
+        {isExpired && <Badge destructive>Expired</Badge>}
       </XStack>
       <ERC20CredentialDisplay credential={credential} />
       <View position="absolute" top="$2" right="$3">

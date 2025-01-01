@@ -9,18 +9,28 @@ import { DeletePostFarcaster } from '../actions/delete-post-farcaster'
 import { BaseAction } from '../actions/base'
 import { ActionRequest, ActionType } from '../actions/types'
 
+export const CREDENTIAL_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7 // 7 days
+
 async function getActionInstance(request: ActionRequest) {
   const action = await getAction(request.actionId)
 
   let actionInstance: BaseAction | undefined
 
-  if (
-    action.credential_id &&
-    !request.credentials.some(
+  if (action.credential_id) {
+    const credential = request.credentials.find(
       (credential) => credential.credential_id === action.credential_id
     )
-  ) {
-    throw new Error('Missing required credential')
+
+    if (!credential) {
+      throw new Error('Missing required credential')
+    }
+
+    if (
+      new Date(credential.verified_at).getTime() + CREDENTIAL_EXPIRATION_TIME <
+      Date.now()
+    ) {
+      throw new Error('Credential expired')
+    }
   }
 
   switch (action.type) {

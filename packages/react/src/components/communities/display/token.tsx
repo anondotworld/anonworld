@@ -5,7 +5,7 @@ import { extractChain } from 'viem'
 import { formatEther, formatUnits } from 'viem'
 import { useActions } from '../../../hooks/use-actions'
 import { Action, ActionType, Community } from '../../../types'
-import { useSDK } from '../../../providers'
+import { useCredentials } from '../../../providers'
 import { getUsableCredential } from '../../../utils'
 import { CircleCheck, CircleX } from '@tamagui/lucide-icons'
 import { TokenImage } from '../../tokens/image'
@@ -121,7 +121,7 @@ export function CommunityActions({ community }: { community: Community }) {
 }
 
 function CommunityActionItem({ action }: { action: CommunityAction }) {
-  const { credentials } = useSDK()
+  const { credentials } = useCredentials()
 
   const amount = Number.parseFloat(
     formatUnits(BigInt(action.value), action.action.community?.token.decimals ?? 18)
@@ -135,7 +135,7 @@ function CommunityActionItem({ action }: { action: CommunityAction }) {
     labels.push(`${action.farcaster.join('/')} on Farcaster`)
   }
 
-  const credential = getUsableCredential(credentials.credentials, action.action)
+  const credential = getUsableCredential(credentials, action.action)
 
   return (
     <XStack gap="$2" ai="center">

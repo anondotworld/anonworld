@@ -2,6 +2,10 @@ import { CompiledCircuit, type Noir } from '@noir-lang/noir_js'
 import { UltraHonkBackend, BarretenbergVerifier, ProofData } from '@aztec/bb.js'
 export type { ProofData } from '@aztec/bb.js'
 
+export enum CircuitType {
+  ERC20_BALANCE = 'ERC20_BALANCE',
+}
+
 type ProverModules = {
   Noir: typeof Noir
   UltraHonkBackend: typeof UltraHonkBackend
@@ -23,10 +27,12 @@ export abstract class BaseCircuit {
 
   public key: string
   public version: string
+  public type: CircuitType
 
-  constructor(circuitKey: string, circuitVersion: string) {
+  constructor(circuitKey: string, circuitVersion: string, circuitType: CircuitType) {
     this.key = circuitKey
     this.version = circuitVersion
+    this.type = circuitType
   }
 
   async initCircuit() {

@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Credential, useSDK } from '@anonworld/react'
+import { Credential, useCredentials } from '@anonworld/react'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -35,11 +35,11 @@ export function CredentialsSelect({
   selected: Credential | null
   onSelect: (credential: Credential | null) => void
 }) {
-  const { credentials } = useSDK()
+  const { credentials } = useCredentials()
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
-    onSelect(credentials.credentials[0] ?? null)
+    onSelect(credentials[0] ?? null)
   }, [])
 
   return (
@@ -50,7 +50,7 @@ export function CredentialsSelect({
           if (id === 'new') {
             setOpen(true)
           } else {
-            onSelect(credentials.get(id) ?? null)
+            onSelect(credentials.find((credential) => credential.id === id) ?? null)
           }
         }}
         key={open ? 'open' : 'closed'}
@@ -60,7 +60,7 @@ export function CredentialsSelect({
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {credentials.credentials.map((credential) => (
+            {credentials.map((credential) => (
               <SelectItem key={credential.id} value={credential.id}>
                 <div className="flex flex-row items-center gap-2">
                   <span className="font-semibold">
@@ -77,7 +77,7 @@ export function CredentialsSelect({
               </SelectItem>
             ))}
           </SelectGroup>
-          {credentials.credentials.length > 0 && <SelectSeparator />}
+          {credentials.length > 0 && <SelectSeparator />}
           <SelectGroup>
             <SelectItem value="new" className="font-semibold">
               Add new credential...
@@ -110,13 +110,13 @@ export function VerifyCredential({
   const { data } = useBalance()
   const maxBalance = data ? Number.parseInt(formatUnits(data, 18)) : 0
   const [balance, setBalance] = useState(minBalance)
-  const { credentials } = useSDK()
+  const { add } = useCredentials()
   const [error, setError] = useState<string | null>(null)
 
   const handleVerify = async () => {
     setIsVerifying(true)
     try {
-      const credential = await credentials.addERC20Balance({
+      const credential = await add({
         chainId: 8453,
         tokenAddress: TOKEN_ADDRESS,
         verifiedBalance: parseEther(balance.toString()),

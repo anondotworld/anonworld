@@ -2,8 +2,10 @@ import { createElysia } from '../utils'
 import { t } from 'elysia'
 import {
   createCredentialInstance,
+  CredentialInstance,
   deleteCredentialInstance,
   getCredentialInstance,
+  reverifyCredentialInstance,
 } from '@anonworld/db'
 import { CircuitType, getCircuit } from '@anonworld/zk'
 import {
@@ -64,6 +66,11 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
         throw new Error('Invalid storage hash')
       }
 
+      let parent: CredentialInstance | null = null
+      if (body.parentId) {
+        parent = await getCredentialInstance(body.parentId)
+      }
+
       const credential = await createCredentialInstance({
         id,
         credential_id: credentialId,
@@ -74,8 +81,13 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
           publicInputs: body.publicInputs,
         },
         verified_at: new Date(Number(block.timestamp) * 1000),
-        vault_id: body.vaultId,
+        parent_id: parent?.parent_id ?? parent?.id,
+        vault_id: parent?.vault_id,
       })
+
+      if (parent) {
+        await reverifyCredentialInstance(parent.id, credential.id)
+      }
 
       return {
         ...credential,
@@ -88,7 +100,7 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
         version: t.String(),
         proof: t.Array(t.Number()),
         publicInputs: t.Array(t.String()),
-        vaultId: t.Optional(t.String()),
+        parentId: t.Optional(t.String()),
       }),
     }
   )

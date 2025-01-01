@@ -1,11 +1,10 @@
 import { AnonWorldSDK } from '@anonworld/sdk'
 import { createContext, useContext, ReactNode, useMemo } from 'react'
-import { useCredentials } from '../hooks/use-credentials'
 import { AuthProvider } from './auth'
+import { CredentialsProvider } from './credentials'
 
 interface SDKContextValue {
   sdk: AnonWorldSDK
-  credentials: ReturnType<typeof useCredentials>
   connectWallet?: () => void
   isConnecting: boolean
 }
@@ -24,11 +23,12 @@ export const SDKProvider = ({
   apiUrl?: string
 }) => {
   const sdk = useMemo(() => new AnonWorldSDK(apiUrl), [apiUrl])
-  const credentials = useCredentials(sdk)
 
   return (
-    <SDKContext.Provider value={{ sdk, credentials, connectWallet, isConnecting }}>
-      <AuthProvider sdk={sdk}>{children}</AuthProvider>
+    <SDKContext.Provider value={{ sdk, connectWallet, isConnecting }}>
+      <AuthProvider sdk={sdk}>
+        <CredentialsProvider>{children}</CredentialsProvider>
+      </AuthProvider>
     </SDKContext.Provider>
   )
 }

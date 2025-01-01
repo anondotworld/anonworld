@@ -27,7 +27,7 @@ export function VaultDisplay({ vault }: { vault: Vault }) {
           <Text fos="$4" fow="600">
             {id}
           </Text>
-          <XStack gap="$2">
+          <XStack gap="$2" flexWrap="wrap">
             <Badge>{timeAgo(vault.created_at)}</Badge>
             <Badge icon={<MessageCircle size={12} />}>{formatAmount(vault.posts)}</Badge>
             {vault.credentials.map((credential) => (

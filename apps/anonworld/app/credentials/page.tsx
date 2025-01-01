@@ -1,12 +1,12 @@
 'use client'
 
-import { CredentialDisplay, NewCredential, useSDK } from '@anonworld/react'
+import { CredentialDisplay, NewCredential, useCredentials } from '@anonworld/react'
 import { Text, View, XStack, YStack } from '@anonworld/ui'
 
 export default function Credentials() {
-  const { credentials } = useSDK()
+  const { credentials } = useCredentials()
 
-  const sortedCredentials = credentials.credentials.sort((a, b) => {
+  const sortedCredentials = credentials.sort((a, b) => {
     return new Date(b.verified_at).getTime() - new Date(a.verified_at).getTime()
   })
 

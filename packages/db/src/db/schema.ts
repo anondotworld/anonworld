@@ -117,6 +117,8 @@ export const credentialInstancesTable = pgTable('credential_instances', {
   proof: jsonb('proof').notNull(),
   verified_at: timestamp().notNull(),
   vault_id: uuid('vault_id').references(() => vaultsTable.id),
+  parent_id: varchar({ length: 255 }).references(() => credentialInstancesTable.id),
+  reverified_id: varchar({ length: 255 }).references(() => credentialInstancesTable.id),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
   deleted_at: timestamp(),

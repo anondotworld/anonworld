@@ -4,16 +4,18 @@ export function Badge({
   children,
   icon,
   onPress,
+  destructive = false,
 }: {
   children?: React.ReactNode
   icon?: React.ReactNode
   onPress?: () => void
+  destructive?: boolean
 }) {
   return (
     <View
       theme="surface3"
-      bg="$background"
-      bc="$borderColor"
+      bg={destructive ? '$red3' : '$background'}
+      bc={destructive ? '$red9' : '$borderColor'}
       bw="$0.25"
       br="$12"
       px={children ? '$2' : '$1.5'}
@@ -26,7 +28,11 @@ export function Badge({
       hoverStyle={{ bg: '$color5' }}
     >
       {icon}
-      {children && <Text fos="$1">{children}</Text>}
+      {children && (
+        <Text fos="$1" color={destructive ? '$red12' : undefined}>
+          {children}
+        </Text>
+      )}
     </View>
   )
 }

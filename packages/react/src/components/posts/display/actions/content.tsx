@@ -2,7 +2,6 @@ import { Eye, Trash } from '@tamagui/lucide-icons'
 import { Spinner, Text, useToastController, View, YGroup, YStack } from '@anonworld/ui'
 import { useActions } from '../../../../hooks/use-actions'
 import { Action, ActionType, Cast, CredentialRequirement } from '../../../../types'
-import { useSDK } from '../../../../providers/sdk'
 import { formatAmount, getUsableCredential } from '../../../../utils'
 import { Farcaster } from '../../../svg/farcaster'
 import { X } from '../../../svg/x'
@@ -11,6 +10,7 @@ import { useFarcasterUser } from '../../../../hooks/use-farcaster-user'
 import { useExecuteActions } from '../../../../hooks'
 import { formatUnits } from 'viem/utils'
 import { useNewCredential } from '../../../credentials/new/context'
+import { useCredentials } from '../../../../providers'
 
 export function PostActionsContent({
   post,
@@ -262,8 +262,8 @@ function BasePostAction({
   successMessage: string
 }) {
   const { setIsOpen } = useNewCredential()
-  const { credentials } = useSDK()
-  const credential = getUsableCredential(credentials.credentials, action)
+  const { credentials } = useCredentials()
+  const credential = getUsableCredential(credentials, action)
   const toast = useToastController()
   const { mutate, isPending } = useExecuteActions({
     credentials: credential ? [credential] : [],

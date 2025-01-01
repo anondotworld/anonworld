@@ -1,6 +1,9 @@
 import { base } from 'viem/chains'
 import { Action, Credential } from '../types'
 
+export const CREDENTIAL_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7 // 7 days
+// export const CREDENTIAL_EXPIRATION_TIME = 1000 * 60 * 60 * 24 // 1 day
+
 export const chains = [base]
 
 export const zerionToChainId: Record<string, number> = {

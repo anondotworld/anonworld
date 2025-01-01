@@ -67,7 +67,7 @@ export const authRoutes = createElysia({ prefix: '/auth' })
       }
 
       const result = WebAuthnP256.verify({
-        challenge,
+        challenge: challenge as `0x${string}`,
         signature: {
           r: BigInt(body.signature.r),
           s: BigInt(body.signature.s),

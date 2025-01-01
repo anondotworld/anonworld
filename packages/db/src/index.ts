@@ -316,14 +316,16 @@ export const getTwitterAccount = async (username: string) => {
   return account
 }
 
-export const getCredentialInstance = async (id: string) => {
+export const getCredentialInstance = async (
+  id: string
+): Promise<CredentialInstance | null> => {
   const [credential] = await db
     .select()
     .from(credentialInstancesTable)
     .where(eq(credentialInstancesTable.id, id))
     .limit(1)
 
-  return credential
+  return credential as CredentialInstance | null
 }
 
 export const createCredentialInstance = async (
@@ -339,7 +341,18 @@ export const createCredentialInstance = async (
 export const deleteCredentialInstance = async (id: string) => {
   await db
     .update(credentialInstancesTable)
-    .set({ deleted_at: new Date(), vault_id: null, updated_at: new Date() })
+    .set({
+      deleted_at: new Date(),
+      vault_id: null,
+      updated_at: new Date(),
+    })
+    .where(eq(credentialInstancesTable.id, id))
+}
+
+export const reverifyCredentialInstance = async (id: string, reverifiedId: string) => {
+  await db
+    .update(credentialInstancesTable)
+    .set({ reverified_id: reverifiedId, updated_at: new Date() })
     .where(eq(credentialInstancesTable.id, id))
 }
 
@@ -548,7 +561,12 @@ export const getCredentialsFromVault = async (vaultId: string) => {
   return await db
     .select()
     .from(credentialInstancesTable)
-    .where(eq(credentialInstancesTable.vault_id, vaultId))
+    .where(
+      and(
+        eq(credentialInstancesTable.vault_id, vaultId),
+        isNull(credentialInstancesTable.reverified_id)
+      )
+    )
 }
 
 export const getPostsFromVault = async (

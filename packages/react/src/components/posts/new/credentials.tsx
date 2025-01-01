@@ -1,6 +1,6 @@
 import { Popover, ScrollView, Text, View, XStack } from '@anonworld/ui'
 import { Check, Plus } from '@tamagui/lucide-icons'
-import { useSDK } from '../../../providers'
+import { useCredentials } from '../../../providers'
 import { Badge } from '../../badge'
 import { useToken } from '../../../hooks/use-token'
 import { Credential } from '../../../types'
@@ -9,6 +9,8 @@ import { useNewPost } from './context'
 import { CredentialBadge } from '../../credentials/badge'
 import { TokenImage } from '../../tokens/image'
 import { VaultBadge } from '../../vaults/badge'
+import { CREDENTIAL_EXPIRATION_TIME } from '../../../utils'
+import { LinearGradient } from '@tamagui/linear-gradient'
 
 export function NewPostCredentials() {
   const { credentials, removeCredential } = useNewPost()
@@ -27,7 +29,7 @@ export function NewPostCredentials() {
 }
 
 function CredentialSelector() {
-  const { credentials } = useSDK()
+  const { credentials } = useCredentials()
   const { addCredential, removeCredential } = useNewPost()
   const { credentials: postCredentials } = useNewPost()
 
@@ -70,27 +72,53 @@ function CredentialSelector() {
           </Text>
         </View>
         <ScrollView maxHeight="$14">
-          {credentials.credentials.map((credential) => (
-            <XStack
-              key={credential.id}
-              gap="$2"
-              ai="center"
-              p="$2"
-              hoverStyle={{ bg: '$color5' }}
-              bc="$borderColor"
-              btw="$0.5"
-              onPress={() => handlePress(credential)}
-            >
-              <VaultBadge vaultId={credential.vault_id} />
-              <Badge>ERC20 Balance</Badge>
-              <ERC20Credential credential={credential} />
-              <View w={16}>
-                {postCredentials.some((c) => c.id === credential.id) && (
-                  <Check size={16} />
+          {credentials.map((credential) => {
+            const isExpired =
+              credential.verified_at &&
+              new Date(credential.verified_at).getTime() + CREDENTIAL_EXPIRATION_TIME <
+                Date.now()
+            return (
+              <XStack
+                key={credential.id}
+                gap="$2"
+                ai="center"
+                p="$2"
+                hoverStyle={{ bg: '$color5' }}
+                bc="$borderColor"
+                btw="$0.5"
+                onPress={() => {
+                  if (isExpired) return
+                  handlePress(credential)
+                }}
+              >
+                {!isExpired && <VaultBadge vaultId={credential.vault_id} />}
+                {isExpired && (
+                  <Badge
+                    icon={
+                      <LinearGradient
+                        width={16}
+                        height={16}
+                        borderRadius="$12"
+                        colors={['$red10', '$red12']}
+                        start={[1, 1]}
+                        end={[0, 0]}
+                      />
+                    }
+                    destructive
+                  >
+                    Expired
+                  </Badge>
                 )}
-              </View>
-            </XStack>
-          ))}
+                <Badge>ERC20 Balance</Badge>
+                <ERC20Credential credential={credential} />
+                <View w={16}>
+                  {postCredentials.some((c) => c.id === credential.id) && (
+                    <Check size={16} />
+                  )}
+                </View>
+              </XStack>
+            )
+          })}
         </ScrollView>
       </Popover.Content>
     </Popover>
