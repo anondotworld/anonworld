@@ -7,6 +7,7 @@ import { useToken } from '../../../hooks'
 import { extractChain, formatUnits } from 'viem/utils'
 import { Field } from '../../field'
 import { VaultBadge } from '../../vaults/badge'
+import { Link } from 'solito/link'
 
 export function CredentialDisplay({
   credential,
@@ -21,12 +22,16 @@ export function CredentialDisplay({
       themeShallow
       bg="$background"
       bc="$borderColor"
-      bbw="$0.5"
+      bw="$0.5"
       p="$3"
       gap="$4"
-      $gtXs={{
-        br: '$4',
-        bw: '$0.5',
+      br="$4"
+      $xs={{
+        br: '$0',
+        bw: '$0',
+        btw: '$0.5',
+        px: '$2',
+        py: '$3',
       }}
       onPress={onPress}
       hoverStyle={onPress ? { bg: '$color3' } : {}}
@@ -34,13 +39,15 @@ export function CredentialDisplay({
       f={1}
     >
       <XStack ai="center" gap="$2">
-        <VaultBadge vaultId={credential.vault_id} />
+        <Link href={`/profiles/${credential.vault_id}`}>
+          <VaultBadge vaultId={credential.vault_id} />
+        </Link>
         <Badge>ERC20 Balance</Badge>
         <Badge>{timeAgo(credential.verified_at)}</Badge>
         {isExpired && <Badge destructive>Expired</Badge>}
       </XStack>
       <ERC20CredentialDisplay credential={credential} />
-      <View position="absolute" top="$2" right="$3">
+      <View position="absolute" top="$2" right="$3" $xs={{ right: '$2' }}>
         <CredentialActions credential={credential} />
       </View>
     </YStack>
@@ -59,7 +66,7 @@ function ERC20CredentialDisplay({ credential }: { credential: Credential }) {
   )
 
   return (
-    <XStack>
+    <XStack $xs={{ flexDirection: 'column', gap: '$2', ai: 'flex-start' }}>
       {[
         {
           label: 'Token',

@@ -7,7 +7,7 @@ import { Heart } from '@tamagui/lucide-icons'
 import { PostActions } from './actions'
 import { ReplyButton } from '../actions/reply'
 import { VaultAvatar } from '../../vaults/avatar'
-import { TextLink } from 'solito/link'
+import { Link, TextLink } from 'solito/link'
 import { LikeButton } from '../actions/like'
 
 export function PostConversation({
@@ -16,7 +16,7 @@ export function PostConversation({
   conversation: Array<ConversationCast>
 }) {
   return (
-    <YStack gap="$4">
+    <YStack gap="$4" $xs={{ px: '$2' }}>
       {conversation.map((post, index) => (
         <Post
           key={post.hash}
@@ -83,7 +83,9 @@ function Post({
               </View>
               <XStack gap="$2" ai="center">
                 {post.credentials[0].vault_id && (
-                  <VaultBadge vaultId={post.credentials[0].vault_id} />
+                  <Link href={`/profiles/${post.credentials[0].vault_id}`}>
+                    <VaultBadge vaultId={post.credentials[0].vault_id} />
+                  </Link>
                 )}
                 {post.credentials.map((credential, index) => (
                   <CredentialBadge key={index} credential={credential} />

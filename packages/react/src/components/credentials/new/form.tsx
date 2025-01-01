@@ -180,17 +180,13 @@ function TokenField() {
 
         <Adapt when="sm" platform="touch">
           <Sheet
-            native
+            animation="quicker"
+            zIndex={200000}
             modal
             dismissOnSnapToBottom
-            animationConfig={{
-              type: 'spring',
-              damping: 20,
-              mass: 1.2,
-              stiffness: 250,
-            }}
+            snapPointsMode="fit"
           >
-            <Sheet.Frame>
+            <Sheet.Frame padding="$3" pb="$5" gap="$3" bg="$color2">
               <Sheet.ScrollView>
                 <Adapt.Contents />
               </Sheet.ScrollView>
@@ -206,9 +202,14 @@ function TokenField() {
         <Select.Content zIndex={200000}>
           <Select.Viewport minWidth={200}>
             <Select.Group>
-              <Select.Label>Select a token</Select.Label>
+              <Select.Label $xs={{ bg: '$color2' }}>Select a token</Select.Label>
               {fungibles.map((token, index) => (
-                <Select.Item key={token.id} index={index} value={token.id}>
+                <Select.Item
+                  key={token.id}
+                  index={index}
+                  value={token.id}
+                  $xs={{ bg: '$color2' }}
+                >
                   <TokenValue token={token} />
                 </Select.Item>
               ))}
@@ -252,7 +253,7 @@ function TokenValue({ token }: { token: FungiblePosition }) {
             {`${token.attributes.quantity.float.toLocaleString(undefined, {
               maximumFractionDigits: 2,
               minimumFractionDigits: 2,
-            })} ${token.attributes.fungible_info.symbol}`}
+            })}`}
           </Text>
           <Text fos="$1" fow="400" color="$color11">
             {`$${token.attributes.value?.toLocaleString(undefined, {

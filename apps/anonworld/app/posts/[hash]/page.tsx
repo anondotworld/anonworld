@@ -18,7 +18,11 @@ export default function PostPage({ params }: { params: { hash: string } }) {
   return (
     <View maxWidth={700} mx="auto" my="$4" gap="$6">
       <YStack gap="$3">
-        {post && <Post post={post} />}
+        {post && (
+          <View $xs={{ bbw: '$0.5', bc: '$borderColor' }}>
+            <Post post={post} />
+          </View>
+        )}
         {post && <ReplyBar post={post} />}
       </YStack>
       {conversationLoading && <Spinner color="$color12" />}

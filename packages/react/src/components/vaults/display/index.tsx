@@ -1,4 +1,4 @@
-import { Text, XStack, YStack } from '@anonworld/ui'
+import { ScrollView, Text, XStack, YStack } from '@anonworld/ui'
 import { Badge } from '../../badge'
 import { MessageCircle } from '@tamagui/lucide-icons'
 import { formatAmount, formatHexId } from '../../../utils'
@@ -15,10 +15,18 @@ export function VaultDisplay({ vault }: { vault: Vault }) {
       themeShallow
       bg="$background"
       bc="$borderColor"
-      p="$4"
+      bw="$0.5"
+      p="$3"
       gap="$4"
       br="$4"
-      bw="$0.5"
+      $xs={{
+        br: '$0',
+        bw: '$0',
+        btw: '$0.5',
+        bbw: '$0.5',
+        px: '$2',
+        py: '$3',
+      }}
       f={1}
     >
       <XStack ai="center" gap="$4">
@@ -27,13 +35,17 @@ export function VaultDisplay({ vault }: { vault: Vault }) {
           <Text fos="$4" fow="600">
             {id}
           </Text>
-          <XStack gap="$2" flexWrap="wrap">
-            <Badge>{timeAgo(vault.created_at)}</Badge>
-            <Badge icon={<MessageCircle size={12} />}>{formatAmount(vault.posts)}</Badge>
-            {vault.credentials.map((credential) => (
-              <CredentialBadge key={credential.id} credential={credential} />
-            ))}
-          </XStack>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <XStack gap="$2">
+              <Badge>{timeAgo(vault.created_at)}</Badge>
+              <Badge icon={<MessageCircle size={12} />}>
+                {formatAmount(vault.posts)}
+              </Badge>
+              {vault.credentials.map((credential) => (
+                <CredentialBadge key={credential.id} credential={credential} />
+              ))}
+            </XStack>
+          </ScrollView>
         </YStack>
       </XStack>
     </YStack>

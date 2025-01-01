@@ -2,7 +2,7 @@
 
 import { About, Auth } from '@anonworld/react'
 import { Image, Text, View } from '@anonworld/ui'
-import { WalletMinimal } from '@tamagui/lucide-icons'
+import { UsersRound, WalletMinimal } from '@tamagui/lucide-icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -34,6 +34,9 @@ export function Header() {
         top: 0,
         zIndex: 1000,
       }}
+      $xs={{
+        px: '$3',
+      }}
     >
       <View fd="row" gap="$8" ai="center">
         <Link href="/" style={{ textDecoration: 'none' }}>
@@ -44,7 +47,7 @@ export function Header() {
             </Text>
           </View>
         </Link>
-        <View fd="row" gap="$2" ai="center">
+        <View fd="row" gap="$2" ai="center" $xs={{ display: 'none' }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
             <View
               bg={
@@ -117,8 +120,36 @@ export function Header() {
           </Link>
         </View>
       </View>
-      <View fd="row" gap="$3" ai="center">
-        <About />
+      <View fd="row" gap="$3" ai="center" $xs={{ gap: '$2' }}>
+        <View display="none" $xs={{ display: 'flex' }}>
+          <Link href="/communities" style={{ textDecoration: 'none' }}>
+            <View
+              bg={pathname.startsWith(Pathname.COMMUNITIES) ? '$color12' : '$color1'}
+              br="$12"
+              disabledStyle={{
+                opacity: 0.5,
+                bg: pathname.startsWith(Pathname.COMMUNITIES) ? '$color12' : '$color1',
+              }}
+              hoverStyle={{
+                opacity: 0.9,
+                bg: pathname.startsWith(Pathname.COMMUNITIES) ? '$color12' : '$color5',
+              }}
+              w={32}
+              h={32}
+              jc="center"
+              ai="center"
+            >
+              <UsersRound
+                size={20}
+                strokeWidth={2.5}
+                color={pathname.startsWith(Pathname.COMMUNITIES) ? '$color1' : '$color12'}
+              />
+            </View>
+          </Link>
+        </View>
+        <View $xs={{ display: 'none' }}>
+          <About />
+        </View>
         <Link
           href={pathname === Pathname.CREDENTIALS ? Pathname.HOME : Pathname.CREDENTIALS}
           style={{ textDecoration: 'none' }}

@@ -13,7 +13,7 @@ import { TokenImage } from '../../tokens/image'
 export function CommunityToken({ community }: { community: Community }) {
   const chain = extractChain({ chains, id: Number(community.token.chain_id) as any })
   return (
-    <YStack gap="$4" mt="$2">
+    <YStack gap="$4" mt="$2" $xs={{ gap: '$2' }}>
       <XStack gap="$4" ai="center">
         <Text fos="$1" fow="400" color="$color11" textTransform="uppercase">
           Token
@@ -30,7 +30,14 @@ export function CommunityToken({ community }: { community: Community }) {
             {`${chain.name} | ${formatAddress(community.token.address)}`}
           </Text>
         </YStack>
-        <XStack gap="$4" ai="center" jc="flex-end" px="$4" fg={1}>
+        <XStack
+          gap="$4"
+          ai="center"
+          jc="flex-end"
+          px="$4"
+          fg={1}
+          $xs={{ flexDirection: 'column', gap: '$2', px: '$2', ai: 'flex-end' }}
+        >
           <Field
             label="Mkt Cap"
             value={`$${formatAmount(community.token.market_cap)}`}

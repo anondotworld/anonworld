@@ -54,6 +54,7 @@ export function ReplyBar({ post }: { post: Cast }) {
             group
             cursor="pointer"
             hoverStyle={{ bg: '$color4' }}
+            $xs={{ mx: '$2' }}
           >
             <MessageCircle size={16} col="$color11" $group-hover={{ col: '$color12' }} />
             <Text fos="$2" col="$color11" $group-hover={{ col: '$color12' }}>

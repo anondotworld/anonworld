@@ -4,16 +4,12 @@ import {
   CommunityDisplay,
   NewCommunityPost,
   PostFeed,
-  PostFeedSelector,
   useCommunity,
 } from '@anonworld/react'
 import { View, XStack, YStack } from '@anonworld/ui'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 
 export default function CommunityPage({ params }: { params: { id: string } }) {
   const { data: community } = useCommunity({ id: params.id })
-  const [feedType, setFeedType] = useState<'new' | 'trending'>('trending')
 
   if (!community) {
     return null
@@ -24,11 +20,11 @@ export default function CommunityPage({ params }: { params: { id: string } }) {
       <YStack gap="$3">
         <CommunityDisplay community={community} />
       </YStack>
-      <XStack ai="center" jc="space-between">
-        <PostFeedSelector selected={feedType} onSelect={setFeedType} />
+      <XStack ai="center" jc="space-between" $xs={{ px: '$2' }}>
+        <View />
         <NewCommunityPost community={community} />
       </XStack>
-      <PostFeed fid={community.fid} type={feedType} />
+      <PostFeed fid={community.fid} type="new" />
     </View>
   )
 }

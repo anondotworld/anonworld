@@ -1,4 +1,4 @@
-import { Image, Text, View, XStack, YStack } from '@anonworld/ui'
+import { Image, ScrollView, Text, View, XStack, YStack } from '@anonworld/ui'
 import { Badge } from '../../badge'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
@@ -18,9 +18,17 @@ export function CommunityDisplay({ community }: { community: Community }) {
       bg="$background"
       bc="$borderColor"
       bw="$0.5"
-      br="$4"
-      p="$4"
+      p="$3"
       gap="$4"
+      br="$4"
+      $xs={{
+        br: '$0',
+        bw: '$0',
+        btw: '$0.5',
+        bbw: '$0.5',
+        px: '$2',
+        py: '$3',
+      }}
       f={1}
     >
       <XStack ai="center" gap="$4">
@@ -36,14 +44,16 @@ export function CommunityDisplay({ community }: { community: Community }) {
           <Text fos="$4" fow="600">
             {community.name}
           </Text>
-          <XStack gap="$2">
-            <Badge>{timeAgo(community.created_at)}</Badge>
-            <Badge icon={<MessageCircle size={12} />}>
-              {formatAmount(community.posts)}
-            </Badge>
-            {community.farcaster && <FarcasterBadge farcaster={community.farcaster} />}
-            {community.twitter && <TwitterBadge twitter={community.twitter} />}
-          </XStack>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <XStack gap="$2">
+              <Badge>{timeAgo(community.created_at)}</Badge>
+              <Badge icon={<MessageCircle size={12} />}>
+                {formatAmount(community.posts)}
+              </Badge>
+              {community.farcaster && <FarcasterBadge farcaster={community.farcaster} />}
+              {community.twitter && <TwitterBadge twitter={community.twitter} />}
+            </XStack>
+          </ScrollView>
           <Text fos="$2" fow="400" color="$color11">
             {community.description}
           </Text>

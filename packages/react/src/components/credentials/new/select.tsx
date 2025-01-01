@@ -20,17 +20,13 @@ export function CredentialTypeSelect() {
 
       <Adapt when="sm" platform="touch">
         <Sheet
-          native
+          animation="quicker"
+          zIndex={200000}
           modal
           dismissOnSnapToBottom
-          animationConfig={{
-            type: 'spring',
-            damping: 20,
-            mass: 1.2,
-            stiffness: 250,
-          }}
+          snapPointsMode="fit"
         >
-          <Sheet.Frame>
+          <Sheet.Frame padding="$3" pb="$5" gap="$3" bg="$color2">
             <Sheet.ScrollView>
               <Adapt.Contents />
             </Sheet.ScrollView>
@@ -46,7 +42,11 @@ export function CredentialTypeSelect() {
       <Select.Content zIndex={200000}>
         <Select.Viewport minWidth={200}>
           <Select.Group>
-            <Select.Item index={0} value={CredentialType.ERC20_BALANCE}>
+            <Select.Item
+              index={0}
+              value={CredentialType.ERC20_BALANCE}
+              $xs={{ bg: '$color2' }}
+            >
               <Select.ItemText>ERC20 Balance</Select.ItemText>
               <Select.ItemIndicator marginLeft="auto">
                 <Check size={16} />

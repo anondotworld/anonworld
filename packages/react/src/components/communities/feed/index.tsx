@@ -18,7 +18,7 @@ export function CommunityFeed({ sort }: { sort: string }) {
   })
 
   return (
-    <YStack $gtXs={{ gap: '$4' }}>
+    <YStack gap="$4" $xs={{ gap: '$0', bbw: '$0.5', bc: '$borderColor' }}>
       {sortedCommunities?.map((community) => (
         <Link key={community.id} href={`/communities/${community.id}`}>
           <CommunityDisplay community={community} hoverable />

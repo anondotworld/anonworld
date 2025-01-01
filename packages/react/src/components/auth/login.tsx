@@ -1,4 +1,4 @@
-import { CircleCheck, UserCircle } from '@tamagui/lucide-icons'
+import { CircleCheck } from '@tamagui/lucide-icons'
 import { X } from '@tamagui/lucide-icons'
 import {
   Adapt,
@@ -21,8 +21,14 @@ export function AuthLogin({ children }: { children: ReactNode }) {
     <Dialog modal open={isOpen} onOpenChange={setIsOpen}>
       {children}
       <Adapt when="sm">
-        <Sheet animation="quicker" zIndex={200000} modal dismissOnSnapToBottom>
-          <Sheet.Frame padding="$4" gap="$2">
+        <Sheet
+          animation="quicker"
+          zIndex={200000}
+          modal
+          dismissOnSnapToBottom
+          snapPointsMode="fit"
+        >
+          <Sheet.Frame padding="$4" pb="$5" gap="$3" bg="$color2">
             <Adapt.Contents />
           </Sheet.Frame>
           <Sheet.Overlay

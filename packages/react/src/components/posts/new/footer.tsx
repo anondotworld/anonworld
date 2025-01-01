@@ -9,13 +9,13 @@ export function NewPostFooter() {
   const textLength = new Blob([text ?? '']).size
   return (
     <XStack ai="center" jc="space-between">
-      <XStack gap="$3">
+      <XStack gap="$3" $xs={{ gap: '$2' }}>
         <EmbedImage />
         <EmbedLink />
         <EmbedReply />
         <RevealPhrase />
       </XStack>
-      <XStack gap="$3">
+      <XStack gap="$3" $xs={{ gap: '$2' }}>
         <CircularProgress length={textLength} max={320} />
         <NewPostSubmit disabled={textLength > 320} />
       </XStack>
@@ -180,7 +180,7 @@ function CircularProgress({ length, max }: { length: number; max: number }) {
           },${14 - Math.cos((angle * Math.PI) / 180) * 14} Z')`,
         }}
       />
-      <Circle size={18} bg="$color1" position="absolute" />
+      <Circle size={18} bg="$color1" position="absolute" $xs={{ bg: '$color2' }} />
     </View>
   )
 }

@@ -28,7 +28,7 @@ export function PostFeed({
   }
 
   return (
-    <YStack $gtXs={{ gap: '$4' }}>
+    <YStack gap="$4" $xs={{ gap: '$0', bbw: '$0.5', bc: '$borderColor' }}>
       {data?.map((post) => (
         <Link key={post.hash} href={`/posts/${post.hash}`}>
           <Post post={post} hoverable />
