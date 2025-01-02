@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "cd ../.. && bun run --filter '@anonworld/ui' build && cd apps/anoncast && next build",
     "start": "next start",
     "lint": "next lint"
   },
