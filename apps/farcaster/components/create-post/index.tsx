@@ -32,7 +32,7 @@ export function CreatePost({ variant }: { variant: 'post' | 'launch' }) {
     text,
     setText,
     createPost,
-    status,
+    isPending,
     quote,
     embed,
     setEmbed,
@@ -116,11 +116,9 @@ export function CreatePost({ variant }: { variant: 'post' | 'launch' }) {
           <Button
             onClick={createPost}
             className="font-bold text-md rounded-md hover:scale-105 transition-all duration-300"
-            disabled={
-              !['idle', 'success', 'error'].includes(status.status) || !credential
-            }
+            disabled={isPending || !credential || !text}
           >
-            {status.status === 'loading' ? (
+            {isPending ? (
               <div className="flex flex-row items-center gap-2">
                 <Loader2 className="animate-spin" />
                 <p>Generating proof</p>
@@ -322,7 +320,7 @@ function EmbedLink() {
           <Link />
         </TooltipButton>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-black">
         <DialogHeader>
           <DialogTitle>Embed link</DialogTitle>
           <DialogDescription>You can embed any website.</DialogDescription>
@@ -425,7 +423,7 @@ function ParentCast() {
           <Reply />
         </TooltipButton>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-black">
         <DialogHeader>
           <DialogTitle>Reply to post</DialogTitle>
           <DialogDescription>
@@ -542,7 +540,7 @@ function Channel() {
           )}
         </TooltipButton>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-black">
         <DialogHeader>
           <DialogTitle>Channel</DialogTitle>
           <DialogDescription>You can set a channel for your post.</DialogDescription>
@@ -598,7 +596,7 @@ function QuoteCast() {
           <Quote />
         </TooltipButton>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-black">
         <DialogHeader>
           <DialogTitle>Quote post</DialogTitle>
           <DialogDescription>

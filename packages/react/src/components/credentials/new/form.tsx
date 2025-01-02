@@ -350,7 +350,7 @@ function AddCredentialButton() {
       <Button
         bg="$color12"
         br="$4"
-        disabled={!address || isLoading}
+        disabled={!address || isLoading || balance === 0}
         disabledStyle={{ opacity: 0.5, bg: '$color12' }}
         hoverStyle={{ opacity: 0.9, bg: '$color12' }}
         pressStyle={{ opacity: 0.9, bg: '$color12' }}

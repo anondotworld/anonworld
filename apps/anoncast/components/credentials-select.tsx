@@ -19,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from './ui/alert-dialog'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from './ui/button'
 import { Loader2 } from 'lucide-react'
 import { Slider } from './ui/slider'
@@ -38,8 +38,16 @@ export function CredentialsSelect({
   const { credentials } = useCredentials()
   const [open, setOpen] = useState(false)
 
+  const anonCredentials = useMemo(
+    () =>
+      credentials.filter(
+        (credential) => credential.metadata.tokenAddress === TOKEN_ADDRESS
+      ),
+    [credentials]
+  )
+
   useEffect(() => {
-    onSelect(credentials[0] ?? null)
+    onSelect(anonCredentials[0] ?? null)
   }, [])
 
   return (
@@ -50,7 +58,7 @@ export function CredentialsSelect({
           if (id === 'new') {
             setOpen(true)
           } else {
-            onSelect(credentials.find((credential) => credential.id === id) ?? null)
+            onSelect(anonCredentials.find((credential) => credential.id === id) ?? null)
           }
         }}
         key={open ? 'open' : 'closed'}
@@ -60,7 +68,7 @@ export function CredentialsSelect({
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {credentials.map((credential) => (
+            {anonCredentials.map((credential) => (
               <SelectItem key={credential.id} value={credential.id}>
                 <div className="flex flex-row items-center gap-2">
                   <span className="font-semibold">
@@ -77,7 +85,7 @@ export function CredentialsSelect({
               </SelectItem>
             ))}
           </SelectGroup>
-          {credentials.length > 0 && <SelectSeparator />}
+          {anonCredentials.length > 0 && <SelectSeparator />}
           <SelectGroup>
             <SelectItem value="new" className="font-semibold">
               Add new credential...
@@ -132,7 +140,7 @@ export function VerifyCredential({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-black">
         <AlertDialogHeader>
           <AlertDialogTitle>Add $ANON credential</AlertDialogTitle>
           <AlertDialogDescription>

@@ -1,13 +1,13 @@
 'use client'
 
 import { useToast } from '@/lib/hooks/use-toast'
-import { Cast, Channel, Credential } from '@anonworld/react'
+import { Cast, Channel, Credential, useExecuteActions } from '@anonworld/react'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
 import { ToastAction } from '../ui/toast'
 import { CREATE_POST_ACTION_ID } from '@/lib/utils'
-import { ExecuteActionsStatus, useExecuteActions } from '@anonworld/react'
+import { encodeJson } from '../../../../packages/react/src/utils'
 
 type Variant = 'anoncast' | 'anonfun' | 'anon'
 
@@ -26,7 +26,6 @@ interface CreatePostContextProps {
   setParent: (parent: Cast | null) => void
   createPost: () => Promise<void>
   embedCount: number
-  status: ExecuteActionsStatus
   confetti: boolean
   setConfetti: (confetti: boolean) => void
   revealPhrase: string | null
@@ -35,6 +34,7 @@ interface CreatePostContextProps {
   setVariant: (variant: Variant) => void
   credential: Credential | null
   setCredential: (credential: Credential | null) => void
+  isPending: boolean
 }
 
 const CreatePostContext = createContext<CreatePostContextProps | undefined>(undefined)
@@ -58,7 +58,38 @@ export const CreatePostProvider = ({
   const [variant, setVariant] = useState<Variant>(initialVariant || 'anoncast')
   const [credential, setCredential] = useState<Credential | null>(null)
   const router = useRouter()
-  const { executeActions, status } = useExecuteActions({
+  const { mutateAsync, isPending } = useExecuteActions({
+    credentials: credential ? [credential] : [],
+    actions: [
+      {
+        actionId: CREATE_POST_ACTION_ID,
+        data: {
+          text: text,
+          reply: parent
+            ? `https://warpcast.com/${parent.author.username}/${parent.hash.slice(0, 10)}`
+            : null,
+          links: quote
+            ? [`https://warpcast.com/${quote.author.username}/${quote.hash.slice(0, 10)}`]
+            : embed
+              ? [embed]
+              : [],
+          images: image ? [image] : [],
+          copyActionIds: ['666be9bc-c682-446f-9d2e-350a3c80cdc5'],
+          revealHash: revealPhrase
+            ? hashMessage(
+                encodeJson({
+                  text: text,
+                  reply: parent
+                    ? `https://warpcast.com/${parent.author.username}/${parent.hash.slice(0, 10)}`
+                    : null,
+                  links: embed ? [embed] : [],
+                  images: image ? [image] : [],
+                }) + revealPhrase
+              )
+            : undefined,
+        },
+      },
+    ],
     onSuccess: (response) => {
       setText(null)
       setImage(null)
@@ -87,7 +118,7 @@ export const CreatePostProvider = ({
       toast({
         variant: 'destructive',
         title: 'Failed to post',
-        description: error,
+        description: error.message,
       })
     },
   })
@@ -102,27 +133,7 @@ export const CreatePostProvider = ({
       return
     }
 
-    const data = {
-      text: text ?? undefined,
-      embeds: embed ? [embed] : undefined,
-      images: image ? [image] : undefined,
-      quote: quote?.hash,
-      channel: channel?.id,
-      parent: parent?.hash,
-    }
-
-    await executeActions([
-      {
-        actionId: CREATE_POST_ACTION_ID,
-        data: {
-          ...data,
-          revealHash: revealPhrase
-            ? hashMessage(JSON.stringify(data) + revealPhrase)
-            : undefined,
-        },
-        credential,
-      },
-    ])
+    await mutateAsync()
   }
 
   const embedCount = [image, embed, quote].filter((e) => e !== null).length
@@ -149,7 +160,7 @@ export const CreatePostProvider = ({
         setParent,
         embedCount,
         createPost,
-        status,
+        isPending,
         confetti,
         setConfetti,
         revealPhrase,

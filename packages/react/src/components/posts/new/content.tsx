@@ -1,4 +1,4 @@
-import { Link, Reply, X, Image as ImageIcon } from '@tamagui/lucide-icons'
+import { Link, Reply, X, Image as ImageIcon, Quote } from '@tamagui/lucide-icons'
 import {
   Avatar,
   AvatarFallback,
@@ -28,6 +28,7 @@ export function NewPostReply() {
       onChange={setReply}
       Icon={Reply}
       placeholder="Reply to Warpcast or X URL (optional)"
+      type="reply"
     />
   )
 }
@@ -41,6 +42,7 @@ export function NewPostLink() {
       onChange={setLink}
       Icon={Link}
       placeholder="Link to a website (optional)"
+      type="link"
     />
   )
 }
@@ -55,6 +57,7 @@ export function NewPostImage() {
       Icon={ImageIcon}
       placeholder="Image"
       editable={false}
+      type="image"
     />
   )
 }
@@ -65,13 +68,16 @@ export function NewPostContent({
   Icon,
   placeholder,
   editable = true,
+  type,
 }: {
   content: Content | null
   onChange: (text: string | null) => void
   Icon: NamedExoticComponent<{ size: number; color: string }>
   placeholder: string
   editable?: boolean
+  type: 'reply' | 'link' | 'image'
 }) {
+  const { setLink, setReply } = useNewPost()
   const [value, setValue] = useState(content?.url || '')
   const [error, setError] = useState<string | null>(null)
 
@@ -80,6 +86,16 @@ export function NewPostContent({
   const handleRemove = () => {
     onChange(null)
     setValue('')
+  }
+
+  const handleQuote = () => {
+    setLink(content?.url || null)
+    setReply(null)
+  }
+
+  const handleReply = () => {
+    setReply(content?.url || null)
+    setLink(null)
   }
 
   useEffect(() => {
@@ -132,18 +148,44 @@ export function NewPostContent({
           ) : (
             <View f={1} />
           )}
-          {content ? (
-            <View
-              p="$1.5"
-              br="$12"
-              bg="$color9"
-              hoverStyle={{ bg: '$color7' }}
-              cursor="pointer"
-              onPress={handleRemove}
-            >
-              <X size={12} strokeWidth={3} />
-            </View>
-          ) : null}
+          {content && (
+            <XStack gap="$2">
+              {content.type === 'farcaster' && type === 'reply' && (
+                <View
+                  p="$1.5"
+                  br="$12"
+                  bg="$color9"
+                  hoverStyle={{ bg: '$color7' }}
+                  cursor="pointer"
+                  onPress={handleQuote}
+                >
+                  <Quote size={12} />
+                </View>
+              )}
+              {content.type === 'farcaster' && type === 'link' && (
+                <View
+                  p="$1.5"
+                  br="$12"
+                  bg="$color9"
+                  hoverStyle={{ bg: '$color7' }}
+                  cursor="pointer"
+                  onPress={handleReply}
+                >
+                  <Reply size={12} />
+                </View>
+              )}
+              <View
+                p="$1.5"
+                br="$12"
+                bg="$color9"
+                hoverStyle={{ bg: '$color7' }}
+                cursor="pointer"
+                onPress={handleRemove}
+              >
+                <X size={12} strokeWidth={3} />
+              </View>
+            </XStack>
+          )}
         </XStack>
         {content?.type === 'farcaster' && <FarcasterEmbed identifier={content.url} />}
         {content?.type === 'twitter' && <TwitterEmbed identifier={content.url} />}

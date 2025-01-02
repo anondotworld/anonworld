@@ -42,8 +42,8 @@ export function PostFeed({
       {selected === 'new' ? (
         isNewLoading ? (
           <SkeletonPosts />
-        ) : newPosts?.length && newPosts?.length > 0 ? (
-          <Posts casts={newPosts} />
+        ) : newPosts?.pages[0]?.length && newPosts?.pages[0]?.length > 0 ? (
+          <Posts casts={newPosts?.pages[0]} />
         ) : (
           <h1>Something went wrong. Please refresh the page.</h1>
         )
@@ -91,15 +91,15 @@ export function PromotedFeed({
       {selected === 'new' ? (
         isNewLoading ? (
           <SkeletonPosts />
-        ) : newLaunches?.length && newLaunches?.length > 0 ? (
-          <Posts casts={newLaunches} />
+        ) : newLaunches?.pages[0]?.length && newLaunches?.pages[0]?.length > 0 ? (
+          <Posts casts={newLaunches?.pages[0]} />
         ) : (
           <h1>Something went wrong. Please refresh the page.</h1>
         )
       ) : isPromotedLoading ? (
         <SkeletonPosts />
-      ) : promotedLaunches?.length && promotedLaunches?.length > 0 ? (
-        <Posts casts={promotedLaunches} />
+      ) : promotedLaunches?.pages[0]?.length && promotedLaunches?.pages[0]?.length > 0 ? (
+        <Posts casts={promotedLaunches?.pages[0]} />
       ) : (
         <h1>Something went wrong. Please refresh the page.</h1>
       )}
