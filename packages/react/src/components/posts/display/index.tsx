@@ -18,7 +18,8 @@ import { PostCredential } from './credential'
 import { VaultBadge } from '../../vaults/badge'
 import { ReplyButton } from '../actions/reply'
 import { LikeButton } from '../actions/like'
-import { Link } from 'solito/link'
+import { Link, TextLink } from 'solito/link'
+import { Reply } from '@tamagui/lucide-icons'
 
 export function PostDisplay({ post, hoverable }: { post: Post; hoverable?: boolean }) {
   let text = post.text
@@ -49,18 +50,58 @@ export function PostDisplay({ post, hoverable }: { post: Post; hoverable?: boole
       }}
       hoverStyle={hoverable ? { bg: '$color3' } : {}}
       cursor={hoverable ? 'pointer' : undefined}
-      f={1}
+      fs={1}
     >
-      <XStack gap="$2" ai="center" onPress={(e) => e.preventDefault()}>
-        {vaultId && (
-          <Link href={`/profiles/${vaultId}`}>
-            <VaultBadge vaultId={vaultId} />
-          </Link>
+      <YStack gap="$3">
+        {post.parentText && (
+          <XStack gap="$2" ai="center" pr="$8">
+            <View>
+              <Reply size={12} color="$color11" />
+            </View>
+            <Text fos="$1" fow="400" color="$color11" numberOfLines={1}>
+              {`replying to ${post.parentText}`}
+            </Text>
+          </XStack>
         )}
-        {post.credentials?.map((credential, index) => (
-          <PostCredential key={index} credential={credential} />
-        ))}
-      </XStack>
+        {post.credentials && post.credentials.length > 0 && (
+          <XStack gap="$2" ai="center" onPress={(e) => e.preventDefault()}>
+            {vaultId && (
+              <Link href={`/profiles/${vaultId}`}>
+                <VaultBadge vaultId={vaultId} />
+              </Link>
+            )}
+            {post.credentials?.map((credential, index) => (
+              <PostCredential key={index} credential={credential} />
+            ))}
+          </XStack>
+        )}
+        {(!post.credentials || post.credentials.length === 0) && (
+          <XStack gap="$2" ai="center" onPress={(e) => e.preventDefault()}>
+            <Avatar size="$1" circular>
+              <Avatar.Image src={post.author.pfp_url} />
+              <Avatar.Fallback />
+            </Avatar>
+            <XStack gap="$2" ai="center">
+              <TextLink
+                href={`https://warpcast.com/${post.author.username}`}
+                target="_blank"
+              >
+                <Text
+                  fow="600"
+                  fos="$2"
+                  cursor="pointer"
+                  hoverStyle={{ textDecorationLine: 'underline' }}
+                >
+                  {post.author.username}
+                </Text>
+              </TextLink>
+              <Text fos="$2" fow="400" col="$color11">
+                {timeAgo(post.timestamp)}
+              </Text>
+            </XStack>
+          </XStack>
+        )}
+      </YStack>
       <Text lineHeight={22}>{text}</Text>
       {post.embeds?.map((embed, index) => (
         <PostEmbed key={index} embed={embed} />

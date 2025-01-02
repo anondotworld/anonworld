@@ -14,6 +14,7 @@ export type Post = FarcasterCast & {
   user?: {
     liked: boolean
   }
+  parentText?: string
 }
 
 export type Reveal = {

@@ -27,7 +27,7 @@ export function VaultDisplay({ vault }: { vault: Vault }) {
         px: '$2',
         py: '$3',
       }}
-      f={1}
+      fs={1}
     >
       <XStack ai="center" gap="$4">
         <VaultAvatar id={id} size="$6" />

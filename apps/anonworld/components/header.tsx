@@ -1,8 +1,8 @@
 'use client'
 
-import { About, Auth } from '@anonworld/react'
+import { About, Auth, NotificationsCount, useAuth } from '@anonworld/react'
 import { Image, Text, View } from '@anonworld/ui'
-import { WalletMinimal } from '@tamagui/lucide-icons'
+import { Bell, WalletMinimal } from '@tamagui/lucide-icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -19,6 +19,7 @@ export enum Pathname {
 
 export function Header() {
   const pathname = usePathname() as Pathname
+  const { passkeyId } = useAuth()
 
   return (
     <View
@@ -129,6 +130,43 @@ export function Header() {
           <View $xs={{ display: 'none' }}>
             <About />
           </View>
+          {passkeyId && (
+            <Link
+              href={
+                pathname === Pathname.NOTIFICATIONS
+                  ? Pathname.HOME
+                  : Pathname.NOTIFICATIONS
+              }
+              style={{ textDecoration: 'none' }}
+            >
+              <View
+                bg={pathname === Pathname.NOTIFICATIONS ? '$color12' : '$color1'}
+                br="$12"
+                disabledStyle={{
+                  opacity: 0.5,
+                  bg: pathname === Pathname.NOTIFICATIONS ? '$color12' : '$color1',
+                }}
+                hoverStyle={{
+                  opacity: 0.9,
+                  bg: pathname === Pathname.NOTIFICATIONS ? '$color12' : '$color5',
+                }}
+                w={32}
+                h={32}
+                jc="center"
+                ai="center"
+                $xs={{ display: 'none' }}
+              >
+                <Bell
+                  size={20}
+                  strokeWidth={2.5}
+                  color={pathname === Pathname.NOTIFICATIONS ? '$color1' : '$color12'}
+                />
+                <View position="absolute" top="$0" right="$0">
+                  <NotificationsCount />
+                </View>
+              </View>
+            </Link>
+          )}
           <Link
             href={
               pathname === Pathname.CREDENTIALS ? Pathname.HOME : Pathname.CREDENTIALS

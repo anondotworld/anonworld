@@ -312,4 +312,11 @@ export class Api {
       body: JSON.stringify({ hash }),
     })
   }
+
+  async getNotifications() {
+    if (!this.token) {
+      return { error: { message: 'No token', status: 401 } }
+    }
+    return await this.request<{ data: Array<Post> }>(`/auth/notifications`)
+  }
 }

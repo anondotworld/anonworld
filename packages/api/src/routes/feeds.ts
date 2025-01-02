@@ -1,15 +1,15 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
 import { redis } from '../services/redis'
-import { FarcasterCast } from '../../../common/src/types/farcaster'
-import { getPosts, Post } from '@anonworld/db'
+import { getPosts, Post as DBPost } from '@anonworld/db'
 import { feed } from '../services/feed'
+import { Post } from '@anonworld/common'
 
 export const feedsRoutes = createElysia({ prefix: '/feeds' })
   .get(
     '/:fid/trending',
     async ({ params, passkeyId }) => {
-      let posts: Array<FarcasterCast> = []
+      let posts: Array<Post> = []
 
       const cached = await redis.getTrendingFeed(params.fid)
       if (cached) {
@@ -34,7 +34,7 @@ export const feedsRoutes = createElysia({ prefix: '/feeds' })
   .get(
     '/:fid/new',
     async ({ params, passkeyId, query }) => {
-      let posts: Array<FarcasterCast> = []
+      let posts: Array<Post> = []
 
       const cached = await redis.getNewFeed(params.fid)
       if (cached) {
@@ -70,13 +70,13 @@ const getFormattedPosts = async (fid: number) => {
 
   if (response.length === 0) return []
 
-  const posts = response.map((p) => p.parent_posts ?? p.posts) as Array<Post>
+  const posts = response.map((p) => p.parent_posts ?? p.posts) as Array<DBPost>
 
   const result = await feed.getFeed(posts)
   return result.filter((p) => !p.parent_hash)
 }
 
-const buildTrendingFeed = async (fid: number, posts: Array<FarcasterCast>) => {
+const buildTrendingFeed = async (fid: number, posts: Array<Post>) => {
   const now = Date.now()
   const feed = posts
     .sort((a, b) => {
@@ -94,7 +94,7 @@ const buildTrendingFeed = async (fid: number, posts: Array<FarcasterCast>) => {
   return feed
 }
 
-const buildNewFeed = async (fid: number, posts: Array<FarcasterCast>) => {
+const buildNewFeed = async (fid: number, posts: Array<Post>) => {
   const feed = posts
     .sort((a, b) => {
       return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()

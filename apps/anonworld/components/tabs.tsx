@@ -3,8 +3,9 @@
 import { View, XStack } from '@anonworld/ui'
 import { Bell, HelpCircle, Home, UsersRound, WalletMinimal } from '@tamagui/lucide-icons'
 import { usePathname, useRouter } from 'next/navigation'
-import { NamedExoticComponent } from 'react'
+import { NamedExoticComponent, ReactNode } from 'react'
 import { Pathname } from './header'
+import { NotificationsCount } from '@anonworld/react'
 
 export function Tabs() {
   const pathname = usePathname() as Pathname
@@ -46,11 +47,15 @@ export function Tabs() {
         active={pathname === Pathname.CREDENTIALS}
         onPress={() => router.push('/credentials')}
       />
-      {/* <TabButton
+      <TabButton
         Icon={Bell}
         active={pathname === Pathname.NOTIFICATIONS}
         onPress={() => router.push('/notifications')}
-      /> */}
+      >
+        <View position="absolute" top="$2" right="$2">
+          <NotificationsCount />
+        </View>
+      </TabButton>
       <TabButton
         Icon={HelpCircle}
         active={pathname === Pathname.ABOUT}
@@ -64,14 +69,17 @@ function TabButton({
   Icon,
   active,
   onPress,
+  children,
 }: {
   Icon: NamedExoticComponent<{ color: string; strokeWidth: number }>
   active: boolean
   onPress: () => void
+  children?: ReactNode
 }) {
   return (
     <View py="$3" px="$3" onPress={onPress}>
       <Icon color={active ? '$color12' : '$color11'} strokeWidth={active ? 2.5 : 2} />
+      {children}
     </View>
   )
 }

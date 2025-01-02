@@ -118,9 +118,9 @@ export const syncToken = async (chainId: number, tokenAddress: string) => {
   const token = await getToken(id)
   if (token) {
     const fields = {
-      price_usd: zerionToken.attributes.market_data.price.toFixed(8),
-      market_cap: Math.round(zerionToken.attributes.market_data.market_cap),
-      total_supply: Math.round(zerionToken.attributes.market_data.total_supply),
+      price_usd: zerionToken.attributes.market_data.price?.toFixed(8) ?? 0,
+      market_cap: Math.round(zerionToken.attributes.market_data.market_cap ?? 0),
+      total_supply: Math.round(zerionToken.attributes.market_data.total_supply ?? 0),
       holders: simpleHashToken.holder_count ?? 0,
     }
     await updateToken(id, fields)
@@ -149,9 +149,9 @@ export const syncToken = async (chainId: number, tokenAddress: string) => {
       name: zerionToken.attributes.name,
       decimals: impl?.decimals ?? simpleHashToken?.decimals ?? 18,
       image_url: zerionToken.attributes.icon?.url,
-      price_usd: zerionToken.attributes.market_data.price.toFixed(8),
-      market_cap: Math.round(zerionToken.attributes.market_data.market_cap),
-      total_supply: Math.round(zerionToken.attributes.market_data.total_supply),
+      price_usd: zerionToken.attributes.market_data.price?.toFixed(8) ?? 0,
+      market_cap: Math.round(zerionToken.attributes.market_data.market_cap ?? 0),
+      total_supply: Math.round(zerionToken.attributes.market_data.total_supply ?? 0),
       holders: simpleHashToken?.holder_count ?? 0,
     }
     await createToken(token)

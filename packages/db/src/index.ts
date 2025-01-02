@@ -586,7 +586,7 @@ export const getCredentialsFromVault = async (vaultId: string) => {
 
 export const getPostsFromVault = async (
   vaultId: string,
-  opts: { limit: number; offset: number }
+  opts: { limit: number; offset: number } = { limit: 100, offset: 0 }
 ) => {
   return await db
     .select()

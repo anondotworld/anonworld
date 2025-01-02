@@ -36,7 +36,7 @@ export function CredentialDisplay({
       onPress={onPress}
       hoverStyle={onPress ? { bg: '$color3' } : {}}
       cursor={onPress ? 'pointer' : undefined}
-      f={1}
+      fs={1}
     >
       <XStack ai="center" gap="$2">
         <Link href={`/profiles/${credential.vault_id}`}>

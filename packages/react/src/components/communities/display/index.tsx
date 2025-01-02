@@ -29,7 +29,7 @@ export function CommunityDisplay({ community }: { community: Community }) {
         px: '$2',
         py: '$3',
       }}
-      f={1}
+      fs={1}
     >
       <XStack ai="center" gap="$4">
         <Image

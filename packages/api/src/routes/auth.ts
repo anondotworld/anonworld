@@ -1,5 +1,5 @@
 import { createElysia } from '../utils'
-import { t } from 'elysia'
+import { error, t } from 'elysia'
 import { toHex } from 'viem'
 import { redis } from '../services/redis'
 import { WebAuthnP256 } from 'ox'
@@ -7,11 +7,15 @@ import {
   createPasskey,
   CredentialInstance,
   getPasskey,
+  getPostsFromVault,
   getVaults,
   likePost,
+  Post,
   unlikePost,
   Vault,
 } from '@anonworld/db'
+import { neynar } from '../services/neynar'
+import { notifications } from '../services/notifications'
 
 export const authRoutes = createElysia({ prefix: '/auth' })
   .post(
@@ -168,3 +172,16 @@ export const authRoutes = createElysia({ prefix: '/auth' })
       }),
     }
   )
+  .get('/notifications', async ({ passkeyId }) => {
+    if (!passkeyId) {
+      return error(401, 'Unauthorized')
+    }
+    const vaults = await getVaults(passkeyId)
+    if (vaults.length === 0) {
+      return { data: [] }
+    }
+
+    const vaultId = vaults[0].vaults.id
+    const replies = await notifications.getReplies(vaultId)
+    return { data: replies }
+  })
