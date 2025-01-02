@@ -4,7 +4,6 @@ import { useToast } from '@/lib/hooks/use-toast'
 import {
   FarcasterCast,
   FarcasterChannel,
-  Credential,
   useExecuteActions,
   encodeJson,
   CredentialWithId,
