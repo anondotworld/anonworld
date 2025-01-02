@@ -1,22 +1,23 @@
 import {
   Action,
   ApiResponse,
-  Cast,
-  Channel,
-  Credential,
-  User,
-  ExecuteAction,
-  RequestConfig,
-  UploadImageResponse,
-  ConversationCast,
-  FungiblePosition,
-  RevealPostArgs,
   Community,
+  ConversationPost,
+  Credential,
+  CredentialWithId,
+  ExecuteAction,
+  FarcasterChannel,
+  FarcasterUser,
+  FungiblePosition,
+  Post,
+  RequestConfig,
+  RevealPostArgs,
   SwapQuote,
   SwapQuoteError,
   Token,
+  UploadImageResponse,
   Vault,
-} from './types'
+} from '@anonworld/common'
 
 export class Api {
   private baseUrl: string
@@ -111,37 +112,37 @@ export class Api {
   }
 
   async getTrendingFeed(fid: number) {
-    return await this.request<{ data: Array<Cast> }>(`/feeds/${fid}/trending`)
+    return await this.request<{ data: Array<Post> }>(`/feeds/${fid}/trending`)
   }
 
   async getNewFeed(fid: number, page = 1) {
-    return await this.request<{ data: Array<Cast> }>(`/feeds/${fid}/new?page=${page}`)
+    return await this.request<{ data: Array<Post> }>(`/feeds/${fid}/new?page=${page}`)
   }
 
   async getPost(hash: string) {
-    return await this.request<Cast>(`/posts/${hash}`)
+    return await this.request<Post>(`/posts/${hash}`)
   }
 
   async getPostConversations(hash: string) {
-    return await this.request<{ data: Array<ConversationCast> }>(
+    return await this.request<{ data: Array<ConversationPost> }>(
       `/posts/${hash}/conversations`
     )
   }
 
   async getFarcasterCast(identifier: string) {
-    return await this.request<Cast>(`/farcaster/casts?identifier=${identifier}`)
+    return await this.request<Post>(`/farcaster/casts?identifier=${identifier}`)
   }
 
   async getFarcasterIdentity(address: string) {
-    return await this.request<User>(`/farcaster/identities?address=${address}`)
+    return await this.request<FarcasterUser>(`/farcaster/identities?address=${address}`)
   }
 
   async getFarcasterUser(fid: number) {
-    return await this.request<User>(`/farcaster/users/${fid}`)
+    return await this.request<FarcasterUser>(`/farcaster/users/${fid}`)
   }
 
   async getFarcasterChannel(channelId: string) {
-    return await this.request<Channel>(`/farcaster/channels/${channelId}`)
+    return await this.request<FarcasterChannel>(`/farcaster/channels/${channelId}`)
   }
 
   async uploadImage(image: File) {
@@ -176,7 +177,7 @@ export class Api {
     type: string
     version: string
   }) {
-    return await this.request<Credential>('/credentials', {
+    return await this.request<CredentialWithId>('/credentials', {
       method: 'POST',
       body: JSON.stringify({ proof, publicInputs, parentId, type, version }),
     })
@@ -282,7 +283,7 @@ export class Api {
   }
 
   async getVaultPosts(vaultId: string) {
-    return await this.request<{ data: Array<Cast> }>(`/vaults/${vaultId}/posts`)
+    return await this.request<{ data: Array<Post> }>(`/vaults/${vaultId}/posts`)
   }
 
   async getVaults() {

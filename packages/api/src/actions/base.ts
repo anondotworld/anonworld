@@ -1,7 +1,7 @@
 import { redis } from '../services/redis'
 import { hashMessage } from 'viem'
 import { Action, CredentialInstance, logActionExecution } from '@anonworld/db'
-import { ActionRequest } from './types'
+import { ActionRequest } from '@anonworld/common'
 
 export abstract class BaseAction<TMetadata = any, TData = any> {
   action!: Action<TMetadata>

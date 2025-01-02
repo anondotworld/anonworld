@@ -1,7 +1,7 @@
 import { createPost, createPostCredentials, getActions, PostDataV1 } from '@anonworld/db'
 import { neynar } from '../services/neynar'
 import { BaseAction } from './base'
-import { ActionRequest } from './types'
+import { ActionRequest } from '@anonworld/common'
 
 const INVALID_REGEXES = [
   // biome-ignore lint/suspicious/noMisleadingCharacterClass: regex

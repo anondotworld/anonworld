@@ -1,12 +1,12 @@
 import { Image, Popover, ScrollView, Text, XStack } from '@anonworld/ui'
-import { Cast, Relationship } from '../../../types'
+import { Post, Relationship } from '@anonworld/common'
 import { Badge } from '../../badge'
 import { ReactNode, useState } from 'react'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
 import { Link } from 'solito/link'
 
-export function PostCommunities({ post }: { post: Cast }) {
+export function PostCommunities({ post }: { post: Post }) {
   const relationshipsByCommunity = post.relationships.reduce(
     (acc, relationship) => {
       if (!relationship.community) return acc

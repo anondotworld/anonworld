@@ -1,7 +1,12 @@
 'use client'
 
 import { useToast } from '@/lib/hooks/use-toast'
-import { Cast, Channel, Credential, useExecuteActions } from '@anonworld/react'
+import {
+  FarcasterCast,
+  FarcasterChannel,
+  Credential,
+  useExecuteActions,
+} from '@anonworld/react'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { hashMessage } from 'viem'
@@ -18,12 +23,12 @@ interface CreatePostContextProps {
   setImage: (image: string | null) => void
   embed: string | null
   setEmbed: (embed: string | null) => void
-  quote: Cast | null
-  setQuote: (quote: Cast | null) => void
-  channel: Channel | null
-  setChannel: (channel: Channel | null) => void
-  parent: Cast | null
-  setParent: (parent: Cast | null) => void
+  quote: FarcasterCast | null
+  setQuote: (quote: FarcasterCast | null) => void
+  channel: FarcasterChannel | null
+  setChannel: (channel: FarcasterChannel | null) => void
+  parent: FarcasterCast | null
+  setParent: (parent: FarcasterCast | null) => void
   createPost: () => Promise<void>
   embedCount: number
   confetti: boolean
@@ -49,9 +54,9 @@ export const CreatePostProvider = ({
   const [text, setText] = useState<string | null>(null)
   const [image, setImage] = useState<string | null>(null)
   const [embed, setEmbed] = useState<string | null>(null)
-  const [quote, setQuote] = useState<Cast | null>(null)
-  const [channel, setChannel] = useState<Channel | null>(null)
-  const [parent, setParent] = useState<Cast | null>(null)
+  const [quote, setQuote] = useState<FarcasterCast | null>(null)
+  const [channel, setChannel] = useState<FarcasterChannel | null>(null)
+  const [parent, setParent] = useState<FarcasterCast | null>(null)
   const [revealPhrase, setRevealPhrase] = useState<string | null>(null)
   const [confetti, setConfetti] = useState(false)
   const { toast } = useToast()

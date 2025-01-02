@@ -75,7 +75,7 @@ export class CopyPostFarcaster extends BaseAction<
       hash: response.cast.hash,
       fid: this.action.metadata.fid,
       data: post.data,
-      reveal_hash: post.reveal_hash,
+      reveal_hash: post.reveal_hash ?? undefined,
     })
 
     const parent = await getPostParent(this.data.hash)

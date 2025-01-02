@@ -10,13 +10,13 @@ import {
   getPostRelationships,
   getTokens,
   getTwitterAccounts,
-  Post,
+  Post as DBPost,
   PostRelationship,
   Token,
 } from '@anonworld/db'
+import { FarcasterCast, Post } from '@anonworld/common'
 import { neynar } from './neynar'
-import { Cast } from './neynar/types'
-import { encodeJson, formatHexId } from '../utils'
+import { encodeJson } from '../utils'
 
 export class FeedService {
   async getFeedPost(hash: string) {
@@ -36,7 +36,7 @@ export class FeedService {
     return formattedPost
   }
 
-  async getFeed(posts: Array<Post>) {
+  async getFeed(posts: Array<DBPost>) {
     if (posts.length === 0) return []
 
     const [relationships, credentials] = await Promise.all([
@@ -74,12 +74,18 @@ export class FeedService {
 
     const casts = await this.getCasts(Array.from(hashes))
 
-    const result: Array<Cast> = []
+    const result: Array<Post> = []
     for (const post of posts) {
       const cast = casts[post.hash]
       if (!cast) continue
 
-      const formattedPost: Cast = { ...cast }
+      const formattedPost: Post = {
+        ...cast,
+        relationships: [],
+        credentials: [],
+        aggregate: { likes: 0, replies: 0 },
+      }
+
       if (post.reveal_hash) {
         formattedPost.reveal = {
           ...(post.reveal_metadata || {}),
@@ -92,7 +98,6 @@ export class FeedService {
       formattedPost.credentials =
         credentials[post.hash]?.map((c) => ({
           ...c,
-          displayId: formatHexId(c.id),
           token: tokens[`${c.metadata.chainId}:${c.metadata.tokenAddress}`],
           id: undefined,
           proof: undefined,
@@ -134,7 +139,7 @@ export class FeedService {
 
   private async getCasts(hashes: string[]) {
     const BATCH_SIZE = 100
-    const casts: Record<string, Cast> = {}
+    const casts: Record<string, FarcasterCast> = {}
 
     for (let i = 0; i < hashes.length; i += BATCH_SIZE) {
       const batchHashes = hashes.slice(i, i + BATCH_SIZE)
@@ -148,7 +153,7 @@ export class FeedService {
     return casts
   }
 
-  private async getRelationships(posts: Post[]) {
+  private async getRelationships(posts: DBPost[]) {
     const relationships = await getPostRelationships(posts.map((p) => p.hash))
     const relationshipsByHash = relationships.reduce(
       (acc, r) => {
@@ -163,7 +168,7 @@ export class FeedService {
     return relationshipsByHash
   }
 
-  private async getCredentials(posts: Post[]) {
+  private async getCredentials(posts: DBPost[]) {
     const credentials = await getPostCredentials(posts.map((p) => p.hash))
     const credentialsByHash = credentials.reduce(
       (acc, c) => {
@@ -229,7 +234,7 @@ export class FeedService {
     return communitiesById
   }
 
-  public async addUserData(passkeyId: string, posts: Array<Cast>) {
+  public async addUserData(passkeyId: string, posts: Array<Post>) {
     const hashes = posts.map((p) => p.hash)
     const likes = await getLikedPosts(passkeyId, hashes)
     const likedHashes = likes.map((l) => l.post_hash)

@@ -1,7 +1,7 @@
 import { Eye, Trash } from '@tamagui/lucide-icons'
 import { Spinner, Text, useToastController, View, YGroup, YStack } from '@anonworld/ui'
 import { useActions } from '../../../../hooks/use-actions'
-import { Action, ActionType, Cast, CredentialRequirement } from '../../../../types'
+import { Action, ActionType, Post, CredentialRequirement } from '@anonworld/common'
 import { formatAmount, getUsableCredential } from '../../../../utils'
 import { Farcaster } from '../../../svg/farcaster'
 import { X } from '../../../svg/x'
@@ -18,7 +18,7 @@ export function PostActionsContent({
   post,
   setPostRevealOpen,
 }: {
-  post: Cast
+  post: Post
   setPostRevealOpen: (open: boolean) => void
 }) {
   const { data } = useActions()
@@ -74,7 +74,7 @@ export function PostActionsContent({
   )
 }
 
-function PostAction({ action, post }: { action: Action; post: Cast }) {
+function PostAction({ action, post }: { action: Action; post: Post }) {
   switch (action.type) {
     case ActionType.COPY_POST_TWITTER: {
       return <CopyPostTwitter action={action} post={post} />
@@ -100,7 +100,7 @@ function DeletePostTwitter({
   post,
 }: {
   action: Action
-  post: Cast
+  post: Post
 }) {
   if (action.type !== ActionType.DELETE_POST_TWITTER) {
     return null
@@ -130,7 +130,7 @@ function CopyPostTwitter({
   post,
 }: {
   action: Action
-  post: Cast
+  post: Post
 }) {
   if (action.type !== ActionType.COPY_POST_TWITTER) {
     return null
@@ -176,7 +176,7 @@ function DeletePostFarcaster({
 }: {
   fid: number
   action: Action
-  post: Cast
+  post: Post
 }) {
   const { data } = useFarcasterUser(fid)
 
@@ -210,7 +210,7 @@ function CopyPostFarcaster({
 }: {
   fid: number
   action: Action
-  post: Cast
+  post: Post
 }) {
   const { data } = useFarcasterUser(fid)
 

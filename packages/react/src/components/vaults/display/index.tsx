@@ -3,7 +3,7 @@ import { Badge } from '../../badge'
 import { MessageCircle } from '@tamagui/lucide-icons'
 import { formatAmount, formatHexId } from '../../../utils'
 import { timeAgo } from '../../../utils'
-import { Vault } from '../../../types'
+import { Vault } from '@anonworld/common'
 import { CredentialBadge } from '../../credentials'
 import { VaultAvatar } from '../avatar'
 

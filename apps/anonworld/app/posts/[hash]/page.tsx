@@ -1,7 +1,7 @@
 'use client'
 
 import {
-  Post,
+  PostDisplay,
   PostConversation,
   ReplyBar,
   usePost,
@@ -20,7 +20,7 @@ export default function PostPage({ params }: { params: { hash: string } }) {
       <YStack gap="$3">
         {post && (
           <View $xs={{ bbw: '$0.5', bc: '$borderColor' }}>
-            <Post post={post} />
+            <PostDisplay post={post} />
           </View>
         )}
         {post && <ReplyBar post={post} />}

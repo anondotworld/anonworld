@@ -6,6 +6,7 @@
     ".": "./src/index.tsx"
   },
   "dependencies": {
+    "@anonworld/common": "*",
     "@anonworld/sdk": "*",
     "@anonworld/ui": "*",
     "@tamagui/lucide-icons": "^1.116.12",

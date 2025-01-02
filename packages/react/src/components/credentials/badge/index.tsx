@@ -1,4 +1,4 @@
-import { Credential, Token } from '../../../types'
+import { Credential, Token } from '@anonworld/common'
 import { formatAmount } from '../../../utils'
 import { Badge } from '../../badge'
 import { formatUnits } from 'viem/utils'

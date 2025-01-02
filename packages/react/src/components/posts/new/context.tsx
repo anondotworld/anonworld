@@ -6,7 +6,7 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { Action, Credential } from '../../../types'
+import { Action, CredentialWithId } from '@anonworld/common'
 import { useExecuteActions } from '../../../hooks/use-execute-actions'
 import { useToastController } from '@anonworld/ui'
 import { hashMessage } from 'viem'
@@ -23,9 +23,9 @@ export type Content = {
 interface NewPostContextValue {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
-  credentials: Credential[]
-  addCredential: (credential: Credential) => void
-  removeCredential: (credential: Credential) => void
+  credentials: CredentialWithId[]
+  addCredential: (credential: CredentialWithId) => void
+  removeCredential: (credential: CredentialWithId) => void
   reply: Content | null
   setReply: (reply: string | null) => void
   text: string | null
@@ -52,10 +52,12 @@ export function NewPostProvider({
 }: {
   children: React.ReactNode
   initialReply?: Content
-  initialCredentials?: Credential[]
+  initialCredentials?: CredentialWithId[]
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [credentials, setCredentials] = useState<Credential[]>(initialCredentials || [])
+  const [credentials, setCredentials] = useState<CredentialWithId[]>(
+    initialCredentials || []
+  )
   const [reply, setReply] = useState<Content | null>(initialReply || null)
   const [text, setText] = useState<string | null>(null)
   const [link, setLink] = useState<Content | null>(null)
@@ -121,14 +123,14 @@ export function NewPostProvider({
     },
   })
 
-  const addCredential = (credential: Credential) => {
+  const addCredential = (credential: CredentialWithId) => {
     if (credentials.some((c) => c.id === credential.id)) {
       return
     }
     setCredentials([...credentials, credential])
   }
 
-  const removeCredential = (credential: Credential) => {
+  const removeCredential = (credential: CredentialWithId) => {
     setCredentials(credentials.filter((c) => c.id !== credential.id))
   }
 

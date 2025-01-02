@@ -29,7 +29,7 @@ export type Passkey = typeof passkeysTable.$inferSelect & {
 export type PostCredential = typeof postCredentialsTable.$inferSelect
 export type CredentialInstance = typeof credentialInstancesTable.$inferSelect & {
   metadata: {
-    chainId: string
+    chainId: number
     tokenAddress: string
     balance: string
   }

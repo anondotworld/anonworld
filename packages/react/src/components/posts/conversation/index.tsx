@@ -1,9 +1,7 @@
-import { ConversationCast, CredentialBadge, VaultBadge } from '@anonworld/react'
+import { ConversationPost, CredentialBadge, VaultBadge } from '@anonworld/react'
 import { Avatar, Text, View, XStack, YStack } from '@anonworld/ui'
-import { formatAmount } from '../../../utils'
 import { PostEmbed } from '../display/embeds'
 import { timeAgo } from '../../../utils'
-import { Heart } from '@tamagui/lucide-icons'
 import { PostActions } from './actions'
 import { ReplyButton } from '../actions/reply'
 import { VaultAvatar } from '../../vaults/avatar'
@@ -13,7 +11,7 @@ import { LikeButton } from '../actions/like'
 export function PostConversation({
   conversation,
 }: {
-  conversation: Array<ConversationCast>
+  conversation: Array<ConversationPost>
 }) {
   return (
     <YStack gap="$4" $xs={{ px: '$2' }}>
@@ -36,7 +34,7 @@ function Post({
   post,
   arr,
 }: {
-  post: ConversationCast
+  post: ConversationPost
   arr: Array<'continue' | 'empty'>
 }) {
   let text = post.text
@@ -76,10 +74,7 @@ function Post({
           {post.credentials && post.credentials.length > 0 && (
             <>
               <View w={32} ai="center">
-                <VaultAvatar
-                  id={post.credentials[0].vault_id ?? post.credentials[0].displayId}
-                  size="$2.5"
-                />
+                <VaultAvatar id={post.credentials[0].vault_id ?? ''} size="$2.5" />
               </View>
               <XStack gap="$2" ai="center">
                 {post.credentials[0].vault_id && (

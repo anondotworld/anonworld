@@ -5,11 +5,11 @@ import { toHslColors } from '../../utils'
 export function TokenImage({
   token,
   size = 16,
-}: { token?: { address: string; image_url?: string }; size?: number }) {
+}: { token?: { address: string; image_url?: string | null }; size?: number }) {
   const { background, secondary } = toHslColors(token?.address ?? '')
   return (
     <Avatar circular size={size}>
-      <AvatarImage src={token?.image_url} w={size} h={size} />
+      <AvatarImage src={token?.image_url ?? undefined} w={size} h={size} />
       <AvatarFallback>
         <LinearGradient
           colors={[secondary, background]}

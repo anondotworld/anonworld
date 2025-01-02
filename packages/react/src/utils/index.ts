@@ -1,5 +1,5 @@
 import { base } from 'viem/chains'
-import { Action, Credential } from '../types'
+import { Action, Credential, CredentialWithId } from '@anonworld/common'
 
 export const CREDENTIAL_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7 // 7 days
 // export const CREDENTIAL_EXPIRATION_TIME = 1000 * 60 * 60 * 24 // 1 day
@@ -51,7 +51,7 @@ export function formatAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
-export function getUsableCredential(credentials: Credential[], action: Action) {
+export function getUsableCredential(credentials: CredentialWithId[], action: Action) {
   if (
     !action.credential_id ||
     credentials.length === 0 ||

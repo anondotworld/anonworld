@@ -1,5 +1,5 @@
 import { Image, Popover, ScrollView, Text, XStack } from '@anonworld/ui'
-import { Action, ActionType } from '../../../types'
+import { Action, ActionType } from '@anonworld/common'
 import { useNewPost } from './context'
 import { Badge } from '../../badge'
 import { useEffect, useMemo, useState } from 'react'

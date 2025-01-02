@@ -1,0 +1,13 @@
+{
+  "name": "@anonworld/common",
+  "version": "0.0.1",
+  "private": true,
+  "types": ".",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@anonworld/db": "*"
+  }
+}

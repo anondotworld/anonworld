@@ -1,5 +1,5 @@
 import { MoreHorizontal } from '@tamagui/lucide-icons'
-import { Community } from '../../../types'
+import { Community } from '@anonworld/common'
 import { Popover, Text, View, YGroup } from '@anonworld/ui'
 import { extractChain } from 'viem'
 import { chains } from '../../../utils'

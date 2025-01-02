@@ -1,4 +1,4 @@
-import { Credential } from '../../../types'
+import { CredentialWithId } from '@anonworld/common'
 import { View, XStack, YStack } from '@anonworld/ui'
 import { chains, CREDENTIAL_EXPIRATION_TIME, timeAgo } from '../../../utils'
 import { Badge } from '../../badge'
@@ -12,7 +12,7 @@ import { Link } from 'solito/link'
 export function CredentialDisplay({
   credential,
   onPress,
-}: { credential: Credential; onPress?: () => void }) {
+}: { credential: CredentialWithId; onPress?: () => void }) {
   const isExpired =
     credential.verified_at &&
     new Date(credential.verified_at).getTime() + CREDENTIAL_EXPIRATION_TIME < Date.now()
@@ -54,7 +54,7 @@ export function CredentialDisplay({
   )
 }
 
-function ERC20CredentialDisplay({ credential }: { credential: Credential }) {
+function ERC20CredentialDisplay({ credential }: { credential: CredentialWithId }) {
   const { data } = useToken({
     chainId: Number(credential.metadata.chainId),
     address: credential.metadata.tokenAddress,
@@ -71,7 +71,7 @@ function ERC20CredentialDisplay({ credential }: { credential: Credential }) {
         {
           label: 'Token',
           value: symbol,
-          image: data?.image_url,
+          image: data?.image_url ?? undefined,
           imageFallbackText: credential.metadata.tokenAddress,
         },
         { label: 'Balance', value: amount.toLocaleString() },

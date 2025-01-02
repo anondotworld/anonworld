@@ -14,7 +14,7 @@ import {
   YStack,
 } from '@anonworld/ui'
 import { useNewCredential } from './context'
-import { CredentialType, FungiblePosition } from '../../../types'
+import { CredentialType, FungiblePosition } from '@anonworld/common'
 import { useAccount, useDisconnect } from 'wagmi'
 import { chainIdToZerion, formatAddress, zerionToChainId } from '../../../utils'
 import { useEffect, useMemo, useState } from 'react'
@@ -237,7 +237,7 @@ function TokenValue({ token }: { token: FungiblePosition }) {
           size={28}
           token={{
             address: impl.address,
-            image_url: token.attributes.fungible_info.icon?.url,
+            image_url: token.attributes.fungible_info.icon?.url ?? null,
           }}
         />
         <YStack>

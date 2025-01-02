@@ -1,6 +1,6 @@
 'use client'
 import { CreatePostProvider } from '@/components/create-post/context'
-import { Post } from '@/components/post'
+import { PostDisplay } from '@/components/post'
 import { useSDK } from '@anonworld/react'
 import { useQuery } from '@tanstack/react-query'
 
@@ -16,7 +16,7 @@ export default function Page({ params }: { params: { hash: string } }) {
   return (
     <CreatePostProvider>
       <div className="flex flex-col gap-4">
-        <Post cast={data.data} />
+        <PostDisplay cast={data.data} />
       </div>
     </CreatePostProvider>
   )

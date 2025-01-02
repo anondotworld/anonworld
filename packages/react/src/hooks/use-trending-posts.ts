@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSDK } from '../providers/sdk'
-import { Cast } from '../types'
+import { Post } from '@anonworld/common'
 
 export function useTrendingPosts({
   fid,
   filter,
 }: {
   fid: number
-  filter?: (cast: Cast) => boolean
+  filter?: (cast: Post) => boolean
 }) {
   const { sdk } = useSDK()
   return useQuery({

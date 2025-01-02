@@ -1,6 +1,6 @@
 import { NewPostDialog } from '../new/dialog'
 import { NewPostProvider } from '../new/context'
-import { Cast } from '../../../types'
+import { Post } from '@anonworld/common'
 import { XStack, Text, Dialog, View } from '@anonworld/ui'
 import { MessageCircle } from '@tamagui/lucide-icons'
 import { formatAmount } from '../../../utils'
@@ -9,7 +9,7 @@ import { ActionButton, variants } from './button'
 export function ReplyButton({
   post,
   variant = 'default',
-}: { post: Cast; showCount?: boolean; variant?: keyof typeof variants }) {
+}: { post: Post; showCount?: boolean; variant?: keyof typeof variants }) {
   return (
     <View onPress={(e) => e.preventDefault()}>
       <NewPostProvider
@@ -32,7 +32,7 @@ export function ReplyButton({
   )
 }
 
-export function ReplyBar({ post }: { post: Cast }) {
+export function ReplyBar({ post }: { post: Post }) {
   return (
     <NewPostProvider
       initialReply={{

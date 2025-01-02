@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useAccount, useConfig, useSignMessage } from 'wagmi'
 import { concat, hashMessage, keccak256, pad, toHex } from 'viem'
-import { Credential } from '@anonworld/sdk/types'
+import { CredentialWithId } from '@anonworld/common'
 import { getBlock, getProof } from 'wagmi/actions'
 import { useSDK } from './sdk'
 import { useVaults } from '../hooks/use-vaults'
@@ -25,15 +25,15 @@ const getInitialCredentials = () => {
 }
 
 type CredentialsContextType = {
-  credentials: Credential[]
+  credentials: CredentialWithId[]
   delete: (id: string) => Promise<void>
-  get: (id: string) => Credential | undefined
+  get: (id: string) => CredentialWithId | undefined
   add: (args: {
     chainId: number
-    tokenAddress: `0x${string}`
+    tokenAddress: string
     verifiedBalance: bigint
     parentId?: string
-  }) => Promise<Credential>
+  }) => Promise<CredentialWithId>
   addToVault: (vaultId: string, credentialId: string) => Promise<void>
   removeFromVault: (vaultId: string, credentialId: string) => Promise<void>
 }
@@ -46,7 +46,9 @@ export const CredentialsProvider = ({
   children: React.ReactNode
 }) => {
   const { sdk, connectWallet } = useSDK()
-  const [credentials, setCredentials] = useState<Credential[]>(getInitialCredentials())
+  const [credentials, setCredentials] = useState<CredentialWithId[]>(
+    getInitialCredentials()
+  )
   const { signMessageAsync } = useSignMessage()
   const { address } = useAccount()
   const config = useConfig()
@@ -67,7 +69,7 @@ export const CredentialsProvider = ({
 
   const addERC20Balance = async (args: {
     chainId: number
-    tokenAddress: `0x${string}`
+    tokenAddress: string
     verifiedBalance: bigint
     parentId?: string
   }) => {
@@ -86,7 +88,7 @@ export const CredentialsProvider = ({
     const storageKey = keccak256(concat([pad(address), balanceSlotHex]))
     const block = await getBlock(config, { chainId: Number(args.chainId) })
     const proof = await getProof(config, {
-      address: args.tokenAddress,
+      address: args.tokenAddress as `0x${string}`,
       storageKeys: [storageKey],
       blockNumber: block.number,
     })
@@ -110,7 +112,7 @@ export const CredentialsProvider = ({
       storageProof: proof.storageProof,
       chainId: args.chainId,
       blockNumber: block.number,
-      tokenAddress: args.tokenAddress,
+      tokenAddress: args.tokenAddress as `0x${string}`,
       balanceSlot: balanceSlotHex,
       verifiedBalance: args.verifiedBalance,
       blockTimestamp: block.timestamp,
@@ -126,7 +128,7 @@ export const CredentialsProvider = ({
 
   const addCredential = async (args: {
     chainId: number
-    tokenAddress: `0x${string}`
+    tokenAddress: string
     verifiedBalance: bigint
     parentId?: string
   }) => {
@@ -144,7 +146,7 @@ export const CredentialsProvider = ({
   const deleteCredential = async (id: string) => {
     const credential = credentials.find((cred) => cred.id === id)
     if (credential?.vault_id) {
-      await sdk.removeFromVault(credential.vault_id, credential.id)
+      await sdk.removeFromVault(credential.vault_id, id)
     }
     setCredentials((prev) => prev.filter((cred) => cred.id !== id))
   }

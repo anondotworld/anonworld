@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis'
-import { Cast } from './neynar/types'
+import { FarcasterCast } from '@anonworld/common'
 
 export class RedisService {
   private readonly client: Redis
@@ -28,7 +28,7 @@ export class RedisService {
     return this.client.set(`post:${hash}`, post)
   }
 
-  async setPosts(posts: Cast[]) {
+  async setPosts(posts: FarcasterCast[]) {
     const args = posts.flatMap((post) => [`post:${post.hash}`, JSON.stringify(post)])
     return this.client.mset(args)
   }

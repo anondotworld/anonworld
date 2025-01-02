@@ -1,4 +1,4 @@
-import { Cast, Reveal } from '../../../types'
+import { Post, Reveal } from '@anonworld/common'
 import { formatAddress, timeAgo } from '../../../utils'
 import {
   Avatar,
@@ -20,7 +20,7 @@ import { ReplyButton } from '../actions/reply'
 import { LikeButton } from '../actions/like'
 import { Link } from 'solito/link'
 
-export function Post({ post, hoverable }: { post: Cast; hoverable?: boolean }) {
+export function PostDisplay({ post, hoverable }: { post: Post; hoverable?: boolean }) {
   let text = post.text
   if (post.embeds) {
     for (const embed of post.embeds) {

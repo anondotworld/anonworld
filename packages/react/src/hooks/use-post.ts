@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSDK } from '../providers/sdk'
-import { Cast } from '../types'
 
 export function usePost({ hash }: { hash: string }) {
   const { sdk } = useSDK()

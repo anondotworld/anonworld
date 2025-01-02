@@ -4,9 +4,9 @@ import { PostReveal } from '../../reveal'
 import { PostActionsContent } from './content'
 import { useState } from 'react'
 import { Popover } from '@tamagui/popover'
-import { Cast } from '../../../../types'
+import { Post } from '@anonworld/common'
 
-export function PostActions({ post }: { post: Cast }) {
+export function PostActions({ post }: { post: Post }) {
   const [isOpen, setIsOpen] = useState(false)
   const [postRevealOpen, setPostRevealOpen] = useState(false)
 

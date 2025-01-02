@@ -1,26 +1,20 @@
-import { FileText, Plus, Minus, RefreshCw, Trash } from '@tamagui/lucide-icons'
+import { Plus, Minus, RefreshCw, Trash } from '@tamagui/lucide-icons'
 import { Spinner, Text, View, YGroup } from '@anonworld/ui'
-import { Credential, useCredentials } from '../../../..'
+import { CredentialWithId } from '@anonworld/common'
+import { useCredentials } from '../../../..'
 import { useVaults } from '../../../../hooks/use-vaults'
 import { NamedExoticComponent, useState } from 'react'
 
 export function CredentialActionsContent({
   credential,
-  onViewProof,
 }: {
-  credential: Credential
-  onViewProof: (open: boolean) => void
+  credential: CredentialWithId
 }) {
   const credentials = useCredentials()
   const { data: vaults } = useVaults()
 
   return (
     <YGroup>
-      <ActionButton
-        label="View proof"
-        onPress={() => onViewProof(true)}
-        Icon={FileText}
-      />
       {!credential.vault_id && vaults && vaults.length > 0 && (
         <ActionButton
           label="Add to profile"

@@ -29,7 +29,7 @@ import { useRouter } from 'next/navigation'
 import { formatEther, hashMessage, parseEther } from 'viem'
 import { Input } from '../ui/input'
 import { useQuery } from '@tanstack/react-query'
-import { Cast, Reveal, useCredentials, useSDK } from '@anonworld/react'
+import { Post, Reveal, useCredentials, useSDK } from '@anonworld/react'
 import { VerifyCredential } from '../credentials-select'
 import { useDeletePost } from '@/hooks/use-delete-post'
 import { usePromotePost } from '@/hooks/use-promote-post'
@@ -44,10 +44,10 @@ function formatNumber(num: number): string {
   return `${formattedNumber}${units[unitIndex]}`
 }
 
-export function Post({
+export function PostDisplay({
   cast,
 }: {
-  cast: Cast
+  cast: Post
 }) {
   const { variant } = useCreatePost()
   const { address } = useAccount()
@@ -402,7 +402,7 @@ function DeleteButton({ tweetId, isVerified }: { tweetId: string; isVerified: bo
   )
 }
 
-function PromoteButton({ cast, isVerified }: { cast: Cast; isVerified: boolean }) {
+function PromoteButton({ cast, isVerified }: { cast: Post; isVerified: boolean }) {
   const [open, setOpen] = useState(false)
   const [verifyOpen, setVerifyOpen] = useState(false)
   const [asReply, setAsReply] = useState(false)
@@ -486,7 +486,7 @@ function PromoteButton({ cast, isVerified }: { cast: Cast; isVerified: boolean }
   )
 }
 
-function LaunchButton({ cast, isVerified }: { cast: Cast; isVerified: boolean }) {
+function LaunchButton({ cast, isVerified }: { cast: Post; isVerified: boolean }) {
   const [open, setOpen] = useState(false)
   const [verifyOpen, setVerifyOpen] = useState(false)
   const { mutateAsync, isPending } = useLaunchPost({ hash: cast.hash })
@@ -553,7 +553,7 @@ function LaunchButton({ cast, isVerified }: { cast: Cast; isVerified: boolean })
 function RevealButton({
   cast,
   onReveal,
-}: { cast: Cast; onReveal: (reveal: Reveal) => void }) {
+}: { cast: Post; onReveal: (reveal: Reveal) => void }) {
   const { sdk } = useSDK()
   const [open, setOpen] = useState(false)
   const { toast } = useToast()

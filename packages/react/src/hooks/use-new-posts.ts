@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useSDK } from '../providers/sdk'
-import { Cast } from '../types'
+import { Post } from '@anonworld/common'
 
 const pageSize = 25
 
@@ -9,10 +9,10 @@ export function useNewPosts({
   filter,
 }: {
   fid: number
-  filter?: (cast: Cast) => boolean
+  filter?: (cast: Post) => boolean
 }) {
   const { sdk } = useSDK()
-  return useInfiniteQuery<Cast[]>({
+  return useInfiniteQuery<Post[]>({
     queryKey: ['new-posts', fid],
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
@@ -23,7 +23,7 @@ export function useNewPosts({
       }
       return posts
     },
-    getNextPageParam: (lastPage: Cast[], allPages: Cast[][]) => {
+    getNextPageParam: (lastPage: Post[], allPages: Post[][]) => {
       if (lastPage.length < pageSize) return undefined
       return allPages.length + 1
     },

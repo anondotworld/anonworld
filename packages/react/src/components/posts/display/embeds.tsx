@@ -1,11 +1,11 @@
-import { Embed } from '@anonworld/sdk/types'
+import { FarcasterEmbed } from '@anonworld/common'
 import { timeAgo } from '../../../utils'
 import { Avatar, Image, Text, View, XStack, YStack } from '@anonworld/ui'
 import { X } from '../../svg/x'
 import { useTwitterPost } from '../../../hooks/use-twitter-post'
 import { useRouter } from 'solito/navigation'
 
-export function PostEmbed({ embed }: { embed: Embed }) {
+export function PostEmbed({ embed }: { embed: FarcasterEmbed }) {
   const router = useRouter()
   if (embed.cast) {
     const filteredEmbeds = embed.cast.embeds?.filter((e) => !e.cast)

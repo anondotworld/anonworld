@@ -1,13 +1,5 @@
 import { zeroAddress } from 'viem'
-import {
-  Chain,
-  Portfolio,
-  ZerionResponse,
-  FungiblePosition,
-  Fungible,
-  Chart,
-  ChartPeriod,
-} from './types'
+import { FungiblePosition, Fungible, ZerionResponse } from '@anonworld/common'
 
 const SUPPORTED_CHAIN_IDS = ['base']
 

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { CredentialType } from '../../../types'
+import { CredentialType } from '@anonworld/common'
 import { useSDK } from '../../../providers'
 
 interface NewCredentialContextValue {

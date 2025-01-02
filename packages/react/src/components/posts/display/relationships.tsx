@@ -1,11 +1,11 @@
-import { Cast, FarcasterAccount, TwitterAccount } from '../../../types'
+import { Post, FarcasterUser, TwitterUser } from '@anonworld/common'
 import { View } from '@anonworld/ui'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
 import { Badge } from '../../badge'
 import { Link } from 'solito/link'
 
-export function PostRelationships({ post }: { post: Cast }) {
+export function PostRelationships({ post }: { post: Post }) {
   const relationships = post.relationships.sort((a, b) => {
     if (a.farcaster && !b.farcaster) return -1
     if (b.farcaster && !a.farcaster) return 1
@@ -38,7 +38,13 @@ export function PostRelationships({ post }: { post: Cast }) {
   )
 }
 
-function FarcasterBadge({ farcaster, id }: { farcaster: FarcasterAccount; id: string }) {
+function FarcasterBadge({
+  farcaster,
+  id,
+}: {
+  farcaster: FarcasterUser
+  id: string
+}) {
   return (
     <Link href={`https://warpcast.com/~/conversations/${id}`} target="_blank">
       <Badge icon={<Farcaster size={12} />}>{farcaster.username}</Badge>
@@ -46,7 +52,7 @@ function FarcasterBadge({ farcaster, id }: { farcaster: FarcasterAccount; id: st
   )
 }
 
-function TwitterBadge({ twitter, id }: { twitter: TwitterAccount; id: string }) {
+function TwitterBadge({ twitter, id }: { twitter: TwitterUser; id: string }) {
   return (
     <Link href={`https://x.com/${twitter.screen_name}/status/${id}`} target="_blank">
       <Badge icon={<X size={10} />}>{twitter.screen_name}</Badge>

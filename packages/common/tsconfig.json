@@ -2,10 +2,7 @@
   "extends": "../../tsconfig.base",
   "include": ["**/*.ts", "**/*.tsx"],
   "compilerOptions": {
-    "module": "ES2022",
-    "moduleResolution": "bundler",
-    "composite": true,
-    "resolveJsonModule": true
+    "composite": true
   },
   "references": []
 }

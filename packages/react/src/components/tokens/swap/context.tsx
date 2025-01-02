@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from 'react'
 import { useSwapQuote } from '../../../hooks/use-swap-quote'
 import { useAccount } from 'wagmi'
 import { zeroAddress } from 'viem'
-import { SwapQuote, SwapQuoteError } from '../../../types'
+import { SwapQuote, SwapQuoteError } from '@anonworld/common'
 
 export type Token = {
   chainId: number

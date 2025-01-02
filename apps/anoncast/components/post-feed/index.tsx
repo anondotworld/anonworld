@@ -1,10 +1,10 @@
 'use client'
 
-import { Cast, useTrendingPosts, useNewPosts } from '@anonworld/react'
+import { FarcasterCast, useTrendingPosts, useNewPosts } from '@anonworld/react'
 import { useState } from 'react'
 import AnimatedTabs from './animated-tabs'
 import { Skeleton } from '../ui/skeleton'
-import { Post } from '../post'
+import { PostDisplay } from '../post'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { BEST_OF_FID, LAUNCH_FID } from '@/lib/utils'
@@ -136,13 +136,13 @@ function SkeletonPost() {
 function Posts({
   casts,
 }: {
-  casts?: Cast[]
+  casts?: FarcasterCast[]
 }) {
   return (
     <div className="flex flex-col gap-4">
       {casts?.map((cast) => (
         <Link href={`/posts/${cast.hash}`} key={cast.hash}>
-          <Post cast={cast} />
+          <PostDisplay cast={cast} />
         </Link>
       ))}
     </div>

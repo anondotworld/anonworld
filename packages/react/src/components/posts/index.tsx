@@ -1,5 +1,5 @@
 export { TrendingFeed, NewFeed } from './feed'
-export { Post } from './display'
+export { PostDisplay } from './display'
 export { PostConversation } from './conversation'
 export { PostFeedSelector } from './feed/selector'
 export { NewPost } from './new'

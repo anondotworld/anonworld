@@ -7,7 +7,7 @@ import { CopyPostTwitter } from '../actions/copy-post-twitter'
 import { DeletePostTwitter } from '../actions/delete-post-twitter'
 import { DeletePostFarcaster } from '../actions/delete-post-farcaster'
 import { BaseAction } from '../actions/base'
-import { ActionRequest, ActionType } from '../actions/types'
+import { ActionRequest, ActionType } from '@anonworld/common'
 
 export const CREDENTIAL_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7 // 7 days
 

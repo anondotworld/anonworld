@@ -1,4 +1,4 @@
-import { ActionType, Community } from '../../../types'
+import { ActionType, Community } from '@anonworld/common'
 import { useActions } from '../../../hooks/use-actions'
 import { useCredentials } from '../../../providers'
 import { getUsableCredential } from '../../../utils'

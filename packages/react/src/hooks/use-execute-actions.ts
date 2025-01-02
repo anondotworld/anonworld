@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { useSDK } from '../providers/sdk'
-import { Credential, ExecuteAction } from '../types'
+import { CredentialWithId, ExecuteAction } from '@anonworld/common'
 
 type ExecuteActionsResponse = {
   success: boolean
@@ -14,7 +14,7 @@ export function useExecuteActions({
   onSuccess,
   onError,
 }: {
-  credentials: Credential[]
+  credentials: CredentialWithId[]
   actions: Omit<ExecuteAction, 'credentials'>[]
   onSuccess?: (response: ExecuteActionsResponse[]) => void
   onError?: (error: Error) => void

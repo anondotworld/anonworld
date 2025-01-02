@@ -3,7 +3,7 @@ import { Check, Plus } from '@tamagui/lucide-icons'
 import { useCredentials } from '../../../providers'
 import { Badge } from '../../badge'
 import { useToken } from '../../../hooks/use-token'
-import { Credential } from '../../../types'
+import { CredentialWithId } from '@anonworld/common'
 import { formatUnits } from 'viem'
 import { useNewPost } from './context'
 import { CredentialBadge } from '../../credentials/badge'
@@ -35,7 +35,7 @@ function CredentialSelector() {
   const { credentials: postCredentials } = useNewPost()
   const [isOpen, setIsOpen] = useState(false)
 
-  const handlePress = (credential: Credential) => {
+  const handlePress = (credential: CredentialWithId) => {
     if (postCredentials.some((c) => c.id === credential.id)) {
       removeCredential(credential)
     } else {
@@ -158,7 +158,7 @@ function CredentialSelector() {
   )
 }
 
-function ERC20Credential({ credential }: { credential: Credential }) {
+function ERC20Credential({ credential }: { credential: CredentialWithId }) {
   const { data } = useToken({
     chainId: Number(credential.metadata.chainId),
     address: credential.metadata.tokenAddress,
@@ -175,7 +175,7 @@ function ERC20Credential({ credential }: { credential: Credential }) {
         <TokenImage
           token={{
             address: credential.metadata.tokenAddress,
-            image_url: data?.image_url,
+            image_url: data?.image_url ?? undefined,
           }}
         />
         <Text fos="$1" fow="500" color="$color11" textTransform="uppercase">

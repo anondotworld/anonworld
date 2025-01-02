@@ -2,7 +2,7 @@ import React from 'react'
 import { Check, ChevronDown } from '@tamagui/lucide-icons'
 import { Adapt, Select, Sheet } from 'tamagui'
 import { useNewCredential } from './context'
-import { CredentialType } from '../../../types'
+import { CredentialType } from '@anonworld/common'
 
 export function CredentialTypeSelect() {
   const { credentialType, setCredentialType } = useNewCredential()

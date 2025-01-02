@@ -9,7 +9,7 @@ import {
   getPostRelationships,
   revealPost,
 } from '@anonworld/db'
-import { Cast, ConversationCast } from '../services/neynar/types'
+import { Post, ConversationCast, ConversationPost } from '@anonworld/common'
 import { redis } from '../services/redis'
 import { feed } from '../services/feed'
 
@@ -17,7 +17,7 @@ export const postsRoutes = createElysia({ prefix: '/posts' })
   .get(
     '/:hash',
     async ({ params, passkeyId }) => {
-      let post: Cast | null = null
+      let post: Post | null = null
       const cached = await redis.getPost(params.hash)
       if (cached) {
         post = JSON.parse(cached)
@@ -68,7 +68,7 @@ export const postsRoutes = createElysia({ prefix: '/posts' })
       const formattedPosts = await feed.getFeed(posts)
 
       return {
-        data: formatConversations(conversations, formattedPosts),
+        data: formatConversations(conversations as ConversationPost[], formattedPosts),
       }
     },
     {
@@ -149,14 +149,14 @@ const getRelevantPosts = (
 }
 
 const formatConversations = (
-  conversations: ConversationCast[],
-  formattedPosts: Cast[]
+  conversations: ConversationPost[],
+  formattedPosts: Post[]
 ) => {
-  const formattedConversations: ConversationCast[] = []
+  const formattedConversations: ConversationPost[] = []
 
   const copies: string[] = []
   for (const conversation of conversations) {
-    const replies: ConversationCast[] = conversation.direct_replies
+    const replies: ConversationPost[] = conversation.direct_replies
 
     const formattedPost = formattedPosts.find((p) => p.hash === conversation.hash)
     if (formattedPost?.relationships) {

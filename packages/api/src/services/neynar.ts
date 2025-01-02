@@ -1,14 +1,9 @@
 import {
-  GetCastResponse,
-  CreateCastResponse,
-  GetBulkUsersResponse,
-  GetCastsResponse,
-  GetChannelResponse,
-  GetUserByUsernameResponse,
-  GetUsersResponse,
-  GetBulkCastsResponse,
-  GetConversationResponse,
-} from './types'
+  FarcasterCast,
+  FarcasterChannel,
+  ConversationCast,
+  FarcasterUser,
+} from '@anonworld/common'
 import { getSignerForFid, PostDataV1 } from '@anonworld/db'
 
 class NeynarService {
@@ -74,49 +69,60 @@ class NeynarService {
   }
 
   async getUserByUsername(username: string) {
-    return this.makeRequest<GetUserByUsernameResponse>(
-      `/farcaster/user/by_username?username=${username}`
-    )
+    return this.makeRequest<{
+      user: FarcasterUser
+    }>(`/farcaster/user/by_username?username=${username}`)
   }
 
   async getCast(hash: string) {
-    return this.makeRequest<GetCastResponse>(
+    return this.makeRequest<{
+      cast: FarcasterCast
+    }>(
       `/farcaster/cast?type=${hash.startsWith('0x') ? 'hash' : 'url'}&identifier=${hash}`
     )
   }
 
   async getUser(fid: number) {
-    return this.makeRequest<GetUsersResponse>(`/farcaster/user/bulk?fids=${fid}`)
+    return this.makeRequest<{
+      users: Array<FarcasterUser>
+    }>(`/farcaster/user/bulk?fids=${fid}`)
   }
 
   async getBulkUsersByFids(fids: number[]) {
-    return this.makeRequest<GetBulkUsersResponse>(
+    return this.makeRequest<Record<string, Array<FarcasterUser>>>(
       `/farcaster/user/bulk?fids=${fids.join(',')}`
     )
   }
 
   async getBulkUsersByAddresses(addresses: string[]) {
-    return this.makeRequest<GetBulkUsersResponse>(
+    return this.makeRequest<Record<string, Array<FarcasterUser>>>(
       `/farcaster/user/bulk-by-address?addresses=${addresses.join(',')}`
     )
   }
 
   async getUserCasts(fid: number, limit = 150, cursor?: string) {
-    return this.makeRequest<GetCastsResponse>(
+    return this.makeRequest<{
+      casts: Array<FarcasterCast>
+      next: {
+        cursor: string | null
+      }
+    }>(
       `/farcaster/feed/user/casts?limit=${limit}&include_replies=true&fid=${fid}${cursor ? `&cursor=${cursor}` : ''}`
     )
   }
 
   async getBulkCasts(hashes: string[]) {
-    return this.makeRequest<GetBulkCastsResponse>(
-      `/farcaster/casts?casts=${hashes.join(',')}`
-    )
+    return this.makeRequest<{
+      result: {
+        casts: Array<FarcasterCast>
+      }
+    }>(`/farcaster/casts?casts=${hashes.join(',')}`)
   }
 
   async getChannel(identifier: string) {
-    return this.makeRequest<GetChannelResponse>(
-      `/farcaster/channel?id=${identifier}&type=id`
-    )
+    return this.makeRequest<{
+      channel: FarcasterChannel
+    }>(`/farcaster/channel?id=${identifier}&type=id`)
   }
 
   async getCastFromURL(castURL: string) {
@@ -198,7 +204,19 @@ class NeynarService {
       embeds: embeds.length > 0 ? embeds : undefined,
     }
 
-    return await this.makeRequest<CreateCastResponse>('/farcaster/cast', {
+    return await this.makeRequest<
+      | { success: false }
+      | {
+          success: true
+          cast: {
+            hash: string
+            author: {
+              fid: number
+            }
+          }
+          text: string
+        }
+    >('/farcaster/cast', {
       method: 'POST',
       body: JSON.stringify(body),
     })
@@ -234,7 +252,9 @@ class NeynarService {
   }
 
   async getConversation(identifier: string) {
-    return this.makeRequest<GetConversationResponse>(
+    return this.makeRequest<{
+      conversation: { cast: ConversationCast }
+    }>(
       `/farcaster/cast/conversation?identifier=${identifier}&type=hash&reply_depth=5&include_chronological_parent_casts=false&sort_type=desc_chron&limit=50`
     )
   }

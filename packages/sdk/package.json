@@ -9,6 +9,7 @@
     "./types": "./src/types.ts"
   },
   "dependencies": {
+    "@anonworld/common": "*",
     "@anonworld/zk": "*",
     "@zk-kit/lean-imt": "^2.2.2",
     "viem": "^2.21.53"

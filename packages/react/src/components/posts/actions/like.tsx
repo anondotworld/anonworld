@@ -1,4 +1,4 @@
-import { Cast } from '../../../types'
+import { Post } from '@anonworld/common'
 import { View, Dialog, useTheme } from '@anonworld/ui'
 import { Heart } from '@tamagui/lucide-icons'
 import { formatAmount } from '../../../utils'
@@ -11,7 +11,7 @@ export function LikeButton({
   post,
   variant = 'default',
 }: {
-  post: Cast
+  post: Post
   variant?: keyof typeof variants
 }) {
   const { sdk } = useSDK()

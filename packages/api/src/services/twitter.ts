@@ -2,7 +2,7 @@ import https from 'node:https'
 import { SendTweetV2Params, TwitterApi } from 'twitter-api-v2'
 import { getTwitterAccount } from '@anonworld/db'
 
-export type TwitterConfig = {
+type TwitterConfig = {
   appKey: string
   appSecret: string
   accessToken: string

@@ -14,7 +14,7 @@ import {
   Label,
   Circle,
 } from '@anonworld/ui'
-import { Cast } from '../../../types'
+import { Post } from '@anonworld/common'
 import { useState } from 'react'
 import { usePostReveal } from '../../../hooks/use-post-reveal'
 import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
@@ -28,7 +28,7 @@ export function PostReveal({
   open,
   onOpenChange,
 }: {
-  post: Cast
+  post: Post
   children?: React.ReactNode
   open: boolean
   onOpenChange: (open: boolean) => void

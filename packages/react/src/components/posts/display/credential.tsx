@@ -1,5 +1,5 @@
 import { Popover, XStack } from '@anonworld/ui'
-import { Credential } from '../../../types'
+import { Credential } from '@anonworld/common'
 import { CredentialBadge } from '../../credentials/badge'
 import { useState } from 'react'
 import { timeAgo } from '../../../utils'

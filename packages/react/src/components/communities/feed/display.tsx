@@ -4,7 +4,7 @@ import { formatAmount, timeAgo } from '../../../utils'
 import { Badge } from '../../badge'
 import { Farcaster } from '../../svg/farcaster'
 import { X } from '../../svg/x'
-import { Community, FarcasterAccount, TwitterAccount } from '../../../types'
+import { Community, FarcasterUser, TwitterUser } from '@anonworld/common'
 import { Link } from 'solito/link'
 
 export function CommunityDisplay({
@@ -82,7 +82,7 @@ export function CommunityDisplay({
   )
 }
 
-function FarcasterBadge({ farcaster }: { farcaster: FarcasterAccount }) {
+function FarcasterBadge({ farcaster }: { farcaster: FarcasterUser }) {
   return (
     <Link href={`https://warpcast.com/${farcaster.username}`} target="_blank">
       <Badge icon={<Farcaster size={12} />}>
@@ -93,7 +93,7 @@ function FarcasterBadge({ farcaster }: { farcaster: FarcasterAccount }) {
   )
 }
 
-function TwitterBadge({ twitter }: { twitter: TwitterAccount }) {
+function TwitterBadge({ twitter }: { twitter: TwitterUser }) {
   return (
     <Link href={`https://x.com/${twitter.screen_name}`} target="_blank">
       <Badge icon={<X size={10} />}>

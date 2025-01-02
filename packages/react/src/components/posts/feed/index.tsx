@@ -1,5 +1,5 @@
 import { Spinner, Text, YStack } from '@anonworld/ui'
-import { Post } from '../display'
+import { PostDisplay } from '../display'
 import { Link, TextLink } from 'solito/link'
 import { useNewPosts, useTrendingPosts } from '../../../hooks'
 import { useEffect, useRef } from 'react'
@@ -23,7 +23,7 @@ export function TrendingFeed({ fid }: { fid: number }) {
     <YStack gap="$4" $xs={{ gap: '$0', bbw: '$0.5', bc: '$borderColor' }}>
       {data?.map((post) => (
         <Link key={post.hash} href={`/posts/${post.hash}`}>
-          <Post post={post} hoverable />
+          <PostDisplay post={post} hoverable />
         </Link>
       ))}
       <Link href="/new">
@@ -85,7 +85,7 @@ export function NewFeed({ fid }: { fid: number }) {
       {data.pages.map((page, i) =>
         page.map((post) => (
           <Link key={post.hash} href={`/posts/${post.hash}`}>
-            <Post post={post} hoverable />
+            <PostDisplay post={post} hoverable />
           </Link>
         ))
       )}

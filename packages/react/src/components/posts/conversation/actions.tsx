@@ -1,11 +1,11 @@
 import { MoreHorizontal } from '@tamagui/lucide-icons'
 import { Popover, Text, View, YGroup } from '@anonworld/ui'
-import { Cast } from '../../../types'
+import { Post } from '@anonworld/common'
 import { Farcaster } from '../../svg/farcaster'
 import { NamedExoticComponent } from 'react'
 import { Link } from 'solito/link'
 
-export function PostActions({ post }: { post: Cast }) {
+export function PostActions({ post }: { post: Post }) {
   return (
     <Popover size="$5" placement="bottom">
       <Popover.Trigger

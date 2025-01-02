@@ -1,6 +1,6 @@
 import { useSDK } from '../providers/sdk'
 import { useMutation } from '@tanstack/react-query'
-import { RevealPostArgs } from '../types'
+import { RevealPostArgs } from '@anonworld/common'
 
 export function usePostReveal() {
   const { sdk } = useSDK()
