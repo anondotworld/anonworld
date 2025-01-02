@@ -10,6 +10,10 @@
   },
   "dependencies": {
     "@anonworld/react": "*",
+    "@anonworld/ui": "*",
+    "@tamagui/config": "^1.120.0",
+    "@tamagui/lucide-icons": "^1.116.12",
+    "@tamagui/next-theme": "^1.120.0",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -35,6 +39,7 @@
     "pino-pretty": "^13.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "tamagui": "^1.120.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "viem": "^2.21.53",
