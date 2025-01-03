@@ -1,13 +1,8 @@
-import {
-  createPostRelationship,
-  getPost,
-  getPostParent,
-  getPostRelationship,
-  PostDataV1,
-} from '@anonworld/db'
+import { db } from '@anonworld/common'
 import { neynar } from '../services/neynar'
 import { twitter } from '../services/twitter'
 import { BaseAction } from './base'
+import { PostData } from '@anonworld/common'
 
 export type CopyPostTwitterMetadata = {
   twitter: string
@@ -21,7 +16,7 @@ export class CopyPostTwitter extends BaseAction<
   CopyPostTwitterMetadata,
   CopyPostTwitterData
 > {
-  async isAbleToPromote(post: PostDataV1) {
+  async isAbleToPromote(post: PostData) {
     const unableToPromoteRegex = [
       /.*@clanker.*(launch|deploy|make).*/is,
       /.*dexscreener.com.*/i,
@@ -54,7 +49,7 @@ export class CopyPostTwitter extends BaseAction<
     }
   }
 
-  async postToTweet(post: PostDataV1) {
+  async postToTweet(post: PostData) {
     let text = post.text ?? ''
     let quoteTweetId: string | undefined
     let replyToTweetId: string | undefined
@@ -111,7 +106,7 @@ export class CopyPostTwitter extends BaseAction<
   }
 
   async handle() {
-    const relationship = await getPostRelationship(
+    const relationship = await db.relationships.get(
       this.data.hash,
       'twitter',
       this.action.metadata.twitter
@@ -120,7 +115,7 @@ export class CopyPostTwitter extends BaseAction<
       return { success: true, tweetId: relationship.target_id }
     }
 
-    const post = await getPost(this.data.hash)
+    const post = await db.posts.get(this.data.hash)
     if (!post) {
       return { success: false }
     }
@@ -136,9 +131,9 @@ export class CopyPostTwitter extends BaseAction<
       return { success: false }
     }
 
-    const parent = await getPostParent(this.data.hash)
+    const parent = await db.relationships.getParent(this.data.hash)
 
-    await createPostRelationship({
+    await db.relationships.create({
       post_hash: parent?.post_hash || this.data.hash,
       target: 'twitter',
       target_account: this.action.metadata.twitter,

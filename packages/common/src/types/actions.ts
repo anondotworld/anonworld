@@ -1,9 +1,9 @@
-import { CredentialInstance } from '@anonworld/db'
 import { Community } from './community'
+import { Credential } from './credentials'
 
 export type ActionRequest = {
   data: any
-  credentials: CredentialInstance[]
+  credentials: Credential[]
   actionId: string
 }
 

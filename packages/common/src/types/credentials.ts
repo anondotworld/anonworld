@@ -19,6 +19,7 @@ export type Credential = {
   verified_at: string
   token?: Token
   vault_id: string | null
+  parent_id: string | null
 }
 
 export type CredentialWithId = Credential & { id: string }

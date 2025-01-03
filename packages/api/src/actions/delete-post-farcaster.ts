@@ -1,4 +1,4 @@
-import { deletePost, deletePostRelationship } from '@anonworld/db'
+import { db } from '@anonworld/common'
 import { neynar } from '../services/neynar'
 import { BaseAction } from './base'
 
@@ -23,9 +23,9 @@ export class DeletePostFarcaster extends BaseAction<
       throw new Error('Failed to delete cast')
     }
 
-    await deletePost(this.data.hash)
+    await db.posts.delete(this.data.hash)
 
-    await deletePostRelationship('farcaster', this.data.hash)
+    await db.relationships.delete('farcaster', this.data.hash)
 
     return { success: true }
   }

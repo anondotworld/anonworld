@@ -1,6 +1,6 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import { getAction, getAllActions, getCredentials } from '@anonworld/db'
+import { db } from '@anonworld/common'
 import { CreatePost } from '../actions/create-post'
 import { CopyPostFarcaster } from '../actions/copy-post-farcaster'
 import { CopyPostTwitter } from '../actions/copy-post-twitter'
@@ -12,7 +12,7 @@ import { ActionRequest, ActionType } from '@anonworld/common'
 export const CREDENTIAL_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7 // 7 days
 
 async function getActionInstance(request: ActionRequest) {
-  const action = await getAction(request.actionId)
+  const action = await db.actions.get(request.actionId)
 
   let actionInstance: BaseAction | undefined
 
@@ -62,7 +62,7 @@ async function getActionInstance(request: ActionRequest) {
 
 export const actionsRoutes = createElysia({ prefix: '/actions' })
   .get('/', async () => {
-    const data = await getAllActions()
+    const data = await db.actions.list()
     return {
       data,
     }
@@ -70,7 +70,7 @@ export const actionsRoutes = createElysia({ prefix: '/actions' })
   .get(
     '/:actionId',
     async ({ params }) => {
-      const action = await getAction(params.actionId)
+      const action = await db.actions.get(params.actionId)
       return action
     },
     {
@@ -87,7 +87,7 @@ export const actionsRoutes = createElysia({ prefix: '/actions' })
 
       for (const action of body.actions) {
         try {
-          const credentials = await getCredentials(action.credentials)
+          const credentials = await db.credentials.getBulk(action.credentials)
           const actionInstance = await getActionInstance({
             ...action,
             credentials,

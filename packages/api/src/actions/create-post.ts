@@ -1,7 +1,7 @@
-import { createPost, createPostCredentials, getActions, PostDataV1 } from '@anonworld/db'
+import { db } from '@anonworld/common'
 import { neynar } from '../services/neynar'
 import { BaseAction } from './base'
-import { ActionRequest } from '@anonworld/common'
+import { ActionRequest, PostData } from '@anonworld/common'
 
 const INVALID_REGEXES = [
   // biome-ignore lint/suspicious/noMisleadingCharacterClass: regex
@@ -22,7 +22,7 @@ export type CreatePostMetadata = {
   fid: number
 }
 
-export type CreatePostData = PostDataV1 & {
+export type CreatePostData = PostData & {
   revealHash?: string
   copyActionIds?: string[]
 }
@@ -52,7 +52,7 @@ export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
       throw new Error('Failed to create cast')
     }
 
-    await createPost({
+    await db.posts.create({
       hash: response.cast.hash,
       fid: this.action.metadata.fid,
       data: {
@@ -64,7 +64,7 @@ export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
       reveal_hash: revealHash,
     })
 
-    await createPostCredentials(response.cast.hash, this.credentials)
+    await db.posts.addCredentials(response.cast.hash, this.credentials)
 
     this.hash = response.cast.hash
 
@@ -77,7 +77,7 @@ export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
   async next(): Promise<ActionRequest[]> {
     if (!this.hash || !this.data.copyActionIds) return []
 
-    const actions = await getActions(this.data.copyActionIds)
+    const actions = await db.actions.getBulk(this.data.copyActionIds)
 
     const nextActions: ActionRequest[] = []
 

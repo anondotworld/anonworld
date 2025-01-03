@@ -1,4 +1,4 @@
-import { deletePostRelationship } from '@anonworld/db'
+import { db } from '@anonworld/common'
 import { twitter } from '../services/twitter'
 import { BaseAction } from './base'
 
@@ -23,7 +23,7 @@ export class DeletePostTwitter extends BaseAction<
       throw new Error('Failed to delete tweet')
     }
 
-    await deletePostRelationship('twitter', this.data.tweetId)
+    await db.relationships.delete('twitter', this.data.tweetId)
 
     return { success: true }
   }

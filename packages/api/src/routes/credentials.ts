@@ -1,12 +1,6 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import {
-  createCredentialInstance,
-  CredentialInstance,
-  deleteCredentialInstance,
-  getCredentialInstance,
-  reverifyCredentialInstance,
-} from '@anonworld/db'
+import { db } from '@anonworld/common'
 import { CircuitType, getCircuit } from '@anonworld/zk'
 import {
   createPublicClient,
@@ -18,6 +12,7 @@ import {
   toHex,
 } from 'viem'
 import { base } from 'viem/chains'
+import { Credential } from '@anonworld/common'
 
 const client = createPublicClient({
   chain: base,
@@ -45,7 +40,7 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
       const metadata = circuit.parseData(body.publicInputs)
       const credentialId = `${body.type}:${metadata.chainId}:${metadata.tokenAddress}`
       const id = keccak256(new Uint8Array(body.proof))
-      const existingCredential = await getCredentialInstance(id)
+      const existingCredential = await db.credentials.get(id)
       if (existingCredential) {
         return {
           ...existingCredential,
@@ -66,12 +61,12 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
         throw new Error('Invalid storage hash')
       }
 
-      let parent: CredentialInstance | null = null
+      let parent: Credential | null = null
       if (body.parentId) {
-        parent = await getCredentialInstance(body.parentId)
+        parent = await db.credentials.get(body.parentId)
       }
 
-      const credential = await createCredentialInstance({
+      const credential = await db.credentials.create({
         id,
         credential_id: credentialId,
         metadata,
@@ -85,8 +80,8 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
         vault_id: parent?.vault_id,
       })
 
-      if (parent) {
-        await reverifyCredentialInstance(parent.id, credential.id)
+      if (parent?.id) {
+        await db.credentials.reverify(parent.id, credential.id)
       }
 
       return {
@@ -105,7 +100,7 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
     }
   )
   .get('/:id', async ({ params }) => {
-    const credential = await getCredentialInstance(params.id)
+    const credential = await db.credentials.get(params.id)
     return {
       ...credential,
     }

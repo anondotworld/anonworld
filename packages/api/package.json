@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@0x/swap-ts-sdk": "^2.1.1",
-    "@anonworld/db": "*",
+    "@anonworld/common": "*",
     "@anonworld/common": "*",
     "@anonworld/zk": "*",
     "@elysiajs/cors": "1.1.1",

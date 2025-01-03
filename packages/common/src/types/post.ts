@@ -39,10 +39,17 @@ export type ConversationPost = Post & {
   direct_replies: Array<ConversationPost>
 }
 
-export type RevealPostArgs = {
+export type RevealArgs = {
   hash: string
   message: string
   phrase: string
   signature: string
   address: string
+}
+
+export type PostData = {
+  text: string | null
+  reply: string | null
+  links: string[]
+  images: string[]
 }

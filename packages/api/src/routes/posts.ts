@@ -2,13 +2,7 @@ import { createElysia, encodeJson } from '../utils'
 import { t } from 'elysia'
 import { hashMessage, verifyMessage } from 'viem'
 import { neynar } from '../services/neynar'
-import {
-  getAllFarcasterAccounts,
-  getBulkPosts,
-  getPost,
-  getPostRelationships,
-  revealPost,
-} from '@anonworld/db'
+import { db } from '@anonworld/common'
 import { Post, ConversationCast, ConversationPost } from '@anonworld/common'
 import { redis } from '../services/redis'
 import { feed } from '../services/feed'
@@ -46,7 +40,7 @@ export const postsRoutes = createElysia({ prefix: '/posts' })
   .get(
     '/:hash/conversations',
     async ({ params }) => {
-      const relationships = await getPostRelationships([params.hash])
+      const relationships = await db.relationships.getBulk([params.hash])
       const hashes = [
         params.hash,
         ...relationships.filter((r) => r.target === 'farcaster').map((r) => r.target_id),
@@ -62,9 +56,9 @@ export const postsRoutes = createElysia({ prefix: '/posts' })
         .flat()
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
-      const farcasterAccounts = await getAllFarcasterAccounts()
+      const farcasterAccounts = await db.socials.listFarcasterAccounts()
       const relevantHashes = getRelevantPosts(farcasterAccounts, conversations)
-      const posts = await getBulkPosts(relevantHashes)
+      const posts = await db.posts.getBulk(relevantHashes)
       const formattedPosts = await feed.getFeed(posts)
 
       return {
@@ -80,7 +74,7 @@ export const postsRoutes = createElysia({ prefix: '/posts' })
   .post(
     '/reveal',
     async ({ body }) => {
-      const post = await getPost(body.hash)
+      const post = await db.posts.get(body.hash)
       if (!post) {
         throw new Error('Post not found')
       }
@@ -103,7 +97,8 @@ export const postsRoutes = createElysia({ prefix: '/posts' })
         }
       }
 
-      await revealPost(post.reveal_hash, {
+      await db.posts.reveal({
+        hash: post.reveal_hash,
         message: body.message,
         phrase: body.phrase,
         signature: body.signature,

@@ -1,20 +1,13 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import {
-  addCredentialToVault,
-  getCredentialsFromVault,
-  getPostsFromVault,
-  getVault,
-  Post,
-  removeCredentialFromVault,
-} from '@anonworld/db'
+import { db } from '@anonworld/common'
 import { feed } from '../services/feed'
 
 export const vaultsRoutes = createElysia({ prefix: '/vaults' })
   .put(
     '/:vaultId/credentials',
     async ({ body, params }) => {
-      await addCredentialToVault(params.vaultId, body.credentialId)
+      await db.credentials.addToVault(body.credentialId, params.vaultId)
       return {
         success: true,
       }
@@ -30,8 +23,8 @@ export const vaultsRoutes = createElysia({ prefix: '/vaults' })
   )
   .delete(
     '/:vaultId/credentials',
-    async ({ params, body }) => {
-      await removeCredentialFromVault(body.credentialId)
+    async ({ body }) => {
+      await db.credentials.removeFromVault(body.credentialId)
       return {
         success: true,
       }
@@ -49,8 +42,8 @@ export const vaultsRoutes = createElysia({ prefix: '/vaults' })
     '/:vaultId',
     async ({ params }) => {
       const [vault, credentials] = await Promise.all([
-        getVault(params.vaultId),
-        getCredentialsFromVault(params.vaultId),
+        db.vaults.get(params.vaultId),
+        db.vaults.getCredentials(params.vaultId),
       ])
       return {
         ...vault,
@@ -66,14 +59,14 @@ export const vaultsRoutes = createElysia({ prefix: '/vaults' })
   .get(
     '/:vaultId/posts',
     async ({ params }) => {
-      const response = await getPostsFromVault(params.vaultId, {
+      const response = await db.vaults.getFeed(params.vaultId, {
         limit: 100,
         offset: 0,
       })
 
       if (response.length === 0) return { data: [] }
 
-      const posts = response.map((p) => p.posts) as Array<Post>
+      const posts = response.map((p) => p.posts)
       const data = await feed.getFeed(posts)
 
       return {

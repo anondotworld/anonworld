@@ -15,7 +15,7 @@ import { t } from 'elysia'
 import { redis } from '../services/redis'
 import { zerion } from '../services/zerion'
 import { createClientV2 } from '@0x/swap-ts-sdk'
-import { createToken, getToken, updateToken } from '@anonworld/db'
+import { db } from '@anonworld/common'
 
 const zeroExClient = createClientV2({
   apiKey: process.env.ZERO_EX_API_KEY!,
@@ -59,7 +59,7 @@ export const tokenRoutes = createElysia({ prefix: '/tokens' })
         if (data && hexToBigInt(data) === topHolder.balance) {
           await redis.setBalanceStorageSlot(chainId, tokenAddress, slot)
           await getOrCreateToken(chainId, tokenAddress)
-          await updateToken(`${chainId}:${tokenAddress}`, {
+          await db.tokens.update(`${chainId}:${tokenAddress}`, {
             balance_slot: slot,
           })
           return { slot }
@@ -115,7 +115,7 @@ export const syncToken = async (chainId: number, tokenAddress: string) => {
   const simpleHashToken = await simplehash.getFungible(chainId, tokenAddress)
 
   const id = `${chainId}:${tokenAddress}`
-  const token = await getToken(id)
+  const token = await db.tokens.get(id)
   if (token) {
     const fields = {
       price_usd: zerionToken.attributes.market_data.price?.toFixed(8) ?? 0,
@@ -123,7 +123,7 @@ export const syncToken = async (chainId: number, tokenAddress: string) => {
       total_supply: Math.round(zerionToken.attributes.market_data.total_supply ?? 0),
       holders: simpleHashToken.holder_count ?? 0,
     }
-    await updateToken(id, fields)
+    await db.tokens.update(id, fields)
     await redis.setToken(
       chainId,
       tokenAddress,
@@ -154,7 +154,7 @@ export const syncToken = async (chainId: number, tokenAddress: string) => {
       total_supply: Math.round(zerionToken.attributes.market_data.total_supply ?? 0),
       holders: simpleHashToken?.holder_count ?? 0,
     }
-    await createToken(token)
+    await db.tokens.create(token)
     await redis.setToken(chainId, tokenAddress, JSON.stringify(token))
   }
 }

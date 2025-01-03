@@ -11,7 +11,7 @@ import {
   FungiblePosition,
   Post,
   RequestConfig,
-  RevealPostArgs,
+  RevealArgs,
   SwapQuote,
   SwapQuoteError,
   Token,
@@ -104,7 +104,7 @@ export class Api {
     })
   }
 
-  async revealPost(args: RevealPostArgs) {
+  async revealPost(args: RevealArgs) {
     return await this.request<{ success: boolean; hash?: string }>('/posts/reveal', {
       method: 'POST',
       body: JSON.stringify(args),

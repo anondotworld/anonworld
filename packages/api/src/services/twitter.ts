@@ -1,6 +1,6 @@
 import https from 'node:https'
 import { SendTweetV2Params, TwitterApi } from 'twitter-api-v2'
-import { getTwitterAccount } from '@anonworld/db'
+import { db } from '@anonworld/common'
 
 type TwitterConfig = {
   appKey: string
@@ -13,7 +13,7 @@ export class TwitterService {
   private client!: TwitterApi
 
   async refreshClient(username: string) {
-    const account = await getTwitterAccount(username)
+    const account = await db.socials.getTwitterAccount(username)
     if (!account) {
       throw new Error('Twitter account not found')
     }

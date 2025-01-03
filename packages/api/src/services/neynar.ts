@@ -3,8 +3,9 @@ import {
   FarcasterChannel,
   ConversationCast,
   FarcasterUser,
+  PostData,
 } from '@anonworld/common'
-import { getSignerForFid, PostDataV1 } from '@anonworld/db'
+import { db } from '@anonworld/common'
 
 class NeynarService {
   private readonly apiKey: string
@@ -143,11 +144,11 @@ class NeynarService {
   }
 
   async createCast(
-    params: PostDataV1 & {
+    params: PostData & {
       fid: number
     }
   ) {
-    const signerUuid = await getSignerForFid(params.fid)
+    const signerUuid = await db.socials.getFarcasterAccount(params.fid)
     if (!signerUuid) {
       throw new Error('No signer found for address')
     }
@@ -226,7 +227,7 @@ class NeynarService {
     fid: number
     hash: string
   }) {
-    const signer = await getSignerForFid(params.fid)
+    const signer = await db.socials.getFarcasterAccount(params.fid)
     if (!signer) {
       throw new Error('No signer found for address')
     }

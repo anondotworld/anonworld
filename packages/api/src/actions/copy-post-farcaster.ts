@@ -1,14 +1,7 @@
-import {
-  createPost,
-  createPostCredentials,
-  createPostRelationship,
-  getPost,
-  getPostParent,
-  getPostRelationship,
-  PostDataV1,
-} from '@anonworld/db'
+import { db } from '@anonworld/common'
 import { neynar } from '../services/neynar'
 import { BaseAction } from './base'
+import { PostData } from '@anonworld/common'
 
 export type CopyPostFarcasterMetadata = {
   fid: number
@@ -22,7 +15,7 @@ export class CopyPostFarcaster extends BaseAction<
   CopyPostFarcasterMetadata,
   CopyPostFarcasterData
 > {
-  async isAbleToPromote(post: PostDataV1) {
+  async isAbleToPromote(post: PostData) {
     const unableToPromoteRegex = [
       // /.*@clanker.*(launch|deploy|make).*/is,
       /.*dexscreener.com.*/i,
@@ -45,7 +38,7 @@ export class CopyPostFarcaster extends BaseAction<
   }
 
   async handle() {
-    const relationship = await getPostRelationship(
+    const relationship = await db.relationships.get(
       this.data.hash,
       'farcaster',
       this.action.metadata.fid.toString()
@@ -54,7 +47,7 @@ export class CopyPostFarcaster extends BaseAction<
       return { success: true, hash: relationship.target_id }
     }
 
-    const post = await getPost(this.data.hash)
+    const post = await db.posts.get(this.data.hash)
     if (!post) {
       return { success: false }
     }
@@ -71,23 +64,23 @@ export class CopyPostFarcaster extends BaseAction<
       return { success: false }
     }
 
-    await createPost({
+    await db.posts.create({
       hash: response.cast.hash,
       fid: this.action.metadata.fid,
       data: post.data,
       reveal_hash: post.reveal_hash ?? undefined,
     })
 
-    const parent = await getPostParent(this.data.hash)
+    const parent = await db.relationships.getParent(this.data.hash)
 
-    await createPostRelationship({
+    await db.relationships.create({
       post_hash: parent?.post_hash || this.data.hash,
       target: 'farcaster',
       target_account: this.action.metadata.fid.toString(),
       target_id: response.cast.hash,
     })
 
-    await createPostCredentials(response.cast.hash, this.credentials)
+    await db.posts.addCredentials(response.cast.hash, this.credentials)
 
     return { success: true, hash: response.cast.hash }
   }

@@ -3,18 +3,7 @@ import { error, t } from 'elysia'
 import { toHex } from 'viem'
 import { redis } from '../services/redis'
 import { WebAuthnP256 } from 'ox'
-import {
-  createPasskey,
-  CredentialInstance,
-  getPasskey,
-  getPostsFromVault,
-  getVaults,
-  likePost,
-  Post,
-  unlikePost,
-  Vault,
-} from '@anonworld/db'
-import { neynar } from '../services/neynar'
+import { db, DBCredential, DBVault } from '@anonworld/common'
 import { notifications } from '../services/notifications'
 
 export const authRoutes = createElysia({ prefix: '/auth' })
@@ -41,13 +30,17 @@ export const authRoutes = createElysia({ prefix: '/auth' })
         return { success: false }
       }
 
-      const passkey = await createPasskey({
+      const passkey = await db.passkeys.create({
         id: body.id,
         public_key: body.publicKey,
       })
       if (!passkey) {
         return { success: false }
       }
+
+      await db.vaults.create({
+        passkey_id: passkey.id,
+      })
 
       const token = await jwt.sign({ passkeyId: passkey.id })
 
@@ -73,7 +66,7 @@ export const authRoutes = createElysia({ prefix: '/auth' })
         return { success: false }
       }
 
-      const passkey = await getPasskey(body.raw.id)
+      const passkey = await db.passkeys.get(body.raw.id)
       if (!passkey) {
         return { success: false }
       }
@@ -121,7 +114,7 @@ export const authRoutes = createElysia({ prefix: '/auth' })
     if (!passkeyId) {
       return { data: [] }
     }
-    const response = await getVaults(passkeyId)
+    const response = await db.vaults.getForPasskey(passkeyId)
     const credentialsByVault = response.reduce(
       (acc, vault) => {
         if (!acc[vault.vaults.id]) {
@@ -132,12 +125,12 @@ export const authRoutes = createElysia({ prefix: '/auth' })
         }
         if (vault.credential_instances) {
           acc[vault.vaults.id].credentials.push(
-            vault.credential_instances as CredentialInstance
+            vault.credential_instances as DBCredential
           )
         }
         return acc
       },
-      {} as Record<string, Vault & { credentials: CredentialInstance[] }>
+      {} as Record<string, DBVault & { credentials: DBCredential[] }>
     )
     return { data: Object.values(credentialsByVault) }
   })
@@ -147,7 +140,7 @@ export const authRoutes = createElysia({ prefix: '/auth' })
       if (!passkeyId) {
         return error(401, 'Unauthorized')
       }
-      await likePost(passkeyId, body.hash)
+      await db.posts.like(passkeyId, body.hash)
       return { success: true }
     },
     {
@@ -163,7 +156,7 @@ export const authRoutes = createElysia({ prefix: '/auth' })
       if (!passkeyId) {
         return error(401, 'Unauthorized')
       }
-      await unlikePost(passkeyId, body.hash)
+      await db.posts.unlike(passkeyId, body.hash)
       return { success: true }
     },
     {
@@ -176,7 +169,7 @@ export const authRoutes = createElysia({ prefix: '/auth' })
     if (!passkeyId) {
       return error(401, 'Unauthorized')
     }
-    const vaults = await getVaults(passkeyId)
+    const vaults = await db.vaults.getForPasskey(passkeyId)
     if (vaults.length === 0) {
       return { data: [] }
     }

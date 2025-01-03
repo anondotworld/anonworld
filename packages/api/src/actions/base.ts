@@ -1,15 +1,15 @@
 import { redis } from '../services/redis'
 import { hashMessage } from 'viem'
-import { Action, CredentialInstance, logActionExecution } from '@anonworld/db'
-import { ActionRequest } from '@anonworld/common'
+import { db } from '@anonworld/common'
+import { ActionRequest, Action, Credential } from '@anonworld/common'
 
 export abstract class BaseAction<TMetadata = any, TData = any> {
-  action!: Action<TMetadata>
+  action!: Action & { metadata: TMetadata }
   data!: TData
-  credentials: CredentialInstance[] = []
+  credentials: Credential[] = []
 
-  constructor(action: Action, data: TData, credentials: CredentialInstance[]) {
-    this.action = action as Action<TMetadata>
+  constructor(action: Action, data: TData, credentials: Credential[]) {
+    this.action = action as Action & { metadata: TMetadata }
     this.data = data
     this.credentials = credentials
   }
@@ -24,7 +24,7 @@ export abstract class BaseAction<TMetadata = any, TData = any> {
 
       const response = await this.handle()
 
-      await logActionExecution({
+      await db.actions.logExecution({
         action_id: this.action.id,
         action_data: this.data,
         status: 'SUCCESS',
@@ -38,7 +38,7 @@ export abstract class BaseAction<TMetadata = any, TData = any> {
 
       return response
     } catch (error) {
-      await logActionExecution({
+      await db.actions.logExecution({
         action_id: this.action.id,
         action_data: this.data,
         status: 'FAILED',

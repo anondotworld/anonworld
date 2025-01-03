@@ -1,5 +1,5 @@
-import { getBulkPosts, getPostsFromVault, Post as DBPost } from '@anonworld/db'
-import { Post } from '@anonworld/common'
+import { db } from '@anonworld/common'
+import { Post, PostData } from '@anonworld/common'
 import { neynar } from './neynar'
 import { feed } from './feed'
 
@@ -59,13 +59,19 @@ export class NotificationsService {
   }
 
   async getRepliesToVault(vaultId: string) {
-    const vaultPosts = await getPostsFromVault(vaultId)
-    const posts = vaultPosts.map((post) => post.posts) as DBPost[]
-    const replies = await Promise.all(posts.map((post) => this.getRepliesFromHub(post)))
+    const vaultPosts = await db.vaults.getFeed(vaultId)
+    const posts = vaultPosts.map((post) => post.posts)
+    const replies = await Promise.all(
+      posts.map((post) => this.getRepliesFromHub(post as any))
+    )
     return replies.flat()
   }
 
-  async getRepliesFromHub({ fid, hash, data }: DBPost) {
+  async getRepliesFromHub({
+    fid,
+    hash,
+    data,
+  }: { fid: number; hash: string; data: PostData }) {
     const response = await fetch(
       `${this.hubUrl}/v1/castsByParent?fid=${fid}&hash=${hash}`
     )
@@ -85,7 +91,7 @@ export class NotificationsService {
   }
 
   async getPosts(hashes: string[]) {
-    const posts = await getBulkPosts(hashes)
+    const posts = await db.posts.getBulk(hashes)
     const formattedPosts = await feed.getFeed(posts)
     return formattedPosts
   }

@@ -1,7 +1,7 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
 import { redis } from '../services/redis'
-import { getPosts, Post as DBPost } from '@anonworld/db'
+import { db } from '@anonworld/common'
 import { feed } from '../services/feed'
 import { Post } from '@anonworld/common'
 
@@ -63,14 +63,14 @@ export const feedsRoutes = createElysia({ prefix: '/feeds' })
   )
 
 const getFormattedPosts = async (fid: number) => {
-  const response = await getPosts(fid, {
+  const response = await db.posts.getFeed(fid, {
     limit: 200,
     offset: 0,
   })
 
   if (response.length === 0) return []
 
-  const posts = response.map((p) => p.parent_posts ?? p.posts) as Array<DBPost>
+  const posts = response.map((p) => p.parent_posts ?? p.posts)
 
   const result = await feed.getFeed(posts)
   return result.filter((p) => !p.parent_hash)

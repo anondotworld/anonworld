@@ -8,6 +8,7 @@ export * from './token'
 export * from './twitter'
 export * from './vaults'
 export * from './zerion'
+export * from './db'
 
 export type ApiResponse<T> =
   | {

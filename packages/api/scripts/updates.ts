@@ -1,24 +1,11 @@
-import {
-  countPostsForCommunity,
-  getAllTokens,
-  getAllFarcasterAccounts,
-  updateCommunity,
-  getCommunities,
-  updateToken,
-  updateFarcasterAccount,
-  getAllTwitterAccounts,
-  updateTwitterAccount,
-  getAllVaults,
-  countPostsForVault,
-  updateVault,
-} from '@anonworld/db'
+import { db } from '@anonworld/common'
 import { buildFeeds } from '../src/routes/feeds'
 import { zerion } from '../src/services/zerion'
 import { simplehash } from '../src/services/simplehash'
 import { neynar } from '../src/services/neynar'
 
 const updateFeeds = async () => {
-  const accounts = await getAllFarcasterAccounts()
+  const accounts = await db.socials.listFarcasterAccounts()
   for (const account of accounts) {
     console.log(`[feed] updating feeds for ${account.fid}`)
     await buildFeeds(account.fid)
@@ -26,12 +13,12 @@ const updateFeeds = async () => {
 }
 
 const updateTokens = async () => {
-  const tokens = await getAllTokens()
+  const tokens = await db.tokens.list()
   for (const token of tokens) {
     console.log(`[token] updating token for ${token.id}`)
     const zerionToken = await zerion.getFungible(token.chain_id, token.address)
     const simpleHashToken = await simplehash.getFungible(token.chain_id, token.address)
-    await updateToken(token.id, {
+    await db.tokens.update(token.id, {
       price_usd: zerionToken.attributes.market_data.price?.toFixed(8) ?? '0',
       market_cap: Math.round(zerionToken.attributes.market_data.market_cap ?? 0),
       total_supply: Math.round(zerionToken.attributes.market_data.total_supply ?? 0),
@@ -41,13 +28,13 @@ const updateTokens = async () => {
 }
 
 const updateCommunities = async () => {
-  const communities = await getCommunities()
+  const communities = await db.communities.list()
   for (const community of communities) {
     console.log(`[community] updating community for ${community.id}`)
-    const posts = await countPostsForCommunity(community.fid)
+    const posts = await db.posts.countForFid(community.fid)
     const followers =
       (community.farcaster?.follower_count ?? 0) + (community.twitter?.followers ?? 0)
-    await updateCommunity(community.id, {
+    await db.communities.update(community.id, {
       posts,
       followers,
     })
@@ -55,19 +42,19 @@ const updateCommunities = async () => {
 }
 
 const updateFarcasterAccounts = async () => {
-  const accounts = await getAllFarcasterAccounts()
+  const accounts = await db.socials.listFarcasterAccounts()
   const fids = accounts.map((account) => account.fid)
   const users = await neynar.getBulkUsersByFids(fids)
   for (const user of users.users) {
     console.log(`[farcaster] updating account for ${user.fid}`)
-    await updateFarcasterAccount(user.fid, {
+    await db.socials.updateFarcasterAccount(user.fid, {
       metadata: user,
     })
   }
 }
 
 const updateTwitterAccounts = async () => {
-  const accounts = await getAllTwitterAccounts()
+  const accounts = await db.socials.listTwitterAccounts()
   for (const account of accounts) {
     console.log(`[twitter] updating account for ${account.username}`)
     const response = await fetch(`https://api.fxtwitter.com/${account.username}`)
@@ -92,18 +79,18 @@ const updateTwitterAccounts = async () => {
       }
     } = await response.json()
 
-    await updateTwitterAccount(account.username, {
+    await db.socials.updateTwitterAccount(account.username, {
       metadata: data.user,
     })
   }
 }
 
 const updateVaults = async () => {
-  const vaults = await getAllVaults()
+  const vaults = await db.vaults.list()
   for (const vault of vaults) {
     console.log(`[vault] updating vault for ${vault.id}`)
-    const posts = await countPostsForVault(vault.id)
-    await updateVault(vault.id, {
+    const posts = await db.vaults.countPosts(vault.id)
+    await db.vaults.update(vault.id, {
       posts,
     })
   }

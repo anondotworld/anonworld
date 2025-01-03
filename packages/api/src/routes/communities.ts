@@ -1,10 +1,10 @@
 import { t } from 'elysia'
 import { createElysia } from '../utils'
-import { getCommunities, getCommunity } from '@anonworld/db'
+import { db } from '@anonworld/common'
 
 export const communitiesRoutes = createElysia({ prefix: '/communities' })
   .get('/', async () => {
-    const communities = await getCommunities()
+    const communities = await db.communities.list()
     return {
       data: communities,
     }
@@ -12,7 +12,7 @@ export const communitiesRoutes = createElysia({ prefix: '/communities' })
   .get(
     '/:id',
     async ({ params }) => {
-      const community = await getCommunity(params.id)
+      const community = await db.communities.get(params.id)
       return community
     },
     {
