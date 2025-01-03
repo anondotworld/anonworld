@@ -1,6 +1,6 @@
 import https from 'node:https'
 import { SendTweetV2Params, TwitterApi } from 'twitter-api-v2'
-import { db } from '@anonworld/common'
+import { db } from '../db'
 
 type TwitterConfig = {
   appKey: string

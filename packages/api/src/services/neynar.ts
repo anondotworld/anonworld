@@ -5,7 +5,7 @@ import {
   FarcasterUser,
   PostData,
 } from '@anonworld/common'
-import { db } from '@anonworld/common'
+import { db } from '../db'
 
 class NeynarService {
   private readonly apiKey: string

@@ -4,20 +4,7 @@
   "private": true,
   "types": ".",
   "main": "./src/index.ts",
-  "scripts": {
-    "push": "drizzle-kit push"
-  },
   "exports": {
     ".": "./src/index.ts"
-  },
-  "dependencies": {
-    "dotenv": "^16.4.5",
-    "drizzle-orm": "0.36.0",
-    "pg": "^8.13.1"
-  },
-  "devDependencies": {
-    "@types/pg": "^8.11.10",
-    "drizzle-kit": "0.27.2",
-    "tsx": "^4.19.2"
   }
 }

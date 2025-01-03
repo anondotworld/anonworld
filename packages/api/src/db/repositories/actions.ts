@@ -4,7 +4,7 @@ import {
   actionsTable,
   communitiesTable,
   tokensTable,
-} from '../db/schema'
+} from '../schema'
 import { eq, inArray } from 'drizzle-orm'
 import { DBAction, DBCommunity, DBToken } from '../types'
 

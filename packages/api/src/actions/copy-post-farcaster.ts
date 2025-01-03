@@ -1,4 +1,4 @@
-import { db } from '@anonworld/common'
+import { db } from '../db'
 import { neynar } from '../services/neynar'
 import { BaseAction } from './base'
 import { PostData } from '@anonworld/common'
@@ -80,7 +80,8 @@ export class CopyPostFarcaster extends BaseAction<
       target_id: response.cast.hash,
     })
 
-    await db.posts.addCredentials(response.cast.hash, this.credentials)
+    const credentialIds = this.credentials.map((credential) => credential.id!)
+    await db.posts.addCredentials(response.cast.hash, credentialIds)
 
     return { success: true, hash: response.cast.hash }
   }

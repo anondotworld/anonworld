@@ -1,6 +1,5 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import { db } from '@anonworld/common'
 import { CreatePost } from '../actions/create-post'
 import { CopyPostFarcaster } from '../actions/copy-post-farcaster'
 import { CopyPostTwitter } from '../actions/copy-post-twitter'
@@ -8,6 +7,7 @@ import { DeletePostTwitter } from '../actions/delete-post-twitter'
 import { DeletePostFarcaster } from '../actions/delete-post-farcaster'
 import { BaseAction } from '../actions/base'
 import { ActionRequest, ActionType } from '@anonworld/common'
+import { db } from '../db'
 
 export const CREDENTIAL_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7 // 7 days
 

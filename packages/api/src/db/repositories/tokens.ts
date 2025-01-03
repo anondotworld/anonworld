@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { tokensTable } from '../db/schema'
+import { tokensTable } from '../schema'
 import { eq, inArray } from 'drizzle-orm'
 import { DBToken } from '../types'
 

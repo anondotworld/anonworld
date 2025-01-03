@@ -1,4 +1,4 @@
-import { db } from '@anonworld/common'
+import { db } from '../src/db'
 import { buildFeeds } from '../src/routes/feeds'
 import { zerion } from '../src/services/zerion'
 import { simplehash } from '../src/services/simplehash'

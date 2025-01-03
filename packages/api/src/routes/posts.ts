@@ -2,10 +2,10 @@ import { createElysia, encodeJson } from '../utils'
 import { t } from 'elysia'
 import { hashMessage, verifyMessage } from 'viem'
 import { neynar } from '../services/neynar'
-import { db } from '@anonworld/common'
 import { Post, ConversationCast, ConversationPost } from '@anonworld/common'
 import { redis } from '../services/redis'
 import { feed } from '../services/feed'
+import { db } from '../db'
 
 export const postsRoutes = createElysia({ prefix: '/posts' })
   .get(

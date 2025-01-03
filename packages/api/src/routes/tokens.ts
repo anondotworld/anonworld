@@ -15,7 +15,7 @@ import { t } from 'elysia'
 import { redis } from '../services/redis'
 import { zerion } from '../services/zerion'
 import { createClientV2 } from '@0x/swap-ts-sdk'
-import { db } from '@anonworld/common'
+import { db } from '../db'
 
 const zeroExClient = createClientV2({
   apiKey: process.env.ZERO_EX_API_KEY!,

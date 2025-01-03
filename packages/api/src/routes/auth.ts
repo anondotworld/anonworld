@@ -3,8 +3,10 @@ import { error, t } from 'elysia'
 import { toHex } from 'viem'
 import { redis } from '../services/redis'
 import { WebAuthnP256 } from 'ox'
-import { db, DBCredential, DBVault } from '@anonworld/common'
 import { notifications } from '../services/notifications'
+import { db } from '../db'
+import { DBVault } from '../db/types'
+import { DBCredential } from '../db/types'
 
 export const authRoutes = createElysia({ prefix: '/auth' })
   .post(

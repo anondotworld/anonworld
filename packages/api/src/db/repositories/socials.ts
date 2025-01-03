@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { farcasterAccountsTable, twitterAccountsTable } from '../db/schema'
+import { farcasterAccountsTable, twitterAccountsTable } from '../schema'
 import { eq, inArray } from 'drizzle-orm'
 import { DBFarcasterAccount, DBTwitterAccount } from '../types'
 

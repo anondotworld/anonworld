@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { postRelationshipsTable } from '../db/schema'
+import { postRelationshipsTable } from '../schema'
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 import { DBPostRelationship } from '../types'
 

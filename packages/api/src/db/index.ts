@@ -1,15 +1,15 @@
 import 'dotenv/config'
 
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { PostsRepository } from './posts'
-import { VaultsRepository } from './vaults'
-import { CredentialsRepository } from './credentials'
-import { CommunitiesRepository } from './communities'
-import { PasskeysRepository } from './passkeys'
-import { SocialsRepository } from './socials'
-import { TokensRepository } from './tokens'
-import { RelationshipsRepository } from './relationships'
-import { ActionsRepository } from './actions'
+import { PostsRepository } from './repositories/posts'
+import { VaultsRepository } from './repositories/vaults'
+import { CredentialsRepository } from './repositories/credentials'
+import { CommunitiesRepository } from './repositories/communities'
+import { PasskeysRepository } from './repositories/passkeys'
+import { SocialsRepository } from './repositories/socials'
+import { TokensRepository } from './repositories/tokens'
+import { RelationshipsRepository } from './repositories/relationships'
+import { ActionsRepository } from './repositories/actions'
 
 export class Repositories {
   public posts: PostsRepository

@@ -1,4 +1,4 @@
-import { db } from '@anonworld/common'
+import { db } from '../db'
 import { twitter } from '../services/twitter'
 import { BaseAction } from './base'
 

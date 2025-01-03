@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { passkeysTable } from '../db/schema'
+import { passkeysTable } from '../schema'
 import { eq } from 'drizzle-orm'
 import { DBPasskey } from '../types'
 

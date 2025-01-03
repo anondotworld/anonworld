@@ -5,7 +5,7 @@ import {
   postRelationshipsTable,
   postsTable,
   vaultsTable,
-} from '../db/schema'
+} from '../schema'
 import { and, desc, eq, isNull, sql } from 'drizzle-orm'
 import {
   DBCredential,

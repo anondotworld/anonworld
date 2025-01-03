@@ -1,4 +1,4 @@
-import { PostData } from '.'
+import { CredentialMetadata, CredentialProof, PostData } from '@anonworld/common'
 import {
   communitiesTable,
   actionsTable,
@@ -13,7 +13,7 @@ import {
   postLikesTable,
   actionExecutionsTable,
   passkeysTable,
-} from '../db/schema'
+} from './schema'
 
 export type DBAction = typeof actionsTable.$inferSelect
 export type DBFarcasterAccount = typeof farcasterAccountsTable.$inferSelect
@@ -25,7 +25,10 @@ export type DBPostLike = typeof postLikesTable.$inferSelect
 export type DBPostRelationship = typeof postRelationshipsTable.$inferSelect
 export type DBPostCredential = typeof postCredentialsTable.$inferSelect
 export type DBActionExecution = typeof actionExecutionsTable.$inferSelect
-export type DBCredential = typeof credentialInstancesTable.$inferSelect
+export type DBCredential = typeof credentialInstancesTable.$inferSelect & {
+  proof: CredentialProof
+  metadata: CredentialMetadata
+}
 export type DBCommunity = typeof communitiesTable.$inferSelect
 export type DBToken = typeof tokensTable.$inferSelect
 export type DBVault = typeof vaultsTable.$inferSelect

@@ -5,7 +5,7 @@ import {
   postLikesTable,
   postRelationshipsTable,
   postsTable,
-} from '../db/schema'
+} from '../schema'
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import {
   DBCredential,
@@ -16,7 +16,7 @@ import {
   DBVault,
 } from '../types'
 import { alias } from 'drizzle-orm/pg-core'
-import { RevealArgs } from '../types'
+import { RevealArgs } from '@anonworld/common'
 
 export class PostsRepository {
   private db: ReturnType<typeof drizzle>
@@ -171,11 +171,11 @@ export class PostsRepository {
     }[]
   }
 
-  async addCredentials(hash: string, credentials: DBCredential[]) {
+  async addCredentials(hash: string, credentialIds: string[]) {
     await this.db.insert(postCredentialsTable).values(
-      credentials.map((credential) => ({
+      credentialIds.map((credentialId) => ({
         post_hash: hash,
-        credential_id: credential.id,
+        credential_id: credentialId,
       }))
     )
   }

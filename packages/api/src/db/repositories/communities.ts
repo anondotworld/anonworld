@@ -4,10 +4,10 @@ import {
   farcasterAccountsTable,
   tokensTable,
   twitterAccountsTable,
-} from '../db/schema'
+} from '../schema'
 import { eq, inArray, or } from 'drizzle-orm'
 import { DBCommunity, DBToken } from '../types'
-import { FarcasterUser, TwitterUser } from '../types'
+import { FarcasterUser, TwitterUser } from '@anonworld/common'
 
 type Community = DBCommunity & {
   token: DBToken | null

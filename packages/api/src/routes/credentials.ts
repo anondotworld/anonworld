@@ -1,6 +1,5 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import { db } from '@anonworld/common'
 import { CircuitType, getCircuit } from '@anonworld/zk'
 import {
   createPublicClient,
@@ -13,6 +12,7 @@ import {
 } from 'viem'
 import { base } from 'viem/chains'
 import { Credential } from '@anonworld/common'
+import { db } from '../db'
 
 const client = createPublicClient({
   chain: base,

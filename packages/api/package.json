@@ -9,25 +9,31 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
-    "updates": "bun run scripts/updates.ts"
+    "updates": "bun run scripts/updates.ts",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@0x/swap-ts-sdk": "^2.1.1",
     "@anonworld/common": "*",
-    "@anonworld/common": "*",
     "@anonworld/zk": "*",
     "@elysiajs/cors": "1.1.1",
     "@elysiajs/jwt": "1.1.1",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "0.36.0",
     "elysia": "1.1.25",
     "https": "^1.0.0",
     "ioredis": "^5.4.1",
     "logestic": "^1.2.4",
     "ox": "^0.5.0",
+    "pg": "^8.13.1",
     "twitter-api-v2": "^1.18.2",
     "viem": "^2.21.48"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "@types/pg": "^8.11.10",
+    "drizzle-kit": "0.27.2",
+    "tsx": "^4.19.2"
   },
   "module": "src/index.js"
 }

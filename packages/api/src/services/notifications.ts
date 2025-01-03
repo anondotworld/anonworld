@@ -1,7 +1,7 @@
-import { db } from '@anonworld/common'
 import { Post, PostData } from '@anonworld/common'
 import { neynar } from './neynar'
 import { feed } from './feed'
+import { db } from '../db'
 
 type HubMessage = {
   hash: string

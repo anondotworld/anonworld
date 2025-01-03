@@ -1,6 +1,6 @@
 import { t } from 'elysia'
 import { createElysia } from '../utils'
-import { db } from '@anonworld/common'
+import { db } from '../db'
 
 export const communitiesRoutes = createElysia({ prefix: '/communities' })
   .get('/', async () => {

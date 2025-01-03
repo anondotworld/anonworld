@@ -1,4 +1,4 @@
-import { db } from '@anonworld/common'
+import { db } from '../db'
 import { neynar } from '../services/neynar'
 import { BaseAction } from './base'
 import { ActionRequest, PostData } from '@anonworld/common'
@@ -64,7 +64,8 @@ export class CreatePost extends BaseAction<CreatePostMetadata, CreatePostData> {
       reveal_hash: revealHash,
     })
 
-    await db.posts.addCredentials(response.cast.hash, this.credentials)
+    const credentialIds = this.credentials.map((credential) => credential.id!)
+    await db.posts.addCredentials(response.cast.hash, credentialIds)
 
     this.hash = response.cast.hash
 

@@ -1,9 +1,9 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
 import { redis } from '../services/redis'
-import { db } from '@anonworld/common'
 import { feed } from '../services/feed'
 import { Post } from '@anonworld/common'
+import { db } from '../db'
 
 export const feedsRoutes = createElysia({ prefix: '/feeds' })
   .get(

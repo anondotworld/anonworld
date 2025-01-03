@@ -1,15 +1,16 @@
 import { redis } from '../services/redis'
 import { hashMessage } from 'viem'
-import { db } from '@anonworld/common'
-import { ActionRequest, Action, Credential } from '@anonworld/common'
+import { db } from '../db'
+import { ActionRequest, Credential } from '@anonworld/common'
+import { DBAction } from '../db/types'
 
 export abstract class BaseAction<TMetadata = any, TData = any> {
-  action!: Action & { metadata: TMetadata }
+  action!: DBAction & { metadata: TMetadata }
   data!: TData
   credentials: Credential[] = []
 
-  constructor(action: Action, data: TData, credentials: Credential[]) {
-    this.action = action as Action & { metadata: TMetadata }
+  constructor(action: DBAction, data: TData, credentials: Credential[]) {
+    this.action = action as DBAction & { metadata: TMetadata }
     this.data = data
     this.credentials = credentials
   }

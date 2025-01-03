@@ -1,7 +1,7 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import { db } from '@anonworld/common'
 import { feed } from '../services/feed'
+import { db } from '../db'
 
 export const vaultsRoutes = createElysia({ prefix: '/vaults' })
   .put(
