@@ -28,7 +28,9 @@ export const mainnet: Chain = {
   imageUrl: 'https://chain-icons.s3.amazonaws.com/ethereum.png',
   client: createClient(
     viemMainnet,
-    `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+    process.env.ALCHEMY_API_KEY
+      ? `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+      : undefined
   ),
 }
 

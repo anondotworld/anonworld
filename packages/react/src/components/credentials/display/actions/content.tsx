@@ -1,9 +1,10 @@
 import { Plus, Minus, RefreshCw, Trash } from '@tamagui/lucide-icons'
 import { Spinner, Text, View, YGroup } from '@anonworld/ui'
-import { CredentialWithId } from '@anonworld/common'
-import { useCredentials } from '../../../..'
+import { CredentialType, CredentialWithId } from '@anonworld/common'
+import { useCredentials, useSDK } from '../../../..'
 import { useVaults } from '../../../../hooks/use-vaults'
 import { NamedExoticComponent, useState } from 'react'
+import { useAccount } from 'wagmi'
 
 export function CredentialActionsContent({
   credential,
@@ -12,6 +13,8 @@ export function CredentialActionsContent({
 }) {
   const credentials = useCredentials()
   const { data: vaults } = useVaults()
+  const { address } = useAccount()
+  const { sdk, connectWallet } = useSDK()
 
   return (
     <YGroup>
@@ -38,12 +41,30 @@ export function CredentialActionsContent({
       <ActionButton
         label="Reverify"
         onPress={async () => {
-          await credentials.add({
-            chainId: credential.metadata.chainId,
-            tokenAddress: credential.metadata.tokenAddress,
-            verifiedBalance: BigInt(credential.metadata.balance),
-            parentId: credential.id,
-          })
+          if (!address) {
+            connectWallet?.()
+            throw new Error('No address connected')
+          }
+
+          const response = await sdk.getBalanceStorageSlot(
+            credential.metadata.chainId,
+            credential.metadata.tokenAddress
+          )
+          if (!response.data) {
+            throw new Error('Failed to find balance storage slot')
+          }
+
+          await credentials.add(
+            CredentialType.ERC20_BALANCE,
+            {
+              address,
+              chainId: credential.metadata.chainId,
+              tokenAddress: credential.metadata.tokenAddress,
+              verifiedBalance: BigInt(credential.metadata.balance),
+              balanceSlot: response.data.slot,
+            },
+            credential.id
+          )
         }}
         Icon={RefreshCw}
       />

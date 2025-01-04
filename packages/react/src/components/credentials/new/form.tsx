@@ -23,7 +23,7 @@ import {
 import { useAccount, useDisconnect } from 'wagmi'
 import { formatAddress } from '../../../utils'
 import { useEffect, useMemo, useState } from 'react'
-import { useCredentials } from '../../../providers'
+import { useCredentials, useSDK } from '../../../providers'
 import { parseUnits } from 'viem'
 import { useWalletFungibles } from '../../../hooks/use-wallet-fungibles'
 import { TokenImage } from '../../tokens/image'
@@ -333,16 +333,30 @@ function AddCredentialButton() {
   const { add } = useCredentials()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
+  const { sdk } = useSDK()
 
   const handleAddCredential = async () => {
     if (!tokenId) return
     try {
       setIsLoading(true)
-      await add({
+
+      if (!address) {
+        throw new Error('No address connected')
+      }
+
+      const response = await sdk.getBalanceStorageSlot(tokenId.chainId, tokenId.address)
+      if (!response.data) {
+        throw new Error('Failed to find balance storage slot')
+      }
+
+      await add(CredentialType.ERC20_BALANCE, {
+        address,
         chainId: tokenId.chainId,
         tokenAddress: tokenId.address as `0x${string}`,
         verifiedBalance: parseUnits(balance.toString(), decimals),
+        balanceSlot: response.data.slot,
       })
+
       setIsLoading(false)
       setIsOpen(false)
     } catch (e) {
