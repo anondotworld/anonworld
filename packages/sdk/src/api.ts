@@ -198,7 +198,7 @@ export class Api {
   }
 
   async getBalanceStorageSlot(chainId: number, tokenAddress: string) {
-    return await this.request<{ address: string; slot: number }>(
+    return await this.request<{ slot: number }>(
       `/tokens/${chainId}/${tokenAddress}/balance-slot`
     )
   }

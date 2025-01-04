@@ -100,15 +100,15 @@ const main = async () => {
   let i = 0
   while (true) {
     try {
-      // await updateFeeds()
-      // await updateCommunities()
+      await updateFeeds()
+      await updateCommunities()
       if (i % 10 === 0) {
         await updateTokens()
       }
       if (i % 20 === 0) {
-        // await updateFarcasterAccounts()
-        // await updateTwitterAccounts()
-        // await updateVaults()
+        await updateFarcasterAccounts()
+        await updateTwitterAccounts()
+        await updateVaults()
       }
     } catch (error) {
       console.error('[error]', error)
