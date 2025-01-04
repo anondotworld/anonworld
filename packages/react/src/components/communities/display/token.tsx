@@ -1,17 +1,16 @@
 import { Separator, Text, XStack, YStack } from '@anonworld/ui'
 import { Field } from '../../field'
-import { chains, formatAddress, formatAmount } from '../../../utils'
-import { extractChain } from 'viem'
+import { formatAddress, formatAmount } from '../../../utils'
 import { formatEther, formatUnits } from 'viem'
 import { useActions } from '../../../hooks/use-actions'
-import { Action, ActionType, Community } from '@anonworld/common'
+import { Action, ActionType, Community, getChain } from '@anonworld/common'
 import { useCredentials } from '../../../providers'
 import { getUsableCredential } from '../../../utils'
 import { CircleCheck, CircleX } from '@tamagui/lucide-icons'
 import { TokenImage } from '../../tokens/image'
 
 export function CommunityToken({ community }: { community: Community }) {
-  const chain = extractChain({ chains, id: Number(community.token.chain_id) as any })
+  const chain = getChain(Number(community.token.chain_id))
   return (
     <YStack gap="$4" mt="$2" $xs={{ gap: '$2' }}>
       <XStack gap="$4" ai="center">

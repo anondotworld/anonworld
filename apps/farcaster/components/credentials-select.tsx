@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CredentialWithId, useCredentials } from '@anonworld/react'
+import { base, CredentialWithId, useCredentials } from '@anonworld/react'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -125,7 +125,7 @@ export function VerifyCredential({
     setIsVerifying(true)
     try {
       const credential = await add({
-        chainId: 8453,
+        chainId: base.id,
         tokenAddress: TOKEN_ADDRESS,
         verifiedBalance: parseEther(balance.toString()),
       })

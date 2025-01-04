@@ -1,29 +1,23 @@
 import { createElysia } from '../utils'
 import {
   concat,
-  createPublicClient,
   hexToBigInt,
-  http,
+  hexToNumber,
   keccak256,
   pad,
   toHex,
   zeroAddress,
 } from 'viem'
-import { base } from 'viem/chains'
 import { simplehash } from '../services/simplehash'
 import { t } from 'elysia'
 import { redis } from '../services/redis'
 import { zerion } from '../services/zerion'
 import { createClientV2 } from '@0x/swap-ts-sdk'
 import { db } from '../db'
+import { getChain } from '@anonworld/common'
 
 const zeroExClient = createClientV2({
   apiKey: process.env.ZERO_EX_API_KEY!,
-})
-
-const client = createPublicClient({
-  chain: base,
-  transport: http(),
 })
 
 export const tokenRoutes = createElysia({ prefix: '/tokens' })
@@ -45,26 +39,22 @@ export const tokenRoutes = createElysia({ prefix: '/tokens' })
       const chainId = params.chainId
       const tokenAddress = params.tokenAddress
 
-      const slot = await redis.getBalanceStorageSlot(chainId, tokenAddress)
-      if (slot) return { slot: Number(slot) }
+      let cached = await redis.getStorageSlot(chainId, tokenAddress, 'balance')
+      if (cached) {
+        return {
+          slot: hexToNumber(cached as `0x${string}`),
+        }
+      }
 
       const topHolder = await simplehash.getTopHolder(chainId, tokenAddress)
 
-      for (let slot = 0; slot < 10; slot++) {
-        const storageKey = keccak256(concat([pad(topHolder.address), pad(toHex(slot))]))
-        const data = await client.getStorageAt({
-          address: tokenAddress as `0x${string}`,
-          slot: storageKey,
-        })
-        if (data && hexToBigInt(data) === topHolder.balance) {
-          await redis.setBalanceStorageSlot(chainId, tokenAddress, slot)
-          await getOrCreateToken(chainId, tokenAddress)
-          await db.tokens.update(`${chainId}:${tokenAddress}`, {
-            balance_slot: slot,
-          })
-          return { slot }
-        }
-      }
+      let value = await detectBalanceSlot(
+        chainId,
+        tokenAddress,
+        topHolder.address,
+        topHolder.balance
+      )
+      if (value) return value
 
       return error(404, 'Failed to find balance storage slot')
     },
@@ -157,4 +147,35 @@ export const syncToken = async (chainId: number, tokenAddress: string) => {
     await db.tokens.create(token)
     await redis.setToken(chainId, tokenAddress, JSON.stringify(token))
   }
+}
+
+async function detectBalanceSlot(
+  chainId: number,
+  tokenAddress: string,
+  walletAddress: string,
+  balance: bigint
+) {
+  const chain = getChain(chainId)
+
+  const blockNumber = await chain.client.getBlockNumber()
+
+  for (let slot = 0; slot < 50; slot++) {
+    const storageKey = keccak256(
+      concat([pad(walletAddress as `0x${string}`), pad(toHex(slot))])
+    )
+    const data = await chain.client.getStorageAt({
+      address: tokenAddress as `0x${string}`,
+      slot: storageKey,
+    })
+    if (data && hexToBigInt(data) === balance) {
+      await redis.setStorageSlot(chainId, tokenAddress, 'balance', toHex(slot))
+      await getOrCreateToken(chainId, tokenAddress)
+      await db.tokens.update(`${chainId}:${tokenAddress}`, {
+        balance_slot: slot,
+      })
+      return slot
+    }
+  }
+
+  return null
 }

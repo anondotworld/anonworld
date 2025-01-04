@@ -57,12 +57,12 @@ export class RedisService {
     await this.client.set(`action:${actionId}:${hash}`, 'true', 'EX', 60 * 5)
   }
 
-  async getBalanceStorageSlot(chainId: number, address: string) {
-    return this.client.get(`balance-slot:${chainId}:${address}`)
+  async getStorageSlot(chainId: number, address: string, key: string) {
+    return this.client.get(`storage-slot:${chainId}:${address}:${key}`)
   }
 
-  async setBalanceStorageSlot(chainId: number, address: string, slot: number) {
-    return this.client.set(`balance-slot:${chainId}:${address}`, slot)
+  async setStorageSlot(chainId: number, address: string, key: string, value: string) {
+    return this.client.set(`storage-slot:${chainId}:${address}:${key}`, value)
   }
 
   async getToken(chainId: number, tokenAddress: string) {

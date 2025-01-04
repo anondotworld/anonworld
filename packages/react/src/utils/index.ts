@@ -1,17 +1,6 @@
-import { base } from 'viem/chains'
 import { Action, CredentialWithId } from '@anonworld/common'
 
 export const CREDENTIAL_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7 // 7 days
-
-export const chains = [base]
-
-export const zerionToChainId: Record<string, number> = {
-  base: 8453,
-}
-
-export const chainIdToZerion: Record<number, string> = Object.fromEntries(
-  Object.entries(zerionToChainId).map(([key, value]) => [value, key])
-)
 
 export function timeAgo(timestamp: string): string {
   const now = new Date()

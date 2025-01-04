@@ -14,9 +14,14 @@ import {
   YStack,
 } from '@anonworld/ui'
 import { useNewCredential } from './context'
-import { CredentialType, FungiblePosition } from '@anonworld/common'
+import {
+  CredentialType,
+  FungiblePosition,
+  getChain,
+  getZerionChain,
+} from '@anonworld/common'
 import { useAccount, useDisconnect } from 'wagmi'
-import { chainIdToZerion, formatAddress, zerionToChainId } from '../../../utils'
+import { formatAddress } from '../../../utils'
 import { useEffect, useMemo, useState } from 'react'
 import { useCredentials } from '../../../providers'
 import { parseUnits } from 'viem'
@@ -123,14 +128,15 @@ function TokenField() {
     let token = fungibles[0]
 
     if (tokenId) {
-      const chainId = chainIdToZerion[tokenId.chainId]
+      const chain = getChain(tokenId.chainId)
+      if (!chain.zerionId) return
       const foundToken = fungibles.find((t) => {
-        if (t.relationships.chain.data.id !== chainId) return false
+        if (t.relationships.chain.data.id !== chain.zerionId) return false
         const impl = t.attributes.fungible_info.implementations.find(
           (i) =>
             i.address !== null &&
             i.address.toLowerCase() === tokenId.address.toLowerCase() &&
-            i.chain_id === chainId
+            i.chain_id === chain.zerionId
         )
         return impl
       })
@@ -162,15 +168,14 @@ function TokenField() {
 
     if (!chainId || !impl?.address) return
 
-    setTokenId({ chainId: zerionToChainId[chainId], address: impl.address })
+    const chain = getZerionChain(chainId)
+    if (!chain?.zerionId) return
+
+    setTokenId({ chainId: chain.id, address: impl.address })
     setBalance(Math.floor(token.attributes.quantity.float / 2))
     setMaxBalance(Math.floor(token.attributes.quantity.float))
     setDecimals(impl.decimals)
   }, [token])
-
-  if (fungibles.length === 0) {
-    return null
-  }
 
   return (
     <YStack>
@@ -205,16 +210,20 @@ function TokenField() {
           <Select.Viewport minWidth={200}>
             <Select.Group>
               <Select.Label $xs={{ bg: '$color2' }}>Select a token</Select.Label>
-              {fungibles.map((token, index) => (
-                <Select.Item
-                  key={token.id}
-                  index={index}
-                  value={token.id}
-                  $xs={{ bg: '$color2' }}
-                >
-                  <TokenValue token={token} />
-                </Select.Item>
-              ))}
+              {useMemo(
+                () =>
+                  fungibles.map((token, index) => (
+                    <Select.Item
+                      key={token.id}
+                      index={index}
+                      value={token.id}
+                      $xs={{ bg: '$color2' }}
+                    >
+                      <TokenValue token={token} />
+                    </Select.Item>
+                  )),
+                [fungibles]
+              )}
             </Select.Group>
           </Select.Viewport>
         </Select.Content>
@@ -229,6 +238,8 @@ function TokenValue({ token }: { token: FungiblePosition }) {
   )
 
   if (!impl?.address) return null
+
+  const chain = getZerionChain(impl.chain_id)
 
   return (
     <XStack ai="center" jc="space-between" w="100%">
@@ -245,7 +256,7 @@ function TokenValue({ token }: { token: FungiblePosition }) {
             {token.attributes.fungible_info.name}
           </Text>
           <Text fos="$1" fow="400" color="$color11">
-            {formatAddress(impl.address)}
+            {`${chain.name} | ${formatAddress(impl.address)}`}
           </Text>
         </YStack>
       </XStack>

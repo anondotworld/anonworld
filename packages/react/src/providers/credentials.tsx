@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useAccount, useConfig, useSignMessage } from 'wagmi'
 import { concat, hashMessage, keccak256, pad, toHex } from 'viem'
-import { CredentialWithId } from '@anonworld/common'
+import { CredentialWithId, getChain } from '@anonworld/common'
 import { getBlock, getProof } from 'wagmi/actions'
 import { useSDK } from './sdk'
 import { useVaults } from '../hooks/use-vaults'
@@ -78,6 +78,8 @@ export const CredentialsProvider = ({
       throw new Error('No address connected')
     }
 
+    const chain = getChain(args.chainId)
+
     const response = await sdk.getBalanceStorageSlot(args.chainId, args.tokenAddress)
     if (!response.data) {
       throw new Error('Failed to find balance storage slot')
@@ -86,8 +88,8 @@ export const CredentialsProvider = ({
     const balanceSlot = response.data.slot
     const balanceSlotHex = pad(toHex(balanceSlot))
     const storageKey = keccak256(concat([pad(address), balanceSlotHex]))
-    const block = await getBlock(config, { chainId: Number(args.chainId) })
-    const proof = await getProof(config, {
+    const block = await chain.client.getBlock()
+    const proof = await chain.client.getProof({
       address: args.tokenAddress as `0x${string}`,
       storageKeys: [storageKey],
       blockNumber: block.number,

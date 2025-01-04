@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from 'react'
 import { useSwapQuote } from '../../../hooks/use-swap-quote'
 import { useAccount } from 'wagmi'
 import { zeroAddress } from 'viem'
-import { SwapQuote, SwapQuoteError } from '@anonworld/common'
+import { base, SwapQuote, SwapQuoteError } from '@anonworld/common'
 
 export type Token = {
   chainId: number
@@ -33,13 +33,13 @@ export function SwapTokensProvider({
   const [isOpen, setIsOpen] = useState(false)
   const [sellToken, setSellToken] = useState<Token>(
     initialSellToken ?? {
-      chainId: initialBuyToken?.chainId ?? 8453,
+      chainId: initialBuyToken?.chainId ?? base.id,
       address: zeroAddress,
     }
   )
   const [buyToken, setBuyToken] = useState<Token | undefined>(
     initialBuyToken ?? {
-      chainId: initialSellToken?.chainId ?? 8453,
+      chainId: initialSellToken?.chainId ?? base.id,
       address: zeroAddress,
     }
   )

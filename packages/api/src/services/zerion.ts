@@ -1,7 +1,7 @@
 import { zeroAddress } from 'viem'
-import { FungiblePosition, Fungible, ZerionResponse } from '@anonworld/common'
+import { FungiblePosition, Fungible, ZerionResponse, chains } from '@anonworld/common'
 
-const SUPPORTED_CHAIN_IDS = ['base']
+const zerionChains = chains.map((chain) => chain.zerionId).filter((id) => id)
 
 class ZerionService {
   private readonly apiKey: string
@@ -60,7 +60,7 @@ class ZerionService {
 
   async getFungiblePositions(address: string): Promise<FungiblePosition[]> {
     const response = await this.makeRequest<FungiblePosition[]>(
-      `/wallets/${address}/positions?filter[chain_ids]=${SUPPORTED_CHAIN_IDS.join(',')}`
+      `/wallets/${address}/positions?filter[chain_ids]=${zerionChains.join(',')}`
     )
     return response.data
   }

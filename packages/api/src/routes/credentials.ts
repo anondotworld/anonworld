@@ -1,23 +1,9 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
 import { CircuitType, getCircuit } from '@anonworld/zk'
-import {
-  createPublicClient,
-  keccak256,
-  http,
-  zeroAddress,
-  pad,
-  concat,
-  toHex,
-} from 'viem'
-import { base } from 'viem/chains'
-import { Credential } from '@anonworld/common'
+import { keccak256, zeroAddress, pad, concat, toHex } from 'viem'
+import { Credential, getChain } from '@anonworld/common'
 import { db } from '../db'
-
-const client = createPublicClient({
-  chain: base,
-  transport: http(),
-})
 
 export const credentialsRoutes = createElysia({ prefix: '/credentials' })
   .post(
@@ -48,8 +34,12 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
         }
       }
 
-      const block = await client.getBlock({ blockNumber: BigInt(metadata.blockNumber) })
-      const ethProof = await client.getProof({
+      const chain = getChain(metadata.chainId)
+
+      const block = await chain.client.getBlock({
+        blockNumber: BigInt(metadata.blockNumber),
+      })
+      const ethProof = await chain.client.getProof({
         address: metadata.tokenAddress,
         storageKeys: [
           keccak256(concat([pad(zeroAddress), pad(toHex(metadata.balanceSlot))])),

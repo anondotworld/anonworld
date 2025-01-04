@@ -1,16 +1,12 @@
 'use client'
 
-import { createConfig, http } from 'wagmi'
-import { base } from 'wagmi/chains'
+import { createConfig } from 'wagmi'
 import { ThemeProvider } from 'next-themes'
 import { frameConnector } from '@/lib/connector'
-import { Provider, SDKProvider } from '@anonworld/react'
+import { Provider, SDKProvider, viemConfig } from '@anonworld/react'
 
 export const config = createConfig({
-  chains: [base],
-  transports: {
-    [base.id]: http(),
-  },
+  ...viemConfig,
   connectors: [frameConnector()],
   ssr: true,
 })

@@ -156,6 +156,7 @@ export const tokensTable = pgTable('tokens', {
   market_cap: bigint('market_cap', { mode: 'number' }).notNull().default(0),
   total_supply: bigint('total_supply', { mode: 'number' }).notNull().default(0),
   holders: bigint('holders', { mode: 'number' }).notNull().default(0),
+  implementation_address: varchar({ length: 255 }),
   balance_slot: integer('balance_slot'),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),

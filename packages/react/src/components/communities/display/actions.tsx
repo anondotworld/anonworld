@@ -1,15 +1,13 @@
 import { MoreHorizontal } from '@tamagui/lucide-icons'
-import { Community } from '@anonworld/common'
+import { Community, getChain } from '@anonworld/common'
 import { Popover, Text, View, YGroup } from '@anonworld/ui'
-import { extractChain } from 'viem'
-import { chains } from '../../../utils'
 import { DexScreener } from '../../svg/dexscreener'
 import { Etherscan } from '../../svg/etherscan'
 import { Uniswap } from '../../svg/uniswap'
 import { Link } from 'solito/link'
 
 export function CommunityActions({ community }: { community: Community }) {
-  const chain = extractChain({ chains, id: Number(community.token.chain_id) as any })
+  const chain = getChain(Number(community.token.chain_id))
   return (
     <Popover size="$5" placement="bottom">
       <Popover.Trigger>

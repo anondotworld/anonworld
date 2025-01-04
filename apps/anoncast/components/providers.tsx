@@ -7,15 +7,14 @@ import {
   RainbowKitProvider,
   useConnectModal,
 } from '@rainbow-me/rainbowkit'
-import { base } from 'wagmi/chains'
 import { ThemeProvider } from 'next-themes'
-import { Provider, SDKProvider } from '@anonworld/react'
+import { Provider, SDKProvider, viemConfig } from '@anonworld/react'
 import { ReactNode } from 'react'
 
 const config = getDefaultConfig({
+  ...viemConfig,
   appName: 'anoncast',
   projectId: '302e299e8d6c292b6aeb9f313321e134',
-  chains: [base],
   ssr: true,
 })
 

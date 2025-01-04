@@ -1,6 +1,4 @@
-const CHAIN_ID_TO_SIMPLEHASH_CHAIN_ID: Record<number, string> = {
-  8453: 'base',
-}
+import { getChain } from '@anonworld/common'
 
 class SimplehashService {
   private readonly apiKey: string
@@ -41,6 +39,7 @@ class SimplehashService {
         Accept: 'application/json',
         'X-API-KEY': this.apiKey,
       }
+
       response = await fetch(`${this.baseUrl}${endpoint}`, {
         headers,
         method,
@@ -65,12 +64,12 @@ class SimplehashService {
   }
 
   async getTopHolder(chainId: number, tokenAddress: string) {
-    const chain = CHAIN_ID_TO_SIMPLEHASH_CHAIN_ID[chainId]
-    if (!chain) {
+    const chain = getChain(chainId)
+    if (!chain.simplehashId) {
       throw new Error(`Unsupported chainId: ${chainId}`)
     }
 
-    const url = `/fungibles/top_wallets?fungible_id=${chain}.${tokenAddress}&limit=1`
+    const url = `/fungibles/top_wallets?fungible_id=${chain.simplehashId}.${tokenAddress}&limit=1`
     const response = await this.makeRequest<{
       owners: { owner_address: `0x${string}`; quantity_string: string }[]
       next_cursor: string
@@ -85,12 +84,12 @@ class SimplehashService {
   }
 
   async getTopWalletsForFungible(chainId: number, tokenAddress: string, cursor?: string) {
-    const chain = CHAIN_ID_TO_SIMPLEHASH_CHAIN_ID[chainId]
-    if (!chain) {
+    const chain = getChain(chainId)
+    if (!chain.simplehashId) {
       throw new Error(`Unsupported chainId: ${chainId}`)
     }
 
-    const url = `/fungibles/top_wallets?fungible_id=${chain}.${tokenAddress}${cursor ? `&cursor=${cursor}` : ''}`
+    const url = `/fungibles/top_wallets?fungible_id=${chain.simplehashId}.${tokenAddress}${cursor ? `&cursor=${cursor}` : ''}`
     return await this.makeRequest<{
       owners: { owner_address: `0x${string}`; quantity_string: string }[]
       next_cursor: string
@@ -98,12 +97,12 @@ class SimplehashService {
   }
 
   async getFungible(chainId: number, tokenAddress: string) {
-    const chain = CHAIN_ID_TO_SIMPLEHASH_CHAIN_ID[chainId]
-    if (!chain) {
+    const chain = getChain(chainId)
+    if (!chain.simplehashId) {
       throw new Error(`Unsupported chainId: ${chainId}`)
     }
 
-    const url = `/fungibles/assets?fungible_ids=${chain}.${tokenAddress}&include_prices=1`
+    const url = `/fungibles/assets?fungible_ids=${chain.simplehashId}.${tokenAddress}&include_prices=1`
     return await this.makeRequest<{ holder_count: number; decimals: number }>(url)
   }
 }

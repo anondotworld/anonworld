@@ -5,7 +5,10 @@ import { toHslColors } from '../../utils'
 export function TokenImage({
   token,
   size = 16,
-}: { token?: { address: string; image_url?: string | null }; size?: number }) {
+}: {
+  token?: { address: string; chain_id?: number; image_url?: string | null }
+  size?: number
+}) {
   const { background, secondary } = toHslColors(token?.address ?? '')
   return (
     <Avatar circular size={size}>

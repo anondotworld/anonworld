@@ -1,10 +1,10 @@
-import { CredentialWithId } from '@anonworld/common'
+import { CredentialWithId, getChain } from '@anonworld/common'
 import { View, XStack, YStack } from '@anonworld/ui'
-import { chains, CREDENTIAL_EXPIRATION_TIME, timeAgo } from '../../../utils'
+import { CREDENTIAL_EXPIRATION_TIME, timeAgo } from '../../../utils'
 import { Badge } from '../../badge'
 import { CredentialActions } from './actions'
 import { useToken } from '../../../hooks'
-import { extractChain, formatUnits } from 'viem/utils'
+import { formatUnits } from 'viem/utils'
 import { Field } from '../../field'
 import { VaultBadge } from '../../vaults/badge'
 import { Link } from 'solito/link'
@@ -43,7 +43,7 @@ export function CredentialDisplay({
           <VaultBadge vaultId={credential.vault_id} />
         </Link>
         <Badge>ERC20 Balance</Badge>
-        <Badge>{timeAgo(credential.verified_at)}</Badge>
+        <Badge>{timeAgo(credential.verified_at.toString())}</Badge>
         {isExpired && <Badge destructive>Expired</Badge>}
       </XStack>
       <ERC20CredentialDisplay credential={credential} />
@@ -64,6 +64,7 @@ function ERC20CredentialDisplay({ credential }: { credential: CredentialWithId }
   const amount = Number.parseFloat(
     formatUnits(BigInt(credential.metadata.balance), data?.decimals ?? 18)
   )
+  const chain = getChain(Number(credential.metadata.chainId))
 
   return (
     <XStack $xs={{ flexDirection: 'column', gap: '$2', ai: 'flex-start' }}>
@@ -77,8 +78,7 @@ function ERC20CredentialDisplay({ credential }: { credential: CredentialWithId }
         { label: 'Balance', value: amount.toLocaleString() },
         {
           label: 'Chain',
-          value: extractChain({ chains, id: Number(credential.metadata.chainId) as any })
-            .name,
+          value: chain.name,
         },
       ].map(({ label, value, image, imageFallbackText }) => (
         <Field

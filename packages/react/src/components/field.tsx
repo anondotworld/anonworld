@@ -27,7 +27,7 @@ export function Field({
       $xs={{ flexDirection: 'row-reverse', gap: '$2', jc: 'flex-end' }}
     >
       <XStack ai={ai} gap="$2">
-        {image && <Image src={image} w={16} h={16} />}
+        {image && <Image src={image} w={16} h={16} br="$12" />}
         {!image && imageFallbackText && (
           <LinearGradient
             colors={[secondary, background]}
