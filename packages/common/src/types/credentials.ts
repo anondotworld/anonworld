@@ -9,6 +9,11 @@ export type CredentialProof = {
   publicInputs: string[]
 }
 
+export type ProofData = {
+  proof: Uint8Array
+  publicInputs: string[]
+}
+
 export type CredentialMetadata = {
   chainId: number
   tokenAddress: string

@@ -1,30 +1,33 @@
-import { ERC20Balance } from '../credentials/erc20-balance'
-import { Circuit, CircuitType } from '../credentials/circuit'
-export type { ProofData } from '@aztec/bb.js'
-export type { Circuit } from '../credentials/circuit'
-export { CircuitType } from '../credentials/circuit'
+import { CredentialType } from '@anonworld/common'
+import { ERC20BalanceVerifier } from './verifiers/erc20-balance'
+import { Verifier } from './verifiers/verifier'
+export type { Circuit } from './utils/circuit'
 
-const circuits: Record<string, Record<string, Circuit>> = {}
+type VerifierConstructor = new (version: string) => Verifier
 
-type CircuitMap = {
-  [CircuitType.ERC20_BALANCE]: ERC20Balance
+const Verifiers: Record<CredentialType, VerifierConstructor> = {
+  [CredentialType.ERC20_BALANCE]: ERC20BalanceVerifier,
 }
 
-export const getCircuit = <T extends CircuitType>(
-  circuitType: T,
-  circuitVersion = 'latest'
-): CircuitMap[T] => {
-  if (circuitType === 'ERC20_BALANCE') {
-    if (!circuits[circuitType]) {
-      circuits[circuitType] = {}
+export class CredentialsManager {
+  private verifiers: Record<string, Record<string, Verifier>> = {}
+
+  getVerifier<T extends CredentialType>(circuitType: T, circuitVersion = 'latest') {
+    if (!this.verifiers[circuitType]) {
+      this.verifiers[circuitType] = {}
     }
 
-    if (!circuits[circuitType][circuitVersion]) {
-      circuits[circuitType][circuitVersion] = new ERC20Balance(circuitVersion)
+    if (this.verifiers[circuitType][circuitVersion]) {
+      return this.verifiers[circuitType][circuitVersion]
     }
 
-    return circuits[circuitType][circuitVersion] as CircuitMap[T]
+    const VerifierClass = Verifiers[circuitType]
+    if (!VerifierClass) {
+      throw new Error('Invalid circuit type')
+    }
+
+    this.verifiers[circuitType][circuitVersion] = new VerifierClass(circuitVersion)
+
+    return this.verifiers[circuitType][circuitVersion]
   }
-
-  throw new Error('Invalid circuit type')
 }

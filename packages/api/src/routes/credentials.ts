@@ -1,9 +1,9 @@
 import { createElysia } from '../utils'
 import { t } from 'elysia'
-import { CircuitType, getCircuit } from '@anonworld/credentials'
 import { keccak256, zeroAddress, pad, concat, toHex } from 'viem'
-import { Credential, getChain } from '@anonworld/common'
+import { Credential, CredentialType, getChain } from '@anonworld/common'
 import { db } from '../db'
+import { CredentialsManager } from '@anonworld/credentials'
 
 export const credentialsRoutes = createElysia({ prefix: '/credentials' })
   .post(
@@ -13,9 +13,11 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
         throw new Error('Invalid type or version')
       }
 
-      const circuit = getCircuit(body.type as CircuitType, body.version)
+      const credentialType = body.type as CredentialType
+      const manager = new CredentialsManager()
+      const circuit = manager.getVerifier(credentialType, body.version)
 
-      const verified = await circuit.verify({
+      const verified = await circuit.verifyProof({
         proof: new Uint8Array(body.proof),
         publicInputs: body.publicInputs,
       })
@@ -39,6 +41,7 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
       const block = await chain.client.getBlock({
         blockNumber: BigInt(metadata.blockNumber),
       })
+
       const ethProof = await chain.client.getProof({
         address: metadata.tokenAddress,
         storageKeys: [

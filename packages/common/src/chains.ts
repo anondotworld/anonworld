@@ -7,10 +7,10 @@ import {
 } from 'viem/chains'
 import { createPublicClient, http, Transport, Chain as ViemChain } from 'viem'
 
-const createClient = (chain: ViemChain) => {
+const createClient = (chain: ViemChain, rpcUrl?: string) => {
   return createPublicClient({
     chain,
-    transport: http(),
+    transport: http(rpcUrl),
   })
 }
 
@@ -26,7 +26,10 @@ export const mainnet: Chain = {
   zerionId: 'ethereum',
   simplehashId: 'ethereum',
   imageUrl: 'https://chain-icons.s3.amazonaws.com/ethereum.png',
-  client: createClient(viemMainnet),
+  client: createClient(
+    viemMainnet,
+    `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+  ),
 }
 
 export const base: Chain = {

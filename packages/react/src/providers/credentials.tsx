@@ -1,12 +1,12 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
-import { useAccount, useConfig, useSignMessage } from 'wagmi'
-import { concat, hashMessage, keccak256, pad, toHex } from 'viem'
-import { CredentialWithId, getChain } from '@anonworld/common'
-import { getBlock, getProof } from 'wagmi/actions'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { useAccount, useSignMessage } from 'wagmi'
+import { hashMessage } from 'viem'
+import { CredentialType, CredentialWithId } from '@anonworld/common'
 import { useSDK } from './sdk'
 import { useVaults } from '../hooks/use-vaults'
+import { CredentialsManager } from '@anonworld/credentials'
 
 const LOCAL_STORAGE_KEY = 'anon:credentials:v1'
 
@@ -45,13 +45,14 @@ export const CredentialsProvider = ({
 }: {
   children: React.ReactNode
 }) => {
+  const manager = useMemo(() => new CredentialsManager(), [])
+
   const { sdk, connectWallet } = useSDK()
   const [credentials, setCredentials] = useState<CredentialWithId[]>(
     getInitialCredentials()
   )
   const { signMessageAsync } = useSignMessage()
   const { address } = useAccount()
-  const config = useConfig()
   const { data: vaults } = useVaults()
 
   useEffect(() => {
@@ -78,46 +79,30 @@ export const CredentialsProvider = ({
       throw new Error('No address connected')
     }
 
-    const chain = getChain(args.chainId)
-
     const response = await sdk.getBalanceStorageSlot(args.chainId, args.tokenAddress)
     if (!response.data) {
       throw new Error('Failed to find balance storage slot')
     }
 
-    const balanceSlot = response.data.slot
-    const balanceSlotHex = pad(toHex(balanceSlot))
-    const storageKey = keccak256(concat([pad(address), balanceSlotHex]))
-    const block = await chain.client.getBlock()
-    const proof = await chain.client.getProof({
-      address: args.tokenAddress as `0x${string}`,
-      storageKeys: [storageKey],
-      blockNumber: block.number,
+    const verifier = manager.getVerifier(CredentialType.ERC20_BALANCE)
+
+    const { input, message } = await verifier.buildInput({
+      address,
+      chainId: args.chainId,
+      tokenAddress: args.tokenAddress as `0x${string}`,
+      verifiedBalance: args.verifiedBalance,
+      balanceSlot: response.data.slot,
     })
 
-    const message = JSON.stringify({
-      chainId: args.chainId,
-      blockNumber: block.number.toString(),
-      storageHash: proof.storageHash,
-      tokenAddress: args.tokenAddress,
-      balanceSlot: balanceSlot,
-      balance: args.verifiedBalance.toString(),
-    })
-    const messageHash = hashMessage(message)
     const signature = await signMessageAsync({ message })
 
-    const credential = await sdk.verifyERC20Balance({
-      address,
+    const proof = await verifier.generateProof({
+      ...input,
       signature,
-      messageHash,
-      storageHash: proof.storageHash,
-      storageProof: proof.storageProof,
-      chainId: args.chainId,
-      blockNumber: block.number,
-      tokenAddress: args.tokenAddress as `0x${string}`,
-      balanceSlot: balanceSlotHex,
-      verifiedBalance: args.verifiedBalance,
-      blockTimestamp: block.timestamp,
+    })
+
+    const credential = await sdk.createCredential({
+      ...proof,
       parentId: args.parentId,
     })
 

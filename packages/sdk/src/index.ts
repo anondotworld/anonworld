@@ -1,73 +1,322 @@
-import type { ERC20Balance } from '@anonworld/credentials'
-import { formatArray, formatHexArray } from './utils'
-import { Api } from './api'
-import { getPublicKey } from './utils'
-import { GetProofReturnType } from 'viem'
+import {
+  Action,
+  ApiResponse,
+  Community,
+  ConversationPost,
+  Credential,
+  CredentialWithId,
+  ExecuteAction,
+  FarcasterChannel,
+  FarcasterUser,
+  FungiblePosition,
+  Post,
+  RequestConfig,
+  RevealArgs,
+  SwapQuote,
+  SwapQuoteError,
+  Token,
+  UploadImageResponse,
+  Vault,
+} from '@anonworld/common'
 
-export type VerifyERC20Balance = {
-  address: `0x${string}`
-  signature: `0x${string}`
-  messageHash: `0x${string}`
-  storageHash: `0x${string}`
-  storageProof: GetProofReturnType['storageProof']
-  chainId: number
-  blockNumber: bigint
-  tokenAddress: `0x${string}`
-  balanceSlot: `0x${string}`
-  verifiedBalance: bigint
-  blockTimestamp: bigint
-  parentId?: string
-}
-
-export class AnonWorldSDK extends Api {
-  private erc20Balance!: ERC20Balance
+export class AnonWorldSDK {
+  private apiUrl: string
+  private token: string | null
 
   constructor(apiUrl?: string) {
-    super(apiUrl || 'https://api.anon.world')
+    this.apiUrl = apiUrl || 'https://api.anon.world'
   }
 
-  async instantiate() {
-    if (this.erc20Balance) return
-    const { getCircuit, CircuitType } = await import('@anonworld/credentials')
-    this.erc20Balance = getCircuit(CircuitType.ERC20_BALANCE)
+  public setToken(token: string) {
+    this.token = token
   }
 
-  async verifyERC20Balance(args: VerifyERC20Balance) {
-    await this.instantiate()
+  private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
+    const contentType = response.headers.get('content-type')
+    const hasJson = contentType?.includes('application/json')
+    const data = hasJson ? await response.json() : null
 
-    const { pubKeyX, pubKeyY } = await getPublicKey(args.signature, args.messageHash)
-
-    const storageProof = args.storageProof[0]
-    const nodes = storageProof.proof.slice(0, storageProof.proof.length - 1)
-    const leaf = storageProof.proof[storageProof.proof.length - 1]
-
-    const input = {
-      signature: formatHexArray(args.signature, { length: 64 }),
-      message_hash: formatHexArray(args.messageHash),
-      pub_key_x: formatHexArray(pubKeyX),
-      pub_key_y: formatHexArray(pubKeyY),
-      storage_hash: formatHexArray(args.storageHash),
-      storage_nodes: formatArray(nodes, (node) =>
-        formatHexArray(node, { length: 532, pad: 'right' })
-      ),
-      storage_leaf: formatHexArray(leaf, { length: 69, pad: 'right' }),
-      storage_depth: storageProof.proof.length,
-      storage_value: `0x${storageProof.value.toString(16)}`,
-      chain_id: `0x${Number(args.chainId).toString(16)}`,
-      block_number: `0x${args.blockNumber.toString(16)}`,
-      token_address: args.tokenAddress,
-      balance_slot: `0x${BigInt(args.balanceSlot).toString(16)}`,
-      verified_balance: `0x${BigInt(args.verifiedBalance).toString(16)}`,
+    if (!response.ok) {
+      return {
+        error: {
+          message:
+            data?.message ||
+            data?.error ||
+            `API error: ${response.status} ${response.statusText}`,
+          status: response.status,
+        },
+      }
     }
 
-    const proof = await this.erc20Balance.generate(input)
+    return { data }
+  }
 
-    return await this.createCredential({
-      type: this.erc20Balance.type,
-      version: this.erc20Balance.version,
-      proof: Array.from(proof.proof),
-      publicInputs: proof.publicInputs,
-      parentId: args.parentId,
+  public async request<T>(
+    endpoint: string,
+    config: RequestConfig & { maxRetries?: number } = {}
+  ): Promise<ApiResponse<T>> {
+    const { headers = {}, maxRetries = 1, isFormData = false, ...options } = config
+
+    const defaultHeaders: Record<string, string> = {
+      Accept: 'application/json',
+    }
+
+    if (!isFormData) {
+      defaultHeaders['Content-Type'] = 'application/json'
+    }
+
+    const finalHeaders = {
+      ...defaultHeaders,
+      ...headers,
+    }
+
+    if (this.token) {
+      finalHeaders.Authorization = `Bearer ${this.token}`
+    }
+
+    let attempt = 1
+    while (true) {
+      const response = await fetch(`${this.apiUrl}${endpoint}`, {
+        ...options,
+        headers: finalHeaders,
+      })
+
+      if (!response.ok && attempt < maxRetries) {
+        attempt++
+        continue
+      }
+
+      const result = await this.handleResponse<T>(response)
+
+      return result
+    }
+  }
+
+  async executeActions(actions: ExecuteAction[]) {
+    return await this.request<{
+      results: { success: boolean; hash?: string; tweetId?: string }[]
+    }>('/actions/execute', {
+      method: 'POST',
+      body: JSON.stringify({
+        actions,
+      }),
+      maxRetries: 3,
     })
+  }
+
+  async revealPost(args: RevealArgs) {
+    return await this.request<{ success: boolean; hash?: string }>('/posts/reveal', {
+      method: 'POST',
+      body: JSON.stringify(args),
+    })
+  }
+
+  async getTrendingFeed(fid: number) {
+    return await this.request<{ data: Array<Post> }>(`/feeds/${fid}/trending`)
+  }
+
+  async getNewFeed(fid: number, page = 1) {
+    return await this.request<{ data: Array<Post> }>(`/feeds/${fid}/new?page=${page}`)
+  }
+
+  async getPost(hash: string) {
+    return await this.request<Post>(`/posts/${hash}`)
+  }
+
+  async getPostConversations(hash: string) {
+    return await this.request<{ data: Array<ConversationPost> }>(
+      `/posts/${hash}/conversations`
+    )
+  }
+
+  async getFarcasterCast(identifier: string) {
+    return await this.request<Post>(`/farcaster/casts?identifier=${identifier}`)
+  }
+
+  async getFarcasterIdentity(address: string) {
+    return await this.request<FarcasterUser>(`/farcaster/identities?address=${address}`)
+  }
+
+  async getFarcasterUser(fid: number) {
+    return await this.request<FarcasterUser>(`/farcaster/users/${fid}`)
+  }
+
+  async getFarcasterChannel(channelId: string) {
+    return await this.request<FarcasterChannel>(`/farcaster/channels/${channelId}`)
+  }
+
+  async uploadImage(image: File) {
+    const formData = new FormData()
+    formData.append('image', image)
+
+    return await this.request<UploadImageResponse>('/upload', {
+      method: 'POST',
+      body: formData,
+      isFormData: true,
+    })
+  }
+
+  async getAction(actionId: string) {
+    return await this.request<Action>(`/actions/${actionId}`)
+  }
+
+  async getActions() {
+    return await this.request<{ data: Action[] }>('/actions')
+  }
+
+  async createCredential({
+    proof,
+    publicInputs,
+    parentId,
+    type,
+    version,
+  }: {
+    proof: number[]
+    publicInputs: string[]
+    parentId?: string
+    type: string
+    version: string
+  }) {
+    return await this.request<CredentialWithId>('/credentials', {
+      method: 'POST',
+      body: JSON.stringify({ proof, publicInputs, parentId, type, version }),
+    })
+  }
+
+  async getCredential(id: string) {
+    return await this.request<Credential>(`/credentials/${id}`)
+  }
+
+  async getWalletFungibles(address: string) {
+    return await this.request<{ data: FungiblePosition[] }>(
+      `/wallet/${address}/fungibles`
+    )
+  }
+
+  async getToken(chainId: number, tokenAddress: string) {
+    return await this.request<Token>(`/tokens/${chainId}/${tokenAddress}`)
+  }
+
+  async getBalanceStorageSlot(chainId: number, tokenAddress: string) {
+    return await this.request<{ slot: number }>(
+      `/tokens/${chainId}/${tokenAddress}/balance-slot`
+    )
+  }
+
+  async getCommunities() {
+    return await this.request<{ data: Community[] }>('/communities')
+  }
+
+  async getCommunity(id: string) {
+    return await this.request<Community>(`/communities/${id}`)
+  }
+
+  async getSwapQuote(args: {
+    chainId: number
+    taker: string
+    buyToken: string
+    sellToken: string
+    sellAmount: string
+  }) {
+    return await this.request<{ data: SwapQuote | SwapQuoteError }>('/swap/quote', {
+      method: 'POST',
+      body: JSON.stringify(args),
+    })
+  }
+
+  async getPasskeyChallenge(nonce: string) {
+    return await this.request<{ challenge: `0x${string}` }>(`/auth/challenge`, {
+      method: 'POST',
+      body: JSON.stringify({ nonce }),
+    })
+  }
+
+  async createPasskey(args: {
+    nonce: string
+    id: string
+    publicKey: {
+      prefix: number
+      x: string
+      y: string
+    }
+  }) {
+    return await this.request<{ success: boolean; token: string }>(`/auth/create`, {
+      method: 'POST',
+      body: JSON.stringify(args),
+    })
+  }
+
+  async authenticatePasskey(args: {
+    nonce: string
+    raw: {
+      id: string
+      type: string
+    }
+    signature: {
+      r: string
+      s: string
+      yParity?: number
+    }
+    metadata: any
+  }) {
+    return await this.request<{ success: boolean; token: string }>(`/auth/authenticate`, {
+      method: 'POST',
+      body: JSON.stringify(args),
+    })
+  }
+  async addToVault(vaultId: string, credentialId: string) {
+    return await this.request<{ success: boolean }>(`/vaults/${vaultId}/credentials`, {
+      method: 'PUT',
+      body: JSON.stringify({ credentialId }),
+    })
+  }
+
+  async removeFromVault(vaultId: string, credentialId: string) {
+    return await this.request<{ success: boolean }>(`/vaults/${vaultId}/credentials`, {
+      method: 'DELETE',
+      body: JSON.stringify({ credentialId }),
+    })
+  }
+
+  async getVault(vaultId: string) {
+    return await this.request<Vault>(`/vaults/${vaultId}`)
+  }
+
+  async getVaultPosts(vaultId: string) {
+    return await this.request<{ data: Array<Post> }>(`/vaults/${vaultId}/posts`)
+  }
+
+  async getVaults() {
+    if (!this.token) {
+      return { error: { message: 'No token', status: 401 } }
+    }
+    return await this.request<{ data: Vault[] }>(`/auth/vaults`)
+  }
+
+  async likePost(hash: string) {
+    if (!this.token) {
+      return { error: { message: 'No token', status: 401 } }
+    }
+    return await this.request<{ success: boolean }>(`/auth/posts/like`, {
+      method: 'POST',
+      body: JSON.stringify({ hash }),
+    })
+  }
+
+  async unlikePost(hash: string) {
+    if (!this.token) {
+      return { error: { message: 'No token', status: 401 } }
+    }
+    return await this.request<{ success: boolean }>(`/auth/posts/unlike`, {
+      method: 'POST',
+      body: JSON.stringify({ hash }),
+    })
+  }
+
+  async getNotifications() {
+    if (!this.token) {
+      return { error: { message: 'No token', status: 401 } }
+    }
+    return await this.request<{ data: Array<Post> }>(`/auth/notifications`)
   }
 }
