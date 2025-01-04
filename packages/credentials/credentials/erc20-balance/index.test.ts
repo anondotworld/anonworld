@@ -1,6 +1,6 @@
-import { getCircuit, CircuitType } from '../src'
+import { getCircuit, CircuitType } from '../../src'
 import { bytesToHex, concat, keccak256, pad, toHex } from 'viem'
-import { formatArray, formatHexArray } from './utils'
+import { formatArray, formatHexArray } from '../utils'
 import { base } from '@anonworld/common'
 
 const circuit = getCircuit(CircuitType.ERC20_BALANCE)

@@ -20,7 +20,7 @@ type CircuitModules = {
   vkey: Uint8Array
 }
 
-export abstract class BaseCircuit {
+export abstract class Circuit {
   private proverPromise: Promise<ProverModules> | null = null
   private verifierPromise: Promise<VerifierModules> | null = null
   private circuitPromise: Promise<CircuitModules> | null = null
@@ -39,10 +39,10 @@ export abstract class BaseCircuit {
     if (!this.circuitPromise) {
       this.circuitPromise = (async () => {
         const [circuit, vkey] = await Promise.all([
-          import(`../circuits/${this.key}/target/${this.version}/main.json`).then(
+          import(`./${this.key}/circuit/target/${this.version}/main.json`).then(
             (res) => res.default
           ),
-          import(`../circuits/${this.key}/target/${this.version}/vkey.json`).then(
+          import(`./${this.key}/circuit/target/${this.version}/vkey.json`).then(
             (res) => res.default
           ),
         ])
