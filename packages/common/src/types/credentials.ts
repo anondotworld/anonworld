@@ -1,7 +1,8 @@
 import { Token } from './token'
 
 export enum CredentialType {
-  ERC20_BALANCE = 'erc20_balance',
+  ERC20_BALANCE = 'ERC20_BALANCE',
+  ERC721_BALANCE = 'ERC721_BALANCE',
 }
 
 export type CredentialProof = {
@@ -22,6 +23,7 @@ export type CredentialMetadata = {
 
 export type Credential = {
   id?: string
+  type: CredentialType
   credential_id: string
   proof?: CredentialProof
   metadata: CredentialMetadata

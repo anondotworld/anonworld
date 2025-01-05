@@ -1,3 +1,12 @@
+export enum ContractType {
+  ERC20 = 'ERC20',
+  ERC721 = 'ERC721',
+}
+
+export enum StorageType {
+  BALANCE = 'BALANCE',
+}
+
 export type Token = {
   id: string
   chain_id: number

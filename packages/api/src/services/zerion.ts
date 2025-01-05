@@ -1,5 +1,11 @@
 import { zeroAddress } from 'viem'
-import { FungiblePosition, Fungible, ZerionResponse, chains } from '@anonworld/common'
+import {
+  FungiblePosition,
+  Fungible,
+  ZerionResponse,
+  chains,
+  NFTPosition,
+} from '@anonworld/common'
 
 const zerionChains = chains.map((chain) => chain.zerionId).filter((id) => id)
 
@@ -75,6 +81,13 @@ class ZerionService {
     }
     const response = await this.makeRequest<Fungible[]>(`/fungibles?${query.toString()}`)
     return response.data[0]
+  }
+
+  async getNFTPositions(address: string): Promise<NFTPosition[]> {
+    const response = await this.makeRequest<NFTPosition[]>(
+      `/wallets/${address}/nft-positions?filter[chain_ids]=${zerionChains.join(',')}`
+    )
+    return response.data
   }
 }
 

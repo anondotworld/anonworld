@@ -10,6 +10,8 @@ import { tokenRoutes } from './routes/tokens'
 import { communitiesRoutes } from './routes/communities'
 import { authRoutes } from './routes/auth'
 import { vaultsRoutes } from './routes/vaults'
+import { evmRoutes } from './routes/evm'
+import { nftRoutes } from './routes/nfts'
 
 const app = createElysia()
   .use(actionsRoutes)
@@ -23,6 +25,8 @@ const app = createElysia()
   .use(communitiesRoutes)
   .use(authRoutes)
   .use(vaultsRoutes)
+  .use(evmRoutes)
+  .use(nftRoutes)
 
 app.listen(3001)
 

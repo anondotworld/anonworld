@@ -1,4 +1,9 @@
-import { CredentialMetadata, CredentialProof, PostData } from '@anonworld/common'
+import {
+  CredentialMetadata,
+  CredentialProof,
+  CredentialType,
+  PostData,
+} from '@anonworld/common'
 import {
   communitiesTable,
   actionsTable,
@@ -28,6 +33,7 @@ export type DBActionExecution = typeof actionExecutionsTable.$inferSelect
 export type DBCredential = typeof credentialInstancesTable.$inferSelect & {
   proof: CredentialProof
   metadata: CredentialMetadata
+  type: CredentialType
 }
 export type DBCommunity = typeof communitiesTable.$inferSelect
 export type DBToken = typeof tokensTable.$inferSelect

@@ -1,4 +1,4 @@
-import { ConversationPost, CredentialBadge, VaultBadge } from '@anonworld/react'
+import { ConversationPost, VaultBadge } from '@anonworld/react'
 import { Avatar, Text, View, XStack, YStack } from '@anonworld/ui'
 import { PostEmbed } from '../display/embeds'
 import { timeAgo } from '../../../utils'
@@ -7,6 +7,7 @@ import { ReplyButton } from '../actions/reply'
 import { VaultAvatar } from '../../vaults/avatar'
 import { Link, TextLink } from 'solito/link'
 import { LikeButton } from '../actions/like'
+import { CredentialTypeBadge } from '../../credentials/types'
 
 export function PostConversation({
   conversation,
@@ -83,7 +84,7 @@ function Post({
                   </Link>
                 )}
                 {post.credentials.map((credential, index) => (
-                  <CredentialBadge key={index} credential={credential} />
+                  <CredentialTypeBadge key={index} credential={credential} />
                 ))}
                 <Text fos="$2" fow="400" col="$color11">
                   {timeAgo(post.timestamp)}

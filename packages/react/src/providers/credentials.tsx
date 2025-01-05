@@ -58,7 +58,15 @@ export const CredentialsProvider = ({
   }, [vaults])
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(credentials))
+    localStorage.setItem(
+      LOCAL_STORAGE_KEY,
+      JSON.stringify(
+        credentials.map((c) => ({
+          ...c,
+          type: c.credential_id.split(':')[0],
+        }))
+      )
+    )
   }, [credentials])
 
   const addCredential = async (type: CredentialType, args: any, parentId?: string) => {
@@ -75,7 +83,7 @@ export const CredentialsProvider = ({
 
     const credential = await sdk.createCredential({
       ...proof,
-      parentId: args.parentId,
+      parentId,
     })
 
     if (credential.error) {

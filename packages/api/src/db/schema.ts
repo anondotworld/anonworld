@@ -111,6 +111,7 @@ export const actionExecutionsTable = pgTable('action_executions', {
 
 export const credentialInstancesTable = pgTable('credential_instances', {
   id: varchar({ length: 255 }).primaryKey(),
+  type: varchar({ length: 255 }).default('ERC20_BALANCE').notNull(),
   credential_id: varchar({ length: 255 }).notNull(),
   version: varchar({ length: 255 }),
   metadata: jsonb('metadata').notNull(),
@@ -148,6 +149,7 @@ export const tokensTable = pgTable('tokens', {
   id: varchar({ length: 255 }).primaryKey(),
   chain_id: integer('chain_id').notNull(),
   address: varchar({ length: 255 }).notNull(),
+  type: varchar({ length: 255 }).default('ERC20').notNull(),
   name: varchar({ length: 255 }).notNull(),
   symbol: varchar({ length: 255 }).notNull(),
   decimals: integer('decimals').notNull(),

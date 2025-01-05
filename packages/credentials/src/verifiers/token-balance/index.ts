@@ -1,9 +1,8 @@
-import { CredentialType, getChain } from '@anonworld/common'
+import { CredentialType, getChain, ProofData } from '@anonworld/common'
 import { formatArray } from '../../utils'
 import { formatHexArray } from '../../utils'
 import { getPublicKey } from '../../utils'
 import { Circuit } from '../../utils/circuit'
-import type { ProofData } from '@aztec/bb.js'
 import { GetProofReturnType, hashMessage, keccak256 } from 'viem'
 import { concat } from 'viem'
 import { toHex } from 'viem'
@@ -12,9 +11,9 @@ import { Verifier } from '../verifier'
 import circuit from './circuit/target/0.1.5/main.json'
 import vkey from './circuit/target/0.1.5/vkey.json'
 
-export const ERC20_BALANCE_VERSION = '0.1.5'
+export const TOKEN_BALANCE_VERSION = '0.1.5'
 
-export type ERC20BalanceArgs = {
+export type TokenBalanceArgs = {
   chainId: number
   tokenAddress: string
   address: string
@@ -22,7 +21,7 @@ export type ERC20BalanceArgs = {
   balanceSlot: number
 }
 
-export type ERC20BalancePublicData = {
+export type TokenBalancePublicData = {
   balance: string
   chainId: number
   blockNumber: string
@@ -31,7 +30,7 @@ export type ERC20BalancePublicData = {
   storageHash: string
 }
 
-export type ERC20BalanceInputData = {
+export type TokenBalanceInputData = {
   address: string
   signature: string
   messageHash: string
@@ -44,21 +43,23 @@ export type ERC20BalanceInputData = {
   verifiedBalance: string
 }
 
-export class ERC20BalanceVerifier extends Circuit implements Verifier {
+export class TokenBalanceVerifier extends Circuit implements Verifier {
+  public type: CredentialType
   public version: string
 
-  constructor(version: string) {
+  constructor(type: CredentialType, version: string) {
     let circuitVersion = version
     if (version === 'latest') {
-      circuitVersion = ERC20_BALANCE_VERSION
+      circuitVersion = TOKEN_BALANCE_VERSION
     }
     super(circuit, vkey)
+    this.type = type
     this.version = circuitVersion
   }
 
-  async buildInput(args: ERC20BalanceArgs): Promise<{
-    input: Omit<ERC20BalanceInputData, 'signature'>
-    message
+  async buildInput(args: TokenBalanceArgs): Promise<{
+    input: Omit<TokenBalanceInputData, 'signature'>
+    message: string
   }> {
     const chain = getChain(args.chainId)
     const balanceSlotHex = pad(toHex(args.balanceSlot))
@@ -95,7 +96,7 @@ export class ERC20BalanceVerifier extends Circuit implements Verifier {
     }
   }
 
-  async generateProof(args: ERC20BalanceInputData) {
+  async generateProof(args: TokenBalanceInputData) {
     const { pubKeyX, pubKeyY } = await getPublicKey(
       args.signature as `0x${string}`,
       args.messageHash as `0x${string}`
@@ -127,7 +128,7 @@ export class ERC20BalanceVerifier extends Circuit implements Verifier {
     const proof = await super.generate(input)
 
     return {
-      type: CredentialType.ERC20_BALANCE,
+      type: this.type,
       version: this.version,
       proof: Array.from(proof.proof),
       publicInputs: proof.publicInputs,
@@ -138,7 +139,7 @@ export class ERC20BalanceVerifier extends Circuit implements Verifier {
     return super.verify(proof)
   }
 
-  parseData(publicInputs: string[]): ERC20BalancePublicData {
+  parseData(publicInputs: string[]): TokenBalancePublicData {
     const balance = BigInt(publicInputs[0]).toString()
     const chainId = Number(BigInt(publicInputs[1]).toString())
     const blockNumber = BigInt(publicInputs[2]).toString()

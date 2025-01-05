@@ -1,9 +1,9 @@
 import { Popover, XStack } from '@anonworld/ui'
-import { Credential } from '@anonworld/common'
-import { CredentialBadge } from '../../credentials/badge'
+import { Credential, getCredential } from '@anonworld/common'
 import { useState } from 'react'
 import { timeAgo } from '../../../utils'
 import { Badge } from '../../badge'
+import { CredentialTypeBadge } from '../../credentials/types'
 
 export function PostCredential({ credential }: { credential: Credential }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -11,7 +11,7 @@ export function PostCredential({ credential }: { credential: Credential }) {
   return (
     <Popover size="$5" placement="bottom" open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger>
-        <CredentialBadge credential={credential} />
+        <CredentialTypeBadge credential={credential} />
       </Popover.Trigger>
       <Popover.Content
         enterStyle={{ y: -10, opacity: 0 }}
@@ -33,8 +33,8 @@ export function PostCredential({ credential }: { credential: Credential }) {
       >
         {isOpen && (
           <XStack ai="center" gap="$2">
-            <Badge>ERC20 Balance</Badge>
-            <Badge>{`Verified ${timeAgo(credential.verified_at)}`}</Badge>
+            <Badge>{getCredential(credential.type)?.name}</Badge>
+            <Badge>{`Verified ${timeAgo(credential.verified_at.toString())}`}</Badge>
           </XStack>
         )}
       </Popover.Content>

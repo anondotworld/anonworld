@@ -73,6 +73,19 @@ export class RedisService {
     return this.client.set(`token:${chainId}:${tokenAddress}`, token, 'EX', 60 * 60 * 24)
   }
 
+  async getNFTCollection(chainId: number, tokenAddress: string) {
+    return this.client.get(`nft-collection:${chainId}:${tokenAddress}`)
+  }
+
+  async setNFTCollection(chainId: number, tokenAddress: string, collection: string) {
+    return this.client.set(
+      `nft-collection:${chainId}:${tokenAddress}`,
+      collection,
+      'EX',
+      60 * 60 * 24
+    )
+  }
+
   async getVaultChallenge(nonce: string): Promise<string | null> {
     return this.client.get(`vault:challenge:${nonce}`)
   }

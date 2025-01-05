@@ -1,7 +1,5 @@
 import {
   Adapt,
-  Button,
-  Circle,
   Input,
   Label,
   Select,
@@ -13,30 +11,17 @@ import {
   XStack,
   YStack,
 } from '@anonworld/ui'
-import { useNewCredential } from './context'
-import {
-  CredentialType,
-  FungiblePosition,
-  getChain,
-  getZerionChain,
-} from '@anonworld/common'
-import { useAccount, useDisconnect } from 'wagmi'
-import { formatAddress } from '../../../utils'
+import { useNewCredential } from '../context'
+import { FungiblePosition, getChain, getZerionChain } from '@anonworld/common'
+import { useAccount } from 'wagmi'
+import { formatAddress } from '../../../../utils'
 import { useEffect, useMemo, useState } from 'react'
-import { useCredentials, useSDK } from '../../../providers'
-import { parseUnits } from 'viem'
-import { useWalletFungibles } from '../../../hooks/use-wallet-fungibles'
-import { TokenImage } from '../../tokens/image'
+import { useWalletFungibles } from '../../../../hooks/use-wallet-fungibles'
+import { TokenImage } from '../../../tokens/image'
+import { WalletField } from './components/wallet-field'
+import { SubmitButton } from './components/submit-button'
 
-export function NewCredentialForm() {
-  const { credentialType } = useNewCredential()
-  if (credentialType === CredentialType.ERC20_BALANCE) {
-    return <ERC20CredentialForm />
-  }
-  return <View />
-}
-
-function ERC20CredentialForm() {
+export function ERC20CredentialForm() {
   const { address } = useAccount()
 
   return (
@@ -48,59 +33,7 @@ function ERC20CredentialForm() {
           <BalanceField />
         </>
       )}
-      <AddCredentialButton />
-    </YStack>
-  )
-}
-
-function WalletField() {
-  const { address } = useAccount()
-  const { connectWallet } = useNewCredential()
-  const { disconnect } = useDisconnect()
-
-  return (
-    <YStack>
-      <Label fos="$1" fow="400" color="$color11" textTransform="uppercase">
-        Wallet
-      </Label>
-      <XStack
-        ai="center"
-        jc="space-between"
-        bc="$borderColor"
-        bw="$0.5"
-        br="$4"
-        py="$2.5"
-        px="$3"
-        theme="surface1"
-        bg="$background"
-      >
-        <XStack gap="$2.5" ai="center" mx="$2">
-          <Circle size={8} bg={address ? '$green11' : '$red11'} />
-          <Text fos="$2" fow="400" color={address ? '$color12' : '$color11'}>
-            {address ? formatAddress(address) : 'No wallet connected.'}
-          </Text>
-        </XStack>
-        <Button
-          size="$2.5"
-          bg="$color12"
-          br="$4"
-          bw="$0"
-          disabledStyle={{ opacity: 0.5, bg: '$color12' }}
-          hoverStyle={{ opacity: 0.9, bg: '$color12' }}
-          pressStyle={{ opacity: 0.9, bg: '$color12' }}
-          onPress={() => {
-            if (address) {
-              disconnect()
-            } else {
-              connectWallet?.()
-            }
-          }}
-        >
-          <Text fos="$2" fow="600" color="$color1">
-            {address ? 'Disconnect' : 'Connect'}
-          </Text>
-        </Button>
-      </XStack>
+      <SubmitButton />
     </YStack>
   )
 }
@@ -125,7 +58,7 @@ function TokenField() {
   useEffect(() => {
     if (fungibles.length === 0) return
 
-    let token = fungibles[0]
+    let selectedToken = fungibles[0]
 
     if (tokenId) {
       const chain = getChain(tokenId.chainId)
@@ -141,25 +74,24 @@ function TokenField() {
         return impl
       })
       if (foundToken) {
-        token = foundToken
+        selectedToken = foundToken
       }
     }
 
-    setToken(token)
-  }, [fungibles, tokenId])
+    handleSelect(selectedToken.id)
+  }, [fungibles])
 
   const handleSelect = (id: string) => {
     const token = fungibles.find((t) => t.id === id)
-    setToken(token ?? null)
-  }
-
-  useEffect(() => {
     if (!token) {
+      setToken(null)
       setTokenId(undefined)
       setBalance(0)
       setMaxBalance(0)
       return
     }
+
+    setToken(token)
 
     const chainId = token.relationships.chain.data.id
     const impl = token.attributes.fungible_info.implementations.find(
@@ -175,7 +107,7 @@ function TokenField() {
     setBalance(Math.floor(token.attributes.quantity.float / 2))
     setMaxBalance(Math.floor(token.attributes.quantity.float))
     setDecimals(impl.decimals)
-  }, [token])
+  }
 
   return (
     <YStack>
@@ -183,7 +115,9 @@ function TokenField() {
         Token
       </Label>
       <Select value={token?.id} onValueChange={handleSelect} disablePreventBodyScroll>
-        <Select.Trigger>{token && <TokenValue token={token} />}</Select.Trigger>
+        <Select.Trigger>
+          {token ? <TokenValue token={token} /> : <Spinner color="$color12" />}
+        </Select.Trigger>
 
         <Adapt when="sm" platform="touch">
           <Sheet
@@ -323,72 +257,6 @@ function BalanceField() {
           </Text>
         </View>
       </XStack>
-    </YStack>
-  )
-}
-
-function AddCredentialButton() {
-  const { address } = useAccount()
-  const { tokenId, balance, setIsOpen, decimals } = useNewCredential()
-  const { add } = useCredentials()
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string>()
-  const { sdk } = useSDK()
-
-  const handleAddCredential = async () => {
-    if (!tokenId) return
-    try {
-      setIsLoading(true)
-
-      if (!address) {
-        throw new Error('No address connected')
-      }
-
-      const response = await sdk.getBalanceStorageSlot(tokenId.chainId, tokenId.address)
-      if (!response.data) {
-        throw new Error('Failed to find balance storage slot')
-      }
-
-      await add(CredentialType.ERC20_BALANCE, {
-        address,
-        chainId: tokenId.chainId,
-        tokenAddress: tokenId.address as `0x${string}`,
-        verifiedBalance: parseUnits(balance.toString(), decimals),
-        balanceSlot: response.data.slot,
-      })
-
-      setIsLoading(false)
-      setIsOpen(false)
-    } catch (e) {
-      setError((e as Error).message ?? 'Failed to add credential')
-      setIsLoading(false)
-    }
-  }
-
-  return (
-    <YStack mt="$4" gap="$2">
-      {error && (
-        <Text color="$red11" textAlign="center" mt="$-2">
-          {error}
-        </Text>
-      )}
-      <Button
-        bg="$color12"
-        br="$4"
-        disabled={!address || isLoading || balance === 0}
-        disabledStyle={{ opacity: 0.5, bg: '$color12' }}
-        hoverStyle={{ opacity: 0.9, bg: '$color12' }}
-        pressStyle={{ opacity: 0.9, bg: '$color12' }}
-        onPress={handleAddCredential}
-      >
-        {!isLoading ? (
-          <Text fos="$3" fow="600" color="$color1">
-            {address ? 'Add Credential' : 'Connect Wallet'}
-          </Text>
-        ) : (
-          <Spinner color="$color1" />
-        )}
-      </Button>
     </YStack>
   )
 }

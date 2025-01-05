@@ -4,8 +4,8 @@ import { MessageCircle } from '@tamagui/lucide-icons'
 import { formatAmount, formatHexId } from '../../../utils'
 import { timeAgo } from '../../../utils'
 import { Vault } from '@anonworld/common'
-import { CredentialBadge } from '../../credentials'
 import { VaultAvatar } from '../avatar'
+import { CredentialTypeBadge } from '../../credentials/types'
 
 export function VaultDisplay({ vault }: { vault: Vault }) {
   const id = formatHexId(vault.id)
@@ -42,7 +42,7 @@ export function VaultDisplay({ vault }: { vault: Vault }) {
                 {formatAmount(vault.posts)}
               </Badge>
               {vault.credentials.map((credential) => (
-                <CredentialBadge key={credential.id} credential={credential} />
+                <CredentialTypeBadge key={credential.id} credential={credential} />
               ))}
             </XStack>
           </ScrollView>

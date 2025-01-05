@@ -151,6 +151,48 @@ export type ChartAttributes = {
   points: Array<Array<number>>
 }
 
+export type NFTPositionAttributes = {
+  changed_at: string
+  amount: string
+  price?: number
+  value?: number
+  nft_info: {
+    contract_address: string
+    token_id: string
+    name: string
+    interface: string
+    content?: {
+      preview: {
+        url: string
+      }
+      detail: {
+        url: string
+      }
+      audio?: {
+        url: string
+      }
+      video?: {
+        url: string
+      }
+    }
+    flags: {
+      is_spam: boolean
+    }
+  }
+  collection_info: {
+    name: string
+    description: string
+    content: {
+      icon?: {
+        url: string
+      }
+      banner?: {
+        url: string
+      }
+    }
+  }
+}
+
 export type ChartPeriod = 'hour' | 'day' | 'week' | 'month' | 'year' | 'max'
 
 export type Chain = Base<ChainAttributes>
@@ -158,3 +200,4 @@ export type Portfolio = Base<PortfolioAttributes>
 export type FungiblePosition = Base<FungiblePositionAttributes>
 export type Fungible = Base<FungibleAttributes>
 export type Chart = Base<ChartAttributes>
+export type NFTPosition = Base<NFTPositionAttributes>

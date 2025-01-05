@@ -1,4 +1,6 @@
-import { getChain } from '@anonworld/common'
+import { chains, getChain, SimplehashNFT } from '@anonworld/common'
+
+const simplehashChains = chains.map((chain) => chain.simplehashId).filter((id) => id)
 
 class SimplehashService {
   private readonly apiKey: string
@@ -63,7 +65,26 @@ class SimplehashService {
     throw new Error('Maximum retries reached while waiting for data')
   }
 
-  async getTopHolder(chainId: number, tokenAddress: string) {
+  async getTopNFTHolder(chainId: number, tokenAddress: string) {
+    const chain = getChain(chainId)
+    if (!chain.simplehashId) {
+      throw new Error(`Unsupported chainId: ${chainId}`)
+    }
+
+    const url = `/nfts/top_collectors/${chain.simplehashId}/${tokenAddress}?limit=1`
+    const response = await this.makeRequest<{
+      top_collectors: { owner_address: `0x${string}`; distinct_nfts_owned: number }[]
+    }>(url)
+
+    const owner = response.top_collectors[0]
+
+    return {
+      address: owner.owner_address,
+      balance: BigInt(owner.distinct_nfts_owned),
+    }
+  }
+
+  async getTopTokenHolder(chainId: number, tokenAddress: string) {
     const chain = getChain(chainId)
     if (!chain.simplehashId) {
       throw new Error(`Unsupported chainId: ${chainId}`)
@@ -72,7 +93,6 @@ class SimplehashService {
     const url = `/fungibles/top_wallets?fungible_id=${chain.simplehashId}.${tokenAddress}&limit=1`
     const response = await this.makeRequest<{
       owners: { owner_address: `0x${string}`; quantity_string: string }[]
-      next_cursor: string
     }>(url)
 
     const owner = response.owners[0]
@@ -83,7 +103,7 @@ class SimplehashService {
     }
   }
 
-  async getTopWalletsForFungible(chainId: number, tokenAddress: string, cursor?: string) {
+  async getTopWalletsForToken(chainId: number, tokenAddress: string, cursor?: string) {
     const chain = getChain(chainId)
     if (!chain.simplehashId) {
       throw new Error(`Unsupported chainId: ${chainId}`)
@@ -96,7 +116,7 @@ class SimplehashService {
     }>(url)
   }
 
-  async getFungible(chainId: number, tokenAddress: string) {
+  async getToken(chainId: number, tokenAddress: string) {
     const chain = getChain(chainId)
     if (!chain.simplehashId) {
       throw new Error(`Unsupported chainId: ${chainId}`)
@@ -104,6 +124,41 @@ class SimplehashService {
 
     const url = `/fungibles/assets?fungible_ids=${chain.simplehashId}.${tokenAddress}&include_prices=1`
     return await this.makeRequest<{ holder_count: number; decimals: number }>(url)
+  }
+
+  async getNFTCollection(chainId: number, tokenAddress: string) {
+    const chain = getChain(chainId)
+    if (!chain.simplehashId) {
+      throw new Error(`Unsupported chainId: ${chainId}`)
+    }
+
+    const url = `/nfts/collections/${chain.simplehashId}/${tokenAddress}?include_top_contract_details=1`
+    const response = await this.makeRequest<{
+      collections: {
+        name: string
+        image_url: string
+        distinct_owner_count: number
+        distinct_nft_count: number
+        top_contract_details: {
+          symbol: string
+        }[]
+        floor_prices: {
+          value_usd_cents: number
+        }[]
+      }[]
+    }>(url)
+
+    return response.collections[0]
+  }
+
+  async getNFTsForWallet(address: string) {
+    const url = `/nfts/owners_v2?chains=${simplehashChains.join(',')}&wallet_addresses=${address}&order_by=floor_price__desc`
+    return await this.makeRequest<{
+      next_cursor: string | null
+      next: string | null
+      previous: string | null
+      nfts: SimplehashNFT[]
+    }>(url)
   }
 }
 

@@ -1,8 +1,7 @@
 import { db } from '../src/db'
 import { buildFeeds } from '../src/routes/feeds'
-import { zerion } from '../src/services/zerion'
-import { simplehash } from '../src/services/simplehash'
 import { neynar } from '../src/services/neynar'
+import { tokens } from '../src/services/tokens'
 
 const updateFeeds = async () => {
   const accounts = await db.socials.listFarcasterAccounts()
@@ -13,17 +12,14 @@ const updateFeeds = async () => {
 }
 
 const updateTokens = async () => {
-  const tokens = await db.tokens.list()
-  for (const token of tokens) {
+  const communityTokens = await db.tokens.list()
+  for (const token of communityTokens) {
     console.log(`[token] updating token for ${token.id}`)
-    const zerionToken = await zerion.getFungible(token.chain_id, token.address)
-    const simpleHashToken = await simplehash.getFungible(token.chain_id, token.address)
-    await db.tokens.update(token.id, {
-      price_usd: zerionToken.attributes.market_data.price?.toFixed(8) ?? '0',
-      market_cap: Math.round(zerionToken.attributes.market_data.market_cap ?? 0),
-      total_supply: Math.round(zerionToken.attributes.market_data.total_supply ?? 0),
-      holders: simpleHashToken.holder_count ?? 0,
-    })
+    if (token.type === 'ERC20') {
+      await tokens.updateERC20(token)
+    } else if (token.type === 'ERC721') {
+      await tokens.updateERC721(token)
+    }
   }
 }
 
@@ -100,8 +96,10 @@ const main = async () => {
   let i = 0
   while (true) {
     try {
-      await updateFeeds()
-      await updateCommunities()
+      if (i % 2 === 0) {
+        await updateFeeds()
+        await updateCommunities()
+      }
       if (i % 10 === 0) {
         await updateTokens()
       }

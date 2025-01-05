@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { CredentialType } from '@anonworld/common'
-import { useSDK } from '../../../providers'
+import { ContractType, CredentialType, StorageType } from '@anonworld/common'
+import { useCredentials, useSDK } from '../../../providers'
+import { parseUnits } from 'viem'
+import { useAccount } from 'wagmi'
 
 interface NewCredentialContextValue {
   isOpen: boolean
@@ -17,6 +19,9 @@ interface NewCredentialContextValue {
   setMaxBalance: (maxBalance: number) => void
   decimals: number
   setDecimals: (decimals: number) => void
+  handleAddCredential: () => void
+  isLoading: boolean
+  error: string | undefined
 }
 
 const NewCredentialContext = createContext<NewCredentialContextValue | null>(null)
@@ -42,6 +47,11 @@ export function NewCredentialProvider({
   const [balance, setBalance] = useState<number>(initialBalance ?? 0)
   const [maxBalance, setMaxBalance] = useState<number>(0)
   const [decimals, setDecimals] = useState<number>(18)
+  const { address } = useAccount()
+  const { add } = useCredentials()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string>()
+  const { sdk } = useSDK()
 
   const handleConnectWallet = () => {
     if (!connectWallet) return
@@ -68,6 +78,55 @@ export function NewCredentialProvider({
     }
   }, [isOpen, initialTokenId, initialBalance])
 
+  useEffect(() => {
+    if (credentialType === CredentialType.ERC20_BALANCE) {
+      setTokenId(undefined)
+      setBalance(0)
+      setDecimals(18)
+    } else if (credentialType === CredentialType.ERC721_BALANCE) {
+      setTokenId(undefined)
+      setBalance(1)
+      setDecimals(0)
+    }
+  }, [credentialType])
+
+  const handleAddCredential = async () => {
+    if (!tokenId) return
+    try {
+      setIsLoading(true)
+
+      if (!address) {
+        throw new Error('No address connected')
+      }
+
+      const response = await sdk.getStorageSlot(
+        tokenId.chainId,
+        tokenId.address,
+        credentialType === CredentialType.ERC20_BALANCE
+          ? ContractType.ERC20
+          : ContractType.ERC721,
+        StorageType.BALANCE
+      )
+      if (!response.data) {
+        throw new Error('Failed to find balance storage slot')
+      }
+
+      await add(credentialType, {
+        address,
+        chainId: tokenId.chainId,
+        tokenAddress: tokenId.address as `0x${string}`,
+        verifiedBalance: parseUnits(balance.toString(), decimals),
+        balanceSlot: response.data.slot,
+      })
+
+      setIsLoading(false)
+      setIsOpen(false)
+    } catch (e) {
+      setError((e as Error).message ?? 'Failed to add credential')
+      setIsLoading(false)
+    }
+  }
+
   return (
     <NewCredentialContext.Provider
       value={{
@@ -85,6 +144,9 @@ export function NewCredentialProvider({
         setMaxBalance,
         decimals,
         setDecimals,
+        handleAddCredential,
+        isLoading,
+        error,
       }}
     >
       {children}

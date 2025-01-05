@@ -1,6 +1,11 @@
 import { Plus, Minus, RefreshCw, Trash } from '@tamagui/lucide-icons'
 import { Spinner, Text, View, YGroup } from '@anonworld/ui'
-import { CredentialType, CredentialWithId } from '@anonworld/common'
+import {
+  ContractType,
+  CredentialType,
+  CredentialWithId,
+  StorageType,
+} from '@anonworld/common'
 import { useCredentials, useSDK } from '../../../..'
 import { useVaults } from '../../../../hooks/use-vaults'
 import { NamedExoticComponent, useState } from 'react'
@@ -46,16 +51,20 @@ export function CredentialActionsContent({
             throw new Error('No address connected')
           }
 
-          const response = await sdk.getBalanceStorageSlot(
+          const response = await sdk.getStorageSlot(
             credential.metadata.chainId,
-            credential.metadata.tokenAddress
+            credential.metadata.tokenAddress,
+            credential.type === CredentialType.ERC20_BALANCE
+              ? ContractType.ERC20
+              : ContractType.ERC721,
+            StorageType.BALANCE
           )
           if (!response.data) {
             throw new Error('Failed to find balance storage slot')
           }
 
           await credentials.add(
-            CredentialType.ERC20_BALANCE,
+            credential.type,
             {
               address,
               chainId: credential.metadata.chainId,

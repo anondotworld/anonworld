@@ -2,7 +2,7 @@ import React from 'react'
 import { Check, ChevronDown } from '@tamagui/lucide-icons'
 import { Adapt, Select, Sheet } from 'tamagui'
 import { useNewCredential } from './context'
-import { CredentialType } from '@anonworld/common'
+import { credentials } from '@anonworld/common'
 
 export function CredentialTypeSelect() {
   const { credentialType, setCredentialType } = useNewCredential()
@@ -42,16 +42,15 @@ export function CredentialTypeSelect() {
       <Select.Content zIndex={200000}>
         <Select.Viewport minWidth={200}>
           <Select.Group>
-            <Select.Item
-              index={0}
-              value={CredentialType.ERC20_BALANCE}
-              $xs={{ bg: '$color2' }}
-            >
-              <Select.ItemText>ERC20 Balance</Select.ItemText>
-              <Select.ItemIndicator marginLeft="auto">
-                <Check size={16} />
-              </Select.ItemIndicator>
-            </Select.Item>
+            <Select.Label $xs={{ bg: '$color2' }}>Credential Type</Select.Label>
+            {credentials.map(({ type, name }) => (
+              <Select.Item key={type} index={0} value={type} $xs={{ bg: '$color2' }}>
+                <Select.ItemText>{name}</Select.ItemText>
+                <Select.ItemIndicator marginLeft="auto">
+                  <Check size={16} />
+                </Select.ItemIndicator>
+              </Select.Item>
+            ))}
           </Select.Group>
         </Select.Viewport>
       </Select.Content>

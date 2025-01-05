@@ -1,13 +1,11 @@
-import { CredentialWithId, getChain } from '@anonworld/common'
+import { CredentialWithId, getCredential } from '@anonworld/common'
 import { View, XStack, YStack } from '@anonworld/ui'
 import { CREDENTIAL_EXPIRATION_TIME, timeAgo } from '../../../utils'
 import { Badge } from '../../badge'
 import { CredentialActions } from './actions'
-import { useToken } from '../../../hooks'
-import { formatUnits } from 'viem/utils'
-import { Field } from '../../field'
 import { VaultBadge } from '../../vaults/badge'
 import { Link } from 'solito/link'
+import { CredentialTypeDisplay } from '../types'
 
 export function CredentialDisplay({
   credential,
@@ -42,53 +40,14 @@ export function CredentialDisplay({
         <Link href={`/profiles/${credential.vault_id}`}>
           <VaultBadge vaultId={credential.vault_id} />
         </Link>
-        <Badge>ERC20 Balance</Badge>
+        <Badge>{getCredential(credential.type)?.name}</Badge>
         <Badge>{timeAgo(credential.verified_at.toString())}</Badge>
         {isExpired && <Badge destructive>Expired</Badge>}
       </XStack>
-      <ERC20CredentialDisplay credential={credential} />
+      <CredentialTypeDisplay credential={credential} />
       <View position="absolute" top="$2" right="$3" $xs={{ right: '$2' }}>
         <CredentialActions credential={credential} />
       </View>
     </YStack>
-  )
-}
-
-function ERC20CredentialDisplay({ credential }: { credential: CredentialWithId }) {
-  const { data } = useToken({
-    chainId: Number(credential.metadata.chainId),
-    address: credential.metadata.tokenAddress,
-  })
-
-  const symbol = data?.symbol
-  const amount = Number.parseFloat(
-    formatUnits(BigInt(credential.metadata.balance), data?.decimals ?? 18)
-  )
-  const chain = getChain(Number(credential.metadata.chainId))
-
-  return (
-    <XStack $xs={{ flexDirection: 'column', gap: '$2', ai: 'flex-start' }}>
-      {[
-        {
-          label: 'Token',
-          value: symbol,
-          image: data?.image_url ?? undefined,
-          imageFallbackText: credential.metadata.tokenAddress,
-        },
-        { label: 'Balance', value: amount.toLocaleString() },
-        {
-          label: 'Chain',
-          value: chain.name,
-        },
-      ].map(({ label, value, image, imageFallbackText }) => (
-        <Field
-          key={label}
-          label={label}
-          value={value}
-          image={image}
-          imageFallbackText={imageFallbackText}
-        />
-      ))}
-    </XStack>
   )
 }

@@ -2,6 +2,7 @@ import {
   Action,
   ApiResponse,
   Community,
+  ContractType,
   ConversationPost,
   Credential,
   CredentialWithId,
@@ -9,9 +10,13 @@ import {
   FarcasterChannel,
   FarcasterUser,
   FungiblePosition,
+  NFTPosition,
   Post,
   RequestConfig,
   RevealArgs,
+  SimplehashNFT,
+  SimplehashNFTCollection,
+  StorageType,
   SwapQuote,
   SwapQuoteError,
   Token,
@@ -193,14 +198,29 @@ export class AnonWorldSDK {
     )
   }
 
+  async getWalletNFTs(address: string) {
+    return await this.request<{ data: SimplehashNFT[] }>(`/wallet/${address}/nfts`)
+  }
+
   async getToken(chainId: number, tokenAddress: string) {
     return await this.request<Token>(`/tokens/${chainId}/${tokenAddress}`)
   }
 
-  async getBalanceStorageSlot(chainId: number, tokenAddress: string) {
-    return await this.request<{ slot: number }>(
-      `/tokens/${chainId}/${tokenAddress}/balance-slot`
-    )
+  async getStorageSlot(
+    chainId: number,
+    contractAddress: string,
+    contractType: ContractType,
+    storageType: StorageType
+  ) {
+    return await this.request<{ slot: number }>(`/evm/storage-slot`, {
+      method: 'POST',
+      body: JSON.stringify({
+        chainId,
+        contractAddress,
+        contractType,
+        storageType,
+      }),
+    })
   }
 
   async getCommunities() {
@@ -318,5 +338,11 @@ export class AnonWorldSDK {
       return { error: { message: 'No token', status: 401 } }
     }
     return await this.request<{ data: Array<Post> }>(`/auth/notifications`)
+  }
+
+  async getNFTCollection(chainId: number, tokenAddress: string) {
+    return await this.request<SimplehashNFTCollection>(
+      `/nfts/collections/${chainId}/${tokenAddress}`
+    )
   }
 }

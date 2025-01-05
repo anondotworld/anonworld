@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { tokensTable } from '../schema'
+import { communitiesTable, tokensTable } from '../schema'
 import { eq, inArray } from 'drizzle-orm'
 import { DBToken } from '../types'
 
@@ -39,7 +39,10 @@ export class TokensRepository {
   }
 
   async list() {
-    const response = await this.db.select().from(tokensTable)
-    return response as DBToken[]
+    const response = await this.db
+      .select()
+      .from(tokensTable)
+      .innerJoin(communitiesTable, eq(tokensTable.id, communitiesTable.token_id))
+    return response.map((r) => r.tokens) as DBToken[]
   }
 }

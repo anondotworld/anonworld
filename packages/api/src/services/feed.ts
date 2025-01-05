@@ -31,9 +31,7 @@ export class FeedService {
 
     const tokenIds = new Set<string>()
     for (const credential of Object.values(credentials).flat()) {
-      if (credential.credential_id.startsWith('ERC20_BALANCE')) {
-        tokenIds.add(`${credential.metadata.chainId}:${credential.metadata.tokenAddress}`)
-      }
+      tokenIds.add(`${credential.metadata.chainId}:${credential.metadata.tokenAddress}`)
     }
 
     const fids = new Set<number>()

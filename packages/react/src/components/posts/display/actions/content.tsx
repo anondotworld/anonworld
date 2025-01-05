@@ -13,6 +13,7 @@ import { useNewCredential } from '../../../credentials/new/context'
 import { useCredentials } from '../../../../providers'
 import { NewCredentialDialog } from '../../../credentials/new/dialog'
 import { NewCredentialProvider } from '../../../credentials/new/context'
+import { CredentialTypeRequirement } from '../../../credentials/types'
 
 export function PostActionsContent({
   post,
@@ -321,29 +322,13 @@ function BasePostAction({
             {label}
           </Text>
           {!credential && action.credential_requirement && (
-            <ERC20Requirement action={action} req={action.credential_requirement} />
+            <CredentialTypeRequirement
+              action={action}
+              req={action.credential_requirement}
+            />
           )}
         </YStack>
       </View>
     </YGroup.Item>
-  )
-}
-
-function ERC20Requirement({
-  action,
-  req,
-}: {
-  action: Action
-  req: CredentialRequirement
-}) {
-  const symbol = action.community?.token.symbol
-  const amount = Number.parseFloat(
-    formatUnits(BigInt(req.minimumBalance), action.community?.token.decimals ?? 18)
-  )
-
-  return (
-    <Text fos="$1" fow="500" color="$color10">
-      {`req: ${formatAmount(amount)} ${symbol}`}
-    </Text>
   )
 }

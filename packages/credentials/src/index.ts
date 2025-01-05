@@ -1,12 +1,13 @@
 import { CredentialType } from '@anonworld/common'
-import { ERC20BalanceVerifier } from './verifiers/erc20-balance'
 import { Verifier } from './verifiers/verifier'
+import { TokenBalanceVerifier } from './verifiers/token-balance'
 export type { Circuit } from './utils/circuit'
 
-type VerifierConstructor = new (version: string) => Verifier
+type VerifierConstructor = new (type: CredentialType, version: string) => Verifier
 
 const Verifiers: Record<CredentialType, VerifierConstructor> = {
-  [CredentialType.ERC20_BALANCE]: ERC20BalanceVerifier,
+  [CredentialType.ERC20_BALANCE]: TokenBalanceVerifier,
+  [CredentialType.ERC721_BALANCE]: TokenBalanceVerifier,
 }
 
 export class CredentialsManager {
@@ -26,7 +27,10 @@ export class CredentialsManager {
       throw new Error('Invalid circuit type')
     }
 
-    this.verifiers[circuitType][circuitVersion] = new VerifierClass(circuitVersion)
+    this.verifiers[circuitType][circuitVersion] = new VerifierClass(
+      circuitType,
+      circuitVersion
+    )
 
     return this.verifiers[circuitType][circuitVersion]
   }
