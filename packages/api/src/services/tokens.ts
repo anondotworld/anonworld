@@ -1,3 +1,4 @@
+import { ContractType } from '@anonworld/common'
 import { db } from '../db'
 import { DBToken } from '../db/types'
 import { redis } from './redis'
@@ -15,7 +16,11 @@ class TokensService {
     const id = `${chainId}:${tokenAddress}`
     const token = await db.tokens.get(id)
     if (token) {
-      await this.updateERC20(token)
+      if (token.type === ContractType.ERC721) {
+        await this.updateERC721(token)
+      } else {
+        await this.updateERC20(token)
+      }
     } else {
       await this.createERC20(chainId, tokenAddress)
     }
@@ -32,14 +37,14 @@ class TokensService {
       holders: simpleHashToken.holder_count ?? 0,
     }
     await db.tokens.update(token.id, fields)
-    await redis.setToken(
-      token.chain_id,
-      token.address,
-      JSON.stringify({
-        ...token,
-        ...fields,
-      })
-    )
+
+    const result = {
+      ...token,
+      ...fields,
+    }
+    await redis.setToken(token.chain_id, token.address, JSON.stringify(result))
+
+    return result
   }
 
   async createERC20(chainId: number, tokenAddress: string) {
@@ -56,9 +61,9 @@ class TokensService {
       : zerionToken.attributes.implementations[0]
 
     const token = {
-      id,
+      id: id.toLowerCase(),
       chain_id: chainId,
-      address: tokenAddress,
+      address: tokenAddress.toLowerCase(),
       symbol: zerionToken.attributes.symbol,
       name: zerionToken.attributes.name,
       decimals: impl?.decimals ?? simpleHashToken?.decimals ?? 18,
@@ -71,6 +76,8 @@ class TokensService {
     }
     await db.tokens.create(token)
     await redis.setToken(chainId, tokenAddress, JSON.stringify(token))
+
+    return token
   }
 
   async getOrCreateERC721(chainId: number, tokenAddress: string) {
@@ -109,14 +116,15 @@ class TokensService {
       total_supply: collection.distinct_nft_count,
     }
     await db.tokens.update(token.id, fields)
-    await redis.setToken(
-      token.chain_id,
-      token.address,
-      JSON.stringify({
-        ...token,
-        ...fields,
-      })
-    )
+
+    const result = {
+      ...token,
+      ...fields,
+    }
+
+    await redis.setToken(token.chain_id, token.address, JSON.stringify(result))
+
+    return result
   }
 
   async createERC721(chainId: number, tokenAddress: string) {
@@ -132,9 +140,9 @@ class TokensService {
     }
 
     const token = {
-      id,
+      id: id.toLowerCase(),
       chain_id: chainId,
-      address: tokenAddress,
+      address: tokenAddress.toLowerCase(),
       symbol: collection.top_contract_details[0]?.symbol ?? '',
       name: collection.name,
       decimals: 0,
@@ -147,6 +155,8 @@ class TokensService {
     }
     await db.tokens.create(token)
     await redis.setToken(chainId, tokenAddress, JSON.stringify(token))
+
+    return token
   }
 }
 

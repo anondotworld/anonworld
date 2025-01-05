@@ -170,7 +170,7 @@ function TokenValue({ token }: { token: SimplehashNFT }) {
         {floorPrice > 0 && (
           <YStack ai="flex-end">
             <Text fos="$2" fow="500">
-              {`${floorPrice.toLocaleString(undefined, {
+              {`$${floorPrice.toLocaleString(undefined, {
                 maximumFractionDigits: 2,
                 minimumFractionDigits: 2,
               })}`}
