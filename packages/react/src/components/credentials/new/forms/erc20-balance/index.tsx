@@ -11,36 +11,59 @@ import {
   XStack,
   YStack,
 } from '@anonworld/ui'
-import { useNewCredential } from '../context'
+import { NewERC20CredentialProvider, useNewERC20Credential } from './context'
 import { FungiblePosition, getChain, getZerionChain } from '@anonworld/common'
 import { useAccount } from 'wagmi'
 import { formatAddress } from '@anonworld/common'
 import { useEffect, useMemo, useState } from 'react'
-import { useWalletFungibles } from '../../../../hooks/use-wallet-fungibles'
-import { TokenImage } from '../../../tokens/image'
-import { WalletField } from './components/wallet-field'
-import { SubmitButton } from './components/submit-button'
+import { useWalletFungibles } from '../../../../../hooks/use-wallet-fungibles'
+import { TokenImage } from '../../../../tokens/image'
+import { WalletField } from '../components/wallet-field'
+import { SubmitButton } from '../components/submit-button'
 
-export function ERC20CredentialForm() {
+export function ERC20CredentialForm({
+  initialTokenId,
+  initialBalance,
+  isOpen,
+  setIsOpen,
+}: {
+  initialTokenId?: { chainId: number; address: string }
+  initialBalance?: number
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
+}) {
   const { address } = useAccount()
 
   return (
-    <YStack gap="$2">
-      <WalletField />
-      {address && (
-        <>
-          <TokenField />
-          <BalanceField />
-        </>
-      )}
-      <SubmitButton />
-    </YStack>
+    <NewERC20CredentialProvider
+      initialTokenId={initialTokenId}
+      initialBalance={initialBalance}
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+    >
+      <YStack gap="$2">
+        <ERC20WalletField />
+        {address && (
+          <>
+            <TokenField />
+            <BalanceField />
+          </>
+        )}
+        <ERC20SubmitButton />
+      </YStack>
+    </NewERC20CredentialProvider>
   )
+}
+
+function ERC20WalletField() {
+  const { connectWallet } = useNewERC20Credential()
+
+  return <WalletField connectWallet={connectWallet} />
 }
 
 function TokenField() {
   const { tokenId, setTokenId, setBalance, setMaxBalance, setDecimals } =
-    useNewCredential()
+    useNewERC20Credential()
   const [token, setToken] = useState<FungiblePosition | null>(null)
 
   const { data } = useWalletFungibles()
@@ -215,7 +238,7 @@ function TokenValue({ token }: { token: FungiblePosition }) {
 }
 
 function BalanceField() {
-  const { balance, setBalance, maxBalance } = useNewCredential()
+  const { balance, setBalance, maxBalance } = useNewERC20Credential()
 
   return (
     <YStack>
@@ -258,5 +281,19 @@ function BalanceField() {
         </View>
       </XStack>
     </YStack>
+  )
+}
+
+function ERC20SubmitButton() {
+  const { address } = useAccount()
+  const { handleAddCredential, balance, isLoading, error } = useNewERC20Credential()
+  return (
+    <SubmitButton
+      onSubmit={handleAddCredential}
+      disabled={!address || balance === 0}
+      disabledText={balance === 0 ? 'Select a token' : 'Connect Wallet'}
+      error={error}
+      isLoading={isLoading}
+    />
   )
 }

@@ -1,5 +1,4 @@
-import { Action } from '@anonworld/common'
-import { CredentialRequirement } from '@anonworld/common'
+import { Action, ERC721CredentialRequirement } from '@anonworld/common'
 import { Text } from '@anonworld/ui'
 import { formatAmount } from '@anonworld/common'
 import { formatUnits } from 'viem/utils'
@@ -9,7 +8,7 @@ export function ERC721BalanceRequirement({
   req,
 }: {
   action: Action
-  req: CredentialRequirement
+  req: ERC721CredentialRequirement
 }) {
   const symbol = action.community?.token.symbol
   const amount = Number.parseFloat(

@@ -100,6 +100,7 @@ function CredentialSelector() {
                 key={credential.id}
                 gap="$2"
                 ai="center"
+                jc="space-between"
                 p="$2"
                 hoverStyle={{ bg: '$color5' }}
                 bc="$borderColor"

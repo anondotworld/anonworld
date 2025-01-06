@@ -5,7 +5,8 @@ import { useSignMessage } from 'wagmi'
 import { CredentialType, CredentialWithId } from '@anonworld/common'
 import { useSDK } from './sdk'
 import { useVaults } from '../hooks/use-vaults'
-import { CredentialsManager } from '@anonworld/credentials'
+import { CredentialArgsTypeMap, CredentialsManager } from '@anonworld/credentials'
+import { hashMessage } from 'viem'
 
 const LOCAL_STORAGE_KEY = 'anon:credentials:v1'
 
@@ -73,16 +74,26 @@ export const CredentialsProvider = ({
     )
   }, [credentials])
 
-  const addCredential = async (type: CredentialType, args: any, parentId?: string) => {
+  const addCredential = async <T extends CredentialType>(
+    type: T,
+    args: CredentialArgsTypeMap[T],
+    parentId?: string
+  ) => {
     const verifier = manager.getVerifier(type)
 
     const { input, message } = await verifier.buildInput(args)
 
-    const signature = await signMessageAsync({ message })
+    let inputSignature = input.signature
+    let inputMessageHash = input.messageHash
+    if (!inputSignature) {
+      inputSignature = await signMessageAsync({ message })
+      inputMessageHash = hashMessage(message)
+    }
 
     const proof = await verifier.generateProof({
       ...input,
-      signature,
+      signature: inputSignature,
+      messageHash: inputMessageHash,
     })
 
     const credential = await sdk.createCredential({
@@ -94,9 +105,9 @@ export const CredentialsProvider = ({
       throw new Error(credential.error.message)
     }
 
-    if (args.parentId) {
+    if (parentId) {
       setCredentials((prev) =>
-        prev.map((cred) => (cred.id === args.parentId ? credential.data : cred))
+        prev.map((cred) => (cred.id === parentId ? credential.data : cred))
       )
     } else {
       setCredentials((prev) => [...prev, credential.data])

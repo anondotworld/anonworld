@@ -3,12 +3,10 @@ import { Circle, XStack } from '@anonworld/ui'
 import { Label } from '@anonworld/ui'
 import { YStack } from '@anonworld/ui'
 import { useAccount, useDisconnect } from 'wagmi'
-import { useNewCredential } from '../../context'
 import { formatAddress } from '@anonworld/common'
 
-export function WalletField() {
+export function WalletField({ connectWallet }: { connectWallet: () => void }) {
   const { address } = useAccount()
-  const { connectWallet } = useNewCredential()
   const { disconnect } = useDisconnect()
 
   return (

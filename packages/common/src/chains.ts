@@ -27,7 +27,7 @@ type Chain = ViemChain & {
   simplehashId: string
   imageUrl: string
   client: ReturnType<typeof createClient>
-  simplehashSupportsTokens?: boolean
+  simplehashSupportsTokens: boolean
 }
 
 export const mainnet: Chain = {
@@ -36,6 +36,7 @@ export const mainnet: Chain = {
   simplehashId: 'ethereum',
   imageUrl: 'https://chain-icons.s3.amazonaws.com/ethereum.png',
   client: createClient(viemMainnet, getAlchemyRpcUrl('eth-mainnet')),
+  simplehashSupportsTokens: true,
 }
 
 export const base: Chain = {
@@ -44,6 +45,7 @@ export const base: Chain = {
   simplehashId: 'base',
   imageUrl: 'https://chain-icons.s3.amazonaws.com/base.png',
   client: createClient(viemBase, getAlchemyRpcUrl('base-mainnet')),
+  simplehashSupportsTokens: true,
 }
 
 export const arbitrum: Chain = {
@@ -52,6 +54,7 @@ export const arbitrum: Chain = {
   simplehashId: 'arbitrum',
   imageUrl: 'https://chain-icons.s3.amazonaws.com/arbitrum.png',
   client: createClient(viemArbitrum, getAlchemyRpcUrl('arb-mainnet')),
+  simplehashSupportsTokens: true,
 }
 
 export const optimism: Chain = {
@@ -60,6 +63,7 @@ export const optimism: Chain = {
   simplehashId: 'optimism',
   imageUrl: 'https://chain-icons.s3.amazonaws.com/optimism.png',
   client: createClient(viemOptimism, getAlchemyRpcUrl('opt-mainnet')),
+  simplehashSupportsTokens: true,
 }
 
 export const zora: Chain = {
@@ -68,6 +72,7 @@ export const zora: Chain = {
   simplehashId: 'zora',
   imageUrl: 'https://chain-icons.s3.amazonaws.com/zora',
   client: createClient(viemZora, getAlchemyRpcUrl('zora-mainnet')),
+  simplehashSupportsTokens: true,
 }
 
 export const polygon: Chain = {

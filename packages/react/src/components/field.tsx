@@ -1,12 +1,14 @@
 import { Image, Text, XStack, YStack } from '@anonworld/ui'
 import { LinearGradient } from '@tamagui/linear-gradient'
 import { toHslColors } from '@anonworld/common'
+import { ReactNode } from 'react'
 
 export function Field({
   label,
   value,
   image,
   imageFallbackText,
+  imageComponent,
   minWidth = '$12',
   ai = 'flex-start',
 }: {
@@ -14,6 +16,7 @@ export function Field({
   value?: string
   image?: string
   imageFallbackText?: string
+  imageComponent?: ReactNode
   minWidth?: number | string
   ai?: 'flex-start' | 'flex-end'
 }) {
@@ -27,6 +30,7 @@ export function Field({
       $xs={{ flexDirection: 'row-reverse', gap: '$2', jc: 'flex-end' }}
     >
       <XStack ai={ai} gap="$2" f={1} maxWidth={minWidth}>
+        {imageComponent}
         {image && <Image src={image} w={16} h={16} br="$12" />}
         {!image && imageFallbackText && (
           <LinearGradient

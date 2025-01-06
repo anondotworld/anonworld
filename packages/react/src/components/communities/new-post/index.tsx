@@ -1,4 +1,10 @@
-import { ActionType, Community } from '@anonworld/common'
+import {
+  ActionType,
+  Community,
+  CredentialType,
+  ERC20CredentialRequirement,
+  ERC721CredentialRequirement,
+} from '@anonworld/common'
 import { useActions } from '../../../hooks/use-actions'
 import { useCredentials } from '../../../providers'
 import { getUsableCredential } from '@anonworld/common'
@@ -45,18 +51,41 @@ export function NewCommunityPost({
   if (!credential) {
     let minimumBalance: number | undefined = undefined
     for (const action of actions) {
+      const credentialType = action.credential_id?.split(':')[0] as
+        | CredentialType
+        | undefined
+
       if (
-        !action.credential_requirement ||
         !action.community ||
-        action.community.id !== community.id
+        action.community.id !== community.id ||
+        !action.credential_requirement ||
+        !credentialType
       )
         continue
-      const balance = action.credential_requirement.minimumBalance
-      const value = Number.parseFloat(
-        formatUnits(BigInt(balance), community.token.decimals)
-      )
-      if (!minimumBalance || value < minimumBalance) {
-        minimumBalance = value
+
+      switch (credentialType) {
+        case CredentialType.ERC20_BALANCE:
+        case CredentialType.ERC721_BALANCE: {
+          const credentialRequirement = action.credential_requirement as
+            | ERC20CredentialRequirement
+            | ERC721CredentialRequirement
+            | undefined
+
+          if (!credentialRequirement) {
+            continue
+          }
+
+          const balance = credentialRequirement.minimumBalance
+          const value = Number.parseFloat(
+            formatUnits(BigInt(balance), community.token.decimals)
+          )
+          if (!minimumBalance || value < minimumBalance) {
+            minimumBalance = value
+          }
+          break
+        }
+        default:
+          continue
       }
     }
 

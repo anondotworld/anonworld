@@ -1,7 +1,7 @@
-import { NewCredentialProvider } from './context'
 import { NewCredentialDialog } from './dialog'
 import { Button, Text, XStack } from '@anonworld/ui'
 import { Dialog } from '@anonworld/ui'
+import { AuthKitProvider } from '@farcaster/auth-kit'
 import { Plus } from '@tamagui/lucide-icons'
 
 export function NewCredential({
@@ -12,11 +12,18 @@ export function NewCredential({
   initialBalance?: number
 }) {
   return (
-    <NewCredentialProvider
-      initialTokenId={initialTokenId}
-      initialBalance={initialBalance}
+    <AuthKitProvider
+      config={{
+        rpcUrl: 'https://mainnet.optimism.io',
+        domain: 'localhost:3000',
+        siweUri: 'http://localhost:3000',
+        relay: 'https://relay.farcaster.xyz',
+      }}
     >
-      <NewCredentialDialog>
+      <NewCredentialDialog
+        initialTokenId={initialTokenId}
+        initialBalance={initialBalance}
+      >
         <Dialog.Trigger asChild>
           <Button
             size="$3"
@@ -36,6 +43,6 @@ export function NewCredential({
           </Button>
         </Dialog.Trigger>
       </NewCredentialDialog>
-    </NewCredentialProvider>
+    </AuthKitProvider>
   )
 }

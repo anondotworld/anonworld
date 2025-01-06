@@ -1,3 +1,5 @@
+// TODO: Reorganize this file into credentials package
+
 import { createElysia } from '../utils'
 import { t } from 'elysia'
 import { keccak256, zeroAddress, pad, concat, toHex } from 'viem'
@@ -26,7 +28,11 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
       }
 
       const metadata = circuit.parseData(body.publicInputs)
-      const credentialId = `${body.type}:${metadata.chainId}:${metadata.tokenAddress.toLowerCase()}`
+      const address =
+        'tokenAddress' in metadata ? metadata.tokenAddress : metadata.contractAddress
+      const credentialId = `${body.type}:${metadata.chainId}:${address.toLowerCase()}`
+      const slot = 'balanceSlot' in metadata ? metadata.balanceSlot : metadata.storageSlot
+
       const id = keccak256(new Uint8Array(body.proof))
       const existingCredential = await db.credentials.get(id)
       if (existingCredential) {
@@ -43,10 +49,8 @@ export const credentialsRoutes = createElysia({ prefix: '/credentials' })
       })
 
       const ethProof = await chain.client.getProof({
-        address: metadata.tokenAddress,
-        storageKeys: [
-          keccak256(concat([pad(zeroAddress), pad(toHex(metadata.balanceSlot))])),
-        ],
+        address: address as `0x${string}`,
+        storageKeys: [keccak256(concat([pad(zeroAddress), pad(toHex(slot))]))],
         blockNumber: BigInt(metadata.blockNumber),
       })
 

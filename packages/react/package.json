@@ -9,6 +9,7 @@
     "@anonworld/common": "*",
     "@anonworld/sdk": "*",
     "@anonworld/ui": "*",
+    "@farcaster/auth-kit": "^0.6.0",
     "@tamagui/lucide-icons": "^1.116.12",
     "@tamagui/portal": "^1.116.12",
     "@tanstack/react-query": "^5.62.8",

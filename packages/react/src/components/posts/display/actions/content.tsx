@@ -8,10 +8,10 @@ import { X } from '../../../svg/x'
 import { NamedExoticComponent } from 'react'
 import { useFarcasterUser } from '../../../../hooks/use-farcaster-user'
 import { useExecuteActions } from '../../../../hooks'
-import { useNewCredential } from '../../../credentials/new/context'
+import { useNewERC20Credential } from '../../../credentials/new/forms/erc20-balance/context'
 import { useCredentials } from '../../../../providers'
 import { NewCredentialDialog } from '../../../credentials/new/dialog'
-import { NewCredentialProvider } from '../../../credentials/new/context'
+import { NewERC20CredentialProvider } from '../../../credentials/new/forms/erc20-balance/context'
 import { CredentialTypeRequirement } from '../../../credentials/types'
 
 export function PostActionsContent({
@@ -34,7 +34,7 @@ export function PostActionsContent({
   const hasReveal = post.reveal && !post.reveal.phrase
 
   return (
-    <NewCredentialProvider>
+    <NewERC20CredentialProvider>
       <YGroup>
         {!hasActions && !hasReveal && (
           <YGroup.Item>
@@ -70,7 +70,7 @@ export function PostActionsContent({
         )}
       </YGroup>
       <NewCredentialDialog />
-    </NewCredentialProvider>
+    </NewERC20CredentialProvider>
   )
 }
 
@@ -266,7 +266,7 @@ function BasePostAction({
   destructive?: boolean
   successMessage: string
 }) {
-  const { setIsOpen } = useNewCredential()
+  const { setIsOpen } = useNewERC20Credential()
   const { credentials } = useCredentials()
   const credential = getUsableCredential(credentials, action)
   const toast = useToastController()

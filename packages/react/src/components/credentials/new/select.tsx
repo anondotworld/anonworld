@@ -1,12 +1,15 @@
 import React from 'react'
 import { Check, ChevronDown } from '@tamagui/lucide-icons'
 import { Adapt, Select, Sheet } from 'tamagui'
-import { useNewCredential } from './context'
-import { credentials } from '@anonworld/common'
+import { credentials, CredentialType } from '@anonworld/common'
 
-export function CredentialTypeSelect() {
-  const { credentialType, setCredentialType } = useNewCredential()
-
+export function CredentialTypeSelect({
+  credentialType,
+  setCredentialType,
+}: {
+  credentialType: CredentialType
+  setCredentialType: (credentialType: CredentialType) => void
+}) {
   return (
     <Select
       value={credentialType}

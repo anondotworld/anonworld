@@ -108,6 +108,7 @@ export class PostsRepository {
     await this.db
       .insert(postLikesTable)
       .values({ passkey_id: passkeyId, post_hash: hash })
+      .onConflictDoNothing()
   }
 
   async unlike(passkeyId: string, hash: string) {

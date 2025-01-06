@@ -1,9 +1,11 @@
-import { CredentialWithId } from '@anonworld/common'
+import { ERC721BalanceCredential } from '@anonworld/common'
 import { useToken } from '../../../../hooks'
 import { Text, XStack } from '@anonworld/ui'
 import { TokenImage } from '../../../tokens/image'
 
-export function ERC721BalanceSelect({ credential }: { credential: CredentialWithId }) {
+export function ERC721BalanceSelect({
+  credential,
+}: { credential: ERC721BalanceCredential }) {
   const { data } = useToken({
     chainId: Number(credential.metadata.chainId),
     address: credential.metadata.tokenAddress,

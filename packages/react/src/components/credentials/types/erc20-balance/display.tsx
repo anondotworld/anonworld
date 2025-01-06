@@ -1,10 +1,12 @@
-import { CredentialWithId, getChain } from '@anonworld/common'
+import { ERC20BalanceCredential, getChain } from '@anonworld/common'
 import { XStack } from '@anonworld/ui'
 import { useToken } from '../../../../hooks'
 import { formatUnits } from 'viem/utils'
 import { Field } from '../../../field'
 
-export function ERC20BalanceDisplay({ credential }: { credential: CredentialWithId }) {
+export function ERC20BalanceDisplay({
+  credential,
+}: { credential: ERC20BalanceCredential }) {
   const { data } = useToken({
     chainId: Number(credential.metadata.chainId),
     address: credential.metadata.tokenAddress,

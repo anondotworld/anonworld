@@ -1,5 +1,5 @@
 import { Community } from './community'
-import { Credential } from './credentials'
+import { Credential, CredentialRequirement } from './credentials'
 
 export type ActionRequest = {
   data: any
@@ -13,12 +13,6 @@ export enum ActionType {
   COPY_POST_FARCASTER = 'COPY_POST_FARCASTER',
   DELETE_POST_TWITTER = 'DELETE_POST_TWITTER',
   DELETE_POST_FARCASTER = 'DELETE_POST_FARCASTER',
-}
-
-export type CredentialRequirement = {
-  chainId: number
-  tokenAddress: `0x${string}`
-  minimumBalance: string
 }
 
 type BaseAction = {

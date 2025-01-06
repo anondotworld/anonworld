@@ -1,4 +1,10 @@
-import { Action, CredentialWithId } from './types'
+import {
+  Action,
+  CredentialType,
+  CredentialWithId,
+  ERC20CredentialRequirement,
+  ERC721CredentialRequirement,
+} from './types'
 
 export const CREDENTIAL_EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7 // 7 days
 
@@ -31,7 +37,8 @@ export function formatAmount(num: number): string {
   const units = ['K', 'M', 'B', 'T']
   const unitIndex = Math.floor(Math.log10(num) / 3) - 1
   const unitValue = 1000 ** (unitIndex + 1)
-  const formattedNumber = (num / unitValue).toFixed(1)
+  const value = num / unitValue
+  const formattedNumber = Number.isInteger(value) ? value.toString() : value.toFixed(1)
   return `${formattedNumber}${units[unitIndex]}`
 }
 
@@ -40,10 +47,13 @@ export function formatAddress(address: string): string {
 }
 
 export function getUsableCredential(credentials: CredentialWithId[], action: Action) {
+  const credentialType = action.credential_id?.split(':')[0] as CredentialType | undefined
+
   if (
     !action.credential_id ||
     credentials.length === 0 ||
-    !action.credential_requirement?.minimumBalance
+    !action.credential_requirement ||
+    !credentialType
   ) {
     return
   }
@@ -56,8 +66,8 @@ export function getUsableCredential(credentials: CredentialWithId[], action: Act
           Date.now()
     )
     .sort((a, b) => {
-      const aBalance = BigInt(a.metadata.balance)
-      const bBalance = BigInt(b.metadata.balance)
+      const aBalance = BigInt('balance' in a.metadata ? a.metadata.balance : 0)
+      const bBalance = BigInt('balance' in b.metadata ? b.metadata.balance : 0)
       if (aBalance === bBalance) {
         return 0
       }
@@ -65,11 +75,28 @@ export function getUsableCredential(credentials: CredentialWithId[], action: Act
     })
 
   for (const credential of potentialCredentials) {
-    if (
-      BigInt(credential.metadata.balance) >=
-      BigInt(action.credential_requirement.minimumBalance)
-    ) {
-      return credential
+    switch (credential.type) {
+      case CredentialType.ERC20_BALANCE:
+      case CredentialType.ERC721_BALANCE: {
+        const credentialRequirement = action.credential_requirement as
+          | ERC20CredentialRequirement
+          | ERC721CredentialRequirement
+          | undefined
+
+        if (!credentialRequirement) {
+          continue
+        }
+
+        if (
+          BigInt(credential.metadata.balance) >=
+          BigInt(credentialRequirement.minimumBalance)
+        ) {
+          return credential
+        }
+        break
+      }
+      default:
+        break
     }
   }
 }
@@ -126,4 +153,28 @@ export function encodeJson(obj: any): string {
   }
 
   return JSON.stringify(obj)
+}
+
+export function isAndroid(): boolean {
+  return typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent)
+}
+
+export function isSmallIOS(): boolean {
+  return typeof navigator !== 'undefined' && /iPhone|iPod/.test(navigator.userAgent)
+}
+
+export function isLargeIOS(): boolean {
+  return (
+    typeof navigator !== 'undefined' &&
+    (/iPad/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+  )
+}
+
+export function isIOS(): boolean {
+  return isSmallIOS() || isLargeIOS()
+}
+
+export function isMobile(): boolean {
+  return isAndroid() || isIOS()
 }

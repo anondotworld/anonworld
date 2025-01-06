@@ -1,12 +1,24 @@
 import { X } from '@tamagui/lucide-icons'
 import { Adapt, Dialog, Label, Sheet, Unspaced, View, YStack } from '@anonworld/ui'
 import { CredentialTypeSelect } from './select'
-import { NewCredentialForm } from './form'
-import { useNewCredential } from './context'
-import { ReactNode } from 'react'
+import { NewCredentialForm } from './forms'
+import { useNewERC20Credential } from './forms/erc20-balance/context'
+import { ReactNode, useState } from 'react'
+import { CredentialType } from '@anonworld/common'
 
-export function NewCredentialDialog({ children }: { children?: ReactNode }) {
-  const { isOpen, setIsOpen } = useNewCredential()
+export function NewCredentialDialog({
+  children,
+  initialTokenId,
+  initialBalance,
+}: {
+  children?: ReactNode
+  initialTokenId?: { chainId: number; address: string }
+  initialBalance?: number
+}) {
+  const [credentialType, setCredentialType] = useState<CredentialType>(
+    CredentialType.ERC20_BALANCE
+  )
+  const [isOpen, setIsOpen] = useState(false)
   return (
     <Dialog modal open={isOpen} onOpenChange={setIsOpen}>
       {children}
@@ -63,9 +75,20 @@ export function NewCredentialDialog({ children }: { children?: ReactNode }) {
             <Label fos="$1" fow="400" color="$color11" textTransform="uppercase">
               Credential Type
             </Label>
-            <CredentialTypeSelect />
+            <CredentialTypeSelect
+              credentialType={credentialType}
+              setCredentialType={setCredentialType}
+            />
           </YStack>
-          {isOpen && <NewCredentialForm />}
+          {isOpen && (
+            <NewCredentialForm
+              credentialType={credentialType}
+              initialTokenId={initialTokenId}
+              initialBalance={initialBalance}
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+            />
+          )}
           <Unspaced>
             <Dialog.Close asChild>
               <View

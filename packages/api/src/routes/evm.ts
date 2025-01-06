@@ -52,8 +52,6 @@ export const evmRoutes = createElysia({ prefix: '/evm' }).post(
 
     if (!holder) return error(404, 'Failed to find balance storage slot')
 
-    console.log(holder)
-
     slot = await getStorageSlot(chainId, contractAddress, holder.address, holder.balance)
 
     if (slot === null) return error(404, 'Failed to find balance storage slot')

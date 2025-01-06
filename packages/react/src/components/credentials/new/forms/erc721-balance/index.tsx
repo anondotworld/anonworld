@@ -1,27 +1,49 @@
 import { Adapt, Label, Select, Sheet, Spinner, Text, XStack, YStack } from '@anonworld/ui'
-import { useNewCredential } from '../context'
+import { NewERC721CredentialProvider, useNewERC721Credential } from './context'
 import { getChain, getSimplehashChain, SimplehashNFT } from '@anonworld/common'
 import { useAccount } from 'wagmi'
 import { useEffect, useMemo, useState } from 'react'
-import { TokenImage } from '../../../tokens/image'
-import { WalletField } from './components/wallet-field'
-import { SubmitButton } from './components/submit-button'
-import { useWalletNFTs } from '../../../../hooks/use-wallet-nfts'
+import { TokenImage } from '../../../../tokens/image'
+import { WalletField } from '../components/wallet-field'
+import { SubmitButton } from '../components/submit-button'
+import { useWalletNFTs } from '../../../../../hooks/use-wallet-nfts'
 
-export function ERC721CredentialForm() {
+export function ERC721CredentialForm({
+  initialTokenId,
+  initialBalance,
+  isOpen,
+  setIsOpen,
+}: {
+  initialTokenId?: { chainId: number; address: string }
+  initialBalance?: number
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
+}) {
   const { address } = useAccount()
 
   return (
-    <YStack gap="$2">
-      <WalletField />
-      {address && <TokenField />}
-      <SubmitButton />
-    </YStack>
+    <NewERC721CredentialProvider
+      initialTokenId={initialTokenId}
+      initialBalance={initialBalance}
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+    >
+      <YStack gap="$2">
+        <ERC721WalletField />
+        {address && <TokenField />}
+        <ERC721SubmitButton />
+      </YStack>
+    </NewERC721CredentialProvider>
   )
 }
 
+function ERC721WalletField() {
+  const { connectWallet } = useNewERC721Credential()
+  return <WalletField connectWallet={connectWallet} />
+}
+
 function TokenField() {
-  const { tokenId, setTokenId, setBalance } = useNewCredential()
+  const { tokenId, setTokenId } = useNewERC721Credential()
   const [token, setToken] = useState<SimplehashNFT | null>(null)
 
   const { data } = useWalletNFTs()
@@ -57,7 +79,6 @@ function TokenField() {
     if (!token) {
       setToken(null)
       setTokenId(undefined)
-      setBalance(0)
       return
     }
 
@@ -67,7 +88,6 @@ function TokenField() {
     if (!chain?.simplehashId) return
 
     setTokenId({ chainId: chain.id, address: token.contract_address })
-    setBalance(1)
   }
 
   return (
@@ -177,5 +197,19 @@ function TokenValue({ token }: { token: SimplehashNFT }) {
         )}
       </XStack>
     </XStack>
+  )
+}
+
+function ERC721SubmitButton() {
+  const { address } = useAccount()
+  const { handleAddCredential, isLoading, error } = useNewERC721Credential()
+  return (
+    <SubmitButton
+      onSubmit={handleAddCredential}
+      disabled={!address}
+      disabledText="Connect Wallet"
+      error={error}
+      isLoading={isLoading}
+    />
   )
 }

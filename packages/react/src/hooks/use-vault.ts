@@ -9,5 +9,6 @@ export const useVault = (vaultId: string) => {
       const data = await sdk.getVault(vaultId)
       return data.data ?? null
     },
+    enabled: !!vaultId,
   })
 }

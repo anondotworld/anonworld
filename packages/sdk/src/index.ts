@@ -10,7 +10,6 @@ import {
   FarcasterChannel,
   FarcasterUser,
   FungiblePosition,
-  NFTPosition,
   Post,
   RequestConfig,
   RevealArgs,

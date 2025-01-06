@@ -1,5 +1,5 @@
 import {
-  CredentialMetadata,
+  TokenBalanceMetadata,
   CredentialProof,
   CredentialType,
   PostData,
@@ -32,7 +32,7 @@ export type DBPostCredential = typeof postCredentialsTable.$inferSelect
 export type DBActionExecution = typeof actionExecutionsTable.$inferSelect
 export type DBCredential = typeof credentialsTable.$inferSelect & {
   proof: CredentialProof
-  metadata: CredentialMetadata
+  metadata: TokenBalanceMetadata
   type: CredentialType
 }
 export type DBCommunity = typeof communitiesTable.$inferSelect

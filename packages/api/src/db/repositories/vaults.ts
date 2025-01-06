@@ -40,14 +40,15 @@ export class VaultsRepository {
     const response = await this.db
       .select()
       .from(vaultsTable)
-      .leftJoin(credentialsTable, eq(vaultsTable.id, credentialsTable.vault_id))
-      .where(
+      .leftJoin(
+        credentialsTable,
         and(
-          eq(vaultsTable.passkey_id, passkeyId),
+          eq(vaultsTable.id, credentialsTable.vault_id),
           isNull(credentialsTable.deleted_at),
           isNull(credentialsTable.reverified_id)
         )
       )
+      .where(eq(vaultsTable.passkey_id, passkeyId))
 
     return response as {
       vaults: DBVault

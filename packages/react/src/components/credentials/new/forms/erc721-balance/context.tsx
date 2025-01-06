@@ -1,52 +1,42 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { ContractType, CredentialType, StorageType } from '@anonworld/common'
-import { useCredentials, useSDK } from '../../../providers'
-import { parseUnits } from 'viem'
+import { useCredentials, useSDK } from '../../../../../providers'
 import { useAccount } from 'wagmi'
 
-interface NewCredentialContextValue {
+interface NewERC721CredentialContextValue {
   isOpen: boolean
   setIsOpen: (isOpen: boolean) => void
-  credentialType: CredentialType
-  setCredentialType: (credentialType: CredentialType) => void
   connectWallet: () => void
   isConnecting: boolean
   tokenId: { chainId: number; address: string } | undefined
   setTokenId: (token?: { chainId: number; address: string }) => void
-  balance: number
-  setBalance: (balance: number) => void
-  maxBalance: number
-  setMaxBalance: (maxBalance: number) => void
-  decimals: number
-  setDecimals: (decimals: number) => void
   handleAddCredential: () => void
   isLoading: boolean
   error: string | undefined
 }
 
-const NewCredentialContext = createContext<NewCredentialContextValue | null>(null)
+const NewERC721CredentialContext = createContext<NewERC721CredentialContextValue | null>(
+  null
+)
 
-export function NewCredentialProvider({
+export function NewERC721CredentialProvider({
   children,
   initialTokenId,
   initialBalance,
+  isOpen,
+  setIsOpen,
 }: {
   children: React.ReactNode
   initialTokenId?: { chainId: number; address: string }
   initialBalance?: number
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
 }) {
-  const [isOpen, setIsOpen] = useState(false)
   const { connectWallet, isConnecting } = useSDK()
-  const [credentialType, setCredentialType] = useState<CredentialType>(
-    CredentialType.ERC20_BALANCE
-  )
   const [isConnectingWallet, setIsConnectingWallet] = useState(false)
   const [tokenId, setTokenId] = useState<
     { chainId: number; address: string } | undefined
   >(initialTokenId)
-  const [balance, setBalance] = useState<number>(initialBalance ?? 0)
-  const [maxBalance, setMaxBalance] = useState<number>(0)
-  const [decimals, setDecimals] = useState<number>(18)
   const { address } = useAccount()
   const { add } = useCredentials()
   const [isLoading, setIsLoading] = useState(false)
@@ -72,23 +62,8 @@ export function NewCredentialProvider({
       if (initialTokenId) {
         setTokenId(initialTokenId)
       }
-      if (initialBalance) {
-        setBalance(initialBalance)
-      }
     }
   }, [isOpen, initialTokenId, initialBalance])
-
-  useEffect(() => {
-    if (credentialType === CredentialType.ERC20_BALANCE) {
-      setTokenId(undefined)
-      setBalance(0)
-      setDecimals(18)
-    } else if (credentialType === CredentialType.ERC721_BALANCE) {
-      setTokenId(undefined)
-      setBalance(1)
-      setDecimals(0)
-    }
-  }, [credentialType])
 
   const handleAddCredential = async () => {
     if (!tokenId) return
@@ -102,20 +77,18 @@ export function NewCredentialProvider({
       const response = await sdk.getStorageSlot(
         tokenId.chainId,
         tokenId.address,
-        credentialType === CredentialType.ERC20_BALANCE
-          ? ContractType.ERC20
-          : ContractType.ERC721,
+        ContractType.ERC721,
         StorageType.BALANCE
       )
       if (!response.data) {
         throw new Error('Failed to find balance storage slot')
       }
 
-      await add(credentialType, {
+      await add(CredentialType.ERC721_BALANCE, {
         address,
         chainId: tokenId.chainId,
         tokenAddress: tokenId.address as `0x${string}`,
-        verifiedBalance: parseUnits(balance.toString(), decimals),
+        verifiedBalance: BigInt(1),
         balanceSlot: response.data.slot,
       })
 
@@ -128,36 +101,30 @@ export function NewCredentialProvider({
   }
 
   return (
-    <NewCredentialContext.Provider
+    <NewERC721CredentialContext.Provider
       value={{
         isOpen,
         setIsOpen,
         connectWallet: handleConnectWallet,
-        credentialType,
-        setCredentialType,
         isConnecting: isConnectingWallet,
         tokenId,
         setTokenId,
-        balance,
-        setBalance,
-        maxBalance,
-        setMaxBalance,
-        decimals,
-        setDecimals,
         handleAddCredential,
         isLoading,
         error,
       }}
     >
       {children}
-    </NewCredentialContext.Provider>
+    </NewERC721CredentialContext.Provider>
   )
 }
 
-export function useNewCredential() {
-  const context = useContext(NewCredentialContext)
+export function useNewERC721Credential() {
+  const context = useContext(NewERC721CredentialContext)
   if (!context) {
-    throw new Error('useNewCredential must be used within a NewCredentialProvider')
+    throw new Error(
+      'useNewERC721Credential must be used within a NewERC721CredentialProvider'
+    )
   }
   return context
 }

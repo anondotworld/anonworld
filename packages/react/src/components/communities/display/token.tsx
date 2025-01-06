@@ -1,6 +1,12 @@
 import { Separator, Text, XStack, YStack } from '@anonworld/ui'
 import { Field } from '../../field'
-import { formatAddress, formatAmount } from '@anonworld/common'
+import {
+  CredentialType,
+  ERC20CredentialRequirement,
+  ERC721CredentialRequirement,
+  formatAddress,
+  formatAmount,
+} from '@anonworld/common'
 import { formatEther, formatUnits } from 'viem'
 import { useActions } from '../../../hooks/use-actions'
 import { Action, ActionType, Community, getChain } from '@anonworld/common'
@@ -75,24 +81,48 @@ export function CommunityActions({ community }: { community: Community }) {
   const communityActions: Record<number, CommunityAction> = {}
 
   for (const action of actions ?? []) {
+    const credentialType = action.credential_id?.split(':')[0] as
+      | CredentialType
+      | undefined
+
     if (
       !action.community ||
       action.community.id !== community.id ||
-      !action.credential_requirement
+      !action.credential_requirement ||
+      !credentialType
     ) {
       continue
     }
 
-    const value = Number.parseFloat(
-      formatEther(BigInt(action.credential_requirement.minimumBalance))
-    )
-    if (!communityActions[value]) {
-      communityActions[value] = {
-        value: action.credential_requirement.minimumBalance,
-        action,
-        twitter: [],
-        farcaster: [],
+    let value: number | undefined = undefined
+
+    switch (credentialType) {
+      case CredentialType.ERC20_BALANCE:
+      case CredentialType.ERC721_BALANCE: {
+        const credentialRequirement = action.credential_requirement as
+          | ERC20CredentialRequirement
+          | ERC721CredentialRequirement
+          | undefined
+
+        if (!credentialRequirement) {
+          continue
+        }
+
+        value = Number.parseFloat(
+          formatEther(BigInt(credentialRequirement.minimumBalance))
+        )
+        if (!communityActions[value]) {
+          communityActions[value] = {
+            value: credentialRequirement.minimumBalance,
+            action,
+            twitter: [],
+            farcaster: [],
+          }
+        }
+        break
       }
+      default:
+        continue
     }
 
     switch (action.type) {

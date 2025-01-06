@@ -31,7 +31,6 @@ export type TokenBalancePublicData = {
 }
 
 export type TokenBalanceInputData = {
-  address: string
   signature: string
   messageHash: string
   storageHash: string
@@ -58,7 +57,7 @@ export class TokenBalanceVerifier extends Circuit implements Verifier {
   }
 
   async buildInput(args: TokenBalanceArgs): Promise<{
-    input: Omit<TokenBalanceInputData, 'signature'>
+    input: Omit<TokenBalanceInputData, 'signature' | 'messageHash'>
     message: string
   }> {
     const chain = getChain(args.chainId)
@@ -74,7 +73,6 @@ export class TokenBalanceVerifier extends Circuit implements Verifier {
     })
 
     const input = {
-      address: args.address,
       storageHash: ethProof.storageHash,
       storageProof: ethProof.storageProof,
       chainId: `0x${Number(args.chainId).toString(16)}`,
@@ -85,13 +83,9 @@ export class TokenBalanceVerifier extends Circuit implements Verifier {
     }
 
     const message = JSON.stringify({ ...input, storageProof: undefined })
-    const messageHash = hashMessage(message)
 
     return {
-      input: {
-        ...input,
-        messageHash,
-      },
+      input,
       message,
     }
   }

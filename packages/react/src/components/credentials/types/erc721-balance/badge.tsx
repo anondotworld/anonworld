@@ -1,9 +1,11 @@
-import { Credential, Token } from '@anonworld/common'
+import { ERC721BalanceCredential, Token } from '@anonworld/common'
 import { Badge } from '../../../badge'
 import { useToken } from '../../../../hooks'
 import { TokenImage } from '../../../tokens/image'
 
-export function ERC721BalanceBadge({ credential }: { credential: Credential }) {
+export function ERC721BalanceBadge({
+  credential,
+}: { credential: ERC721BalanceCredential }) {
   if (!credential.token) {
     return <ERC721BalanceBadgeWithToken credential={credential} />
   }
@@ -11,7 +13,9 @@ export function ERC721BalanceBadge({ credential }: { credential: Credential }) {
   return <ERC721BalanceBadgeBase token={credential.token} />
 }
 
-function ERC721BalanceBadgeWithToken({ credential }: { credential: Credential }) {
+function ERC721BalanceBadgeWithToken({
+  credential,
+}: { credential: ERC721BalanceCredential }) {
   const { data } = useToken({
     chainId: Number(credential.metadata.chainId),
     address: credential.metadata.tokenAddress,

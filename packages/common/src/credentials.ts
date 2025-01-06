@@ -10,7 +10,12 @@ export const erc721Balance = {
   name: 'ERC721 Owner',
 }
 
-export const credentials = [erc20Balance, erc721Balance]
+export const farcasterFid = {
+  type: CredentialType.FARCASTER_FID,
+  name: 'Farcaster FID',
+}
+
+export const credentials = [erc20Balance, erc721Balance, farcasterFid]
 
 export const getCredential = (type: CredentialType) => {
   return credentials.find((credential) => credential.type === type)

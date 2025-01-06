@@ -1,10 +1,12 @@
-import { CredentialWithId } from '@anonworld/common'
+import { ERC20BalanceCredential } from '@anonworld/common'
 import { useToken } from '../../../../hooks'
 import { formatUnits } from 'viem/utils'
 import { Text, XStack } from '@anonworld/ui'
 import { TokenImage } from '../../../tokens/image'
 
-export function ERC20BalanceSelect({ credential }: { credential: CredentialWithId }) {
+export function ERC20BalanceSelect({
+  credential,
+}: { credential: ERC20BalanceCredential }) {
   const { data } = useToken({
     chainId: Number(credential.metadata.chainId),
     address: credential.metadata.tokenAddress,
