@@ -56,11 +56,11 @@ export const evmRoutes = createElysia({ prefix: '/evm' }).post(
 
     if (slot === null) return error(404, 'Failed to find balance storage slot')
 
-    if (contractType === ContractType.ERC20) {
-      await tokens.getOrCreateERC20(chainId, contractAddress)
-    } else if (contractType === ContractType.ERC721) {
-      await tokens.getOrCreateERC721(chainId, contractAddress)
-    }
+    await tokens.getOrCreate({
+      contractType: contractType,
+      chainId: chainId,
+      address: contractAddress,
+    })
 
     await db.tokens.update(`${chainId}:${contractAddress}`, {
       balance_slot: slot,

@@ -12,6 +12,7 @@ export function SubmitButton({
   disabledText?: string
   isLoading: boolean
   error?: string
+  children?: React.ReactNode
 }) {
   return (
     <YStack mt="$4" gap="$2">

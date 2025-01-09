@@ -17,7 +17,6 @@ export function NewCommunity() {
             disabledStyle={{ opacity: 0.5, bg: '$color12' }}
             hoverStyle={{ opacity: 0.9, bg: '$color12' }}
             pressStyle={{ opacity: 0.9, bg: '$color12' }}
-            disabled
           >
             <XStack ai="center" gap="$2">
               <Plus size={16} strokeWidth={2.5} color="$color1" />

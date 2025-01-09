@@ -6,20 +6,21 @@ import {
   twitterAccountsTable,
 } from '../schema'
 import { eq, inArray, or } from 'drizzle-orm'
-import { DBCommunity, DBToken } from '../types'
-import { FarcasterUser, TwitterUser } from '@anonworld/common'
+import { DBCommunity } from '../types'
+import { FarcasterUser, TwitterUser, Community } from '@anonworld/common'
 
-type Community = DBCommunity & {
-  token: DBToken | null
-  farcaster: FarcasterUser | null
-  twitter: TwitterUser | null
-}
+const ENABLE_HIDDEN_COMMUNITIES = process.env.ENABLE_HIDDEN_COMMUNITIES === 'true'
 
 export class CommunitiesRepository {
   private db: ReturnType<typeof drizzle>
 
   constructor(db: ReturnType<typeof drizzle>) {
     this.db = db
+  }
+
+  async create(params: typeof communitiesTable.$inferInsert) {
+    const [community] = await this.db.insert(communitiesTable).values(params).returning()
+    return community
   }
 
   async get(id: string) {
@@ -43,6 +44,8 @@ export class CommunitiesRepository {
       token: community.tokens,
       farcaster: community.farcaster_accounts?.metadata as FarcasterUser | null,
       twitter: community.twitter_accounts?.metadata as TwitterUser | null,
+      created_at: community.communities.created_at.toISOString(),
+      wallet_id: undefined,
     } as Community
   }
 
@@ -73,13 +76,15 @@ export class CommunitiesRepository {
         twitterAccountsTable,
         eq(communitiesTable.twitter_username, twitterAccountsTable.username)
       )
-      .where(eq(communitiesTable.hidden, false))
+      .where(ENABLE_HIDDEN_COMMUNITIES ? undefined : eq(communitiesTable.hidden, false))
 
     return communities.map((community) => ({
       ...community.communities,
       token: community.tokens,
       farcaster: community.farcaster_accounts?.metadata as FarcasterUser | null,
       twitter: community.twitter_accounts?.metadata as TwitterUser | null,
+      created_at: community.communities.created_at.toISOString(),
+      wallet_id: undefined,
     })) as Community[]
   }
 

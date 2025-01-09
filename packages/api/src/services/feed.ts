@@ -105,6 +105,10 @@ export class FeedService {
       const relatedCasts =
         relationships[post.hash]?.map((r) => casts[r.target_id]).filter((c) => c) ?? []
 
+      const farcasterRelationships = formattedPost.relationships.filter(
+        (r) => r.farcaster
+      )
+
       let postLikes = cast.reactions.likes_count
       postLikes += relatedCasts.reduce((acc, c) => acc + c.reactions.likes_count, 0)
       if (likes[post.hash]) {
@@ -113,6 +117,7 @@ export class FeedService {
 
       let postReplies = cast.replies.count
       postReplies += relatedCasts.reduce((acc, c) => acc + c.replies.count, 0)
+      postReplies -= farcasterRelationships.length - 1
 
       formattedPost.aggregate = {
         likes: postLikes,

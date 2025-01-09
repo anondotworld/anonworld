@@ -235,3 +235,13 @@ export type FarcasterCast = {
 export type ConversationCast = FarcasterCast & {
   direct_replies: Array<ConversationCast>
 }
+
+export type FarcasterSigner = {
+  object: string
+  signer_uuid: string
+  public_key: string
+  status: string
+  signer_approval_url: string
+  fid: number
+  permissions: Array<string>
+}

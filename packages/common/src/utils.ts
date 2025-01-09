@@ -206,3 +206,7 @@ export function isIOS(): boolean {
 export function isMobile(): boolean {
   return isAndroid() || isIOS()
 }
+
+export function generateIdempotencyKey(): string {
+  return crypto.randomUUID().replace(/-/g, '')
+}

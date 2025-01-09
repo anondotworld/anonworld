@@ -35,7 +35,14 @@ export function CommunityDisplay({
     >
       <XStack ai="center" jc="space-between" $xs={{ ai: 'flex-start' }}>
         <XStack ai="center" gap="$3">
-          <Image src={community.image_url} w="$4" h="$4" br="$12" />
+          <Image
+            src={community.image_url}
+            w="$4"
+            h="$4"
+            br="$4"
+            bc="$borderColor"
+            bw="$0.5"
+          />
           <YStack gap="$1" minWidth="$10">
             <Text fow="600">{community.name}</Text>
             <Text fos="$1" fow="400" color="$color11" textTransform="uppercase">

@@ -6,6 +6,18 @@ import { simplehash } from './simplehash'
 import { zerion } from './zerion'
 
 class TokensService {
+  async getOrCreate({
+    contractType,
+    chainId,
+    address,
+  }: { contractType: string; chainId: number; address: string }) {
+    switch (contractType as ContractType) {
+      case ContractType.ERC20:
+        return this.getOrCreateERC20(chainId, address)
+      case ContractType.ERC721:
+        return this.getOrCreateERC721(chainId, address)
+    }
+  }
   async getOrCreateERC20(chainId: number, tokenAddress: string) {
     const token = await redis.getToken(chainId, tokenAddress)
     if (token) return JSON.parse(token)
@@ -72,11 +84,40 @@ class TokensService {
       market_cap: Math.round(zerionToken.attributes.market_data.market_cap ?? 0),
       total_supply: Math.round(zerionToken.attributes.market_data.total_supply ?? 0),
       holders: simpleHashToken?.holder_count ?? 0,
+      balance_slot: null,
       type: 'ERC20',
     }
     await db.tokens.create(token)
     await redis.setToken(chainId, tokenAddress, JSON.stringify(token))
 
+    return token
+  }
+
+  async createNewERC20(args: {
+    chainId: number
+    address: string
+    name: string
+    symbol: string
+    imageUrl: string
+  }) {
+    const id = `${args.chainId}:${args.address}`
+    const token = {
+      id: id.toLowerCase(),
+      chain_id: args.chainId,
+      address: args.address.toLowerCase(),
+      symbol: args.symbol,
+      name: args.name,
+      decimals: 18,
+      image_url: args.imageUrl,
+      price_usd: '0',
+      market_cap: 0,
+      total_supply: 0,
+      holders: 0,
+      balance_slot: null,
+      type: 'ERC20',
+    }
+    await db.tokens.create(token)
+    await redis.setToken(args.chainId, args.address, JSON.stringify(token))
     return token
   }
 

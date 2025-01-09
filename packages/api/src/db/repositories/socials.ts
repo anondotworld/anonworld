@@ -10,6 +10,10 @@ export class SocialsRepository {
     this.db = db
   }
 
+  async createFarcasterAccount(params: typeof farcasterAccountsTable.$inferInsert) {
+    await this.db.insert(farcasterAccountsTable).values(params)
+  }
+
   async updateFarcasterAccount(
     fid: number,
     params: Partial<typeof farcasterAccountsTable.$inferInsert>

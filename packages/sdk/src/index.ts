@@ -362,4 +362,30 @@ export class AnonWorldSDK {
       }
     )
   }
+
+  async checkFnameAvailability(fname: string) {
+    return await this.request<{ available: boolean }>(
+      `/farcaster/fname-availability?fname=${fname}`
+    )
+  }
+
+  async createCommunity(args: {
+    passkeyId?: string
+    name: string
+    description: string
+    imageUrl: string
+    username: string
+    newToken?: {
+      symbol: string
+    }
+    existingToken?: {
+      chainId: number
+      address: string
+    }
+  }) {
+    return await this.request<Community>(`/communities`, {
+      method: 'POST',
+      body: JSON.stringify(args),
+    })
+  }
 }

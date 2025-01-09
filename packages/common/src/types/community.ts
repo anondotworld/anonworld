@@ -11,6 +11,9 @@ export type Community = {
   twitter_username: string
   posts: number
   followers: number
+  passkey_id: string
+  wallet_id?: string
+  wallet_address: string
   token: Token
   farcaster: FarcasterUser
   twitter?: TwitterUser

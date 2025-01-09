@@ -59,3 +59,11 @@ export const farcasterRoutes = createElysia({ prefix: '/farcaster' })
       }),
     }
   )
+  .get(
+    '/fname-availability',
+    async ({ query }) => {
+      const response = await neynar.checkFnameAvailability(query.fname)
+      return response
+    },
+    { query: t.Object({ fname: t.String() }) }
+  )

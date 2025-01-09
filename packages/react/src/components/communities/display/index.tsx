@@ -35,7 +35,7 @@ export function CommunityDisplay({ community }: { community: Community }) {
           src={community.image_url}
           w="$8"
           h="$8"
-          br="$12"
+          br="$4"
           bc="$borderColor"
           bw="$0.5"
         />

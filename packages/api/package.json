@@ -19,6 +19,7 @@
     "@anonworld/credentials": "*",
     "@elysiajs/cors": "1.1.1",
     "@elysiajs/jwt": "1.1.1",
+    "@privy-io/server-auth": "^1.17.2",
     "dotenv": "^16.4.5",
     "drizzle-orm": "0.36.0",
     "elysia": "1.1.25",

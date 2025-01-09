@@ -4,6 +4,7 @@ import {
   ConversationCast,
   FarcasterUser,
   PostData,
+  FarcasterSigner,
 } from '@anonworld/common'
 import { db } from '../db'
 
@@ -262,6 +263,51 @@ class NeynarService {
     }>(
       `/farcaster/cast/conversation?identifier=${identifier}&type=hash&reply_depth=5&include_chronological_parent_casts=false&sort_type=desc_chron&limit=50`
     )
+  }
+
+  async getNewFid() {
+    return this.makeRequest<{
+      fid: number
+    }>('/farcaster/user/fid')
+  }
+
+  async createUser(params: {
+    fid: number
+    custodyAddress: string
+    deadline: number
+    signature: string
+    name: string
+    description: string
+    imageUrl: string
+    username: string
+  }) {
+    return this.makeRequest<{
+      success: boolean
+      message: string
+      signer: FarcasterSigner
+      user: FarcasterUser
+    }>(`/farcaster/user`, {
+      method: 'POST',
+      body: JSON.stringify({
+        signature: params.signature,
+        fid: params.fid,
+        requested_user_custody_address: params.custodyAddress,
+        deadline: params.deadline,
+        fname: params.username,
+        metadata: {
+          bio: params.description,
+          pfp_url: params.imageUrl,
+          username: params.username,
+          display_name: params.name,
+        },
+      }),
+    })
+  }
+
+  async checkFnameAvailability(fname: string) {
+    return this.makeRequest<{
+      available: boolean
+    }>(`/farcaster/fname/availability?fname=${fname}`)
   }
 }
 
