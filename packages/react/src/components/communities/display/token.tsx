@@ -51,7 +51,10 @@ export function CommunityToken({ community }: { community: Community }) {
           />
           <Field
             label="Price"
-            value={`$${Number(community.token.price_usd).toFixed(4)}`}
+            value={`$${Number(community.token.price_usd).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 4,
+            })}`}
             minWidth="$10"
             ai="flex-end"
           />

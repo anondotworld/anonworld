@@ -3,8 +3,11 @@ import { createElysia } from '../utils'
 import { db } from '../db'
 import { provisioning } from '../services/provisioning'
 import { neynar } from '../services/neynar'
-import { Token } from '@anonworld/common'
+import { ActionType, Token } from '@anonworld/common'
 import { tokens } from '../services/tokens'
+import { parseUnits } from 'viem'
+
+const ANONWORLD_FID = 899289
 
 export const communitiesRoutes = createElysia({ prefix: '/communities' })
   .get('/', async () => {
@@ -75,8 +78,47 @@ export const communitiesRoutes = createElysia({ prefix: '/communities' })
         wallet_address: walletAddress,
         posts: 0,
         followers: 0,
-        hidden: true,
       })
+
+      await db.actions.create({
+        community_id: community.id,
+        type: ActionType.COPY_POST_FARCASTER,
+        credential_id: `${token.type}_BALANCE:${token.chain_id}:${token.address.toLowerCase()}`,
+        credential_requirement: {
+          chainId: token.chain_id,
+          tokenAddress: token.address as `0x${string}`,
+          minimumBalance: parseUnits(body.minimumBalance, token.decimals).toString(),
+        },
+        trigger: 'b6ec8ee8-f8bf-474f-8b28-f788f37e4066',
+        metadata: {
+          fid: community.fid,
+        },
+      })
+
+      let text = `👋 This is the community account for ${body.name}.`
+      text += ` Requires ${body.minimumBalance} ${token.symbol} to post to it using @anonworld.`
+
+      const response = await neynar.createCast({
+        fid,
+        links: [`https://anon.world/communities/${community.id}`],
+        reply: null,
+        text,
+        images: [],
+      })
+
+      if (response.success) {
+        await neynar.createCast({
+          fid: ANONWORLD_FID,
+          links: [`https://anon.world/communities/${community.id}`],
+          reply: null,
+          text: `🌐 New community launched: @${body.username}`,
+          quote: {
+            fid: response.cast.author.fid,
+            hash: response.cast.hash,
+          },
+          images: [],
+        })
+      }
 
       return await db.communities.get(community.id)
     },
@@ -99,6 +141,73 @@ export const communitiesRoutes = createElysia({ prefix: '/communities' })
             address: t.String(),
           })
         ),
+        minimumBalance: t.String(),
+      }),
+    }
+  )
+  .post(
+    '/:id/actions',
+    async ({ body, params, passkeyId }) => {
+      const community = await db.communities.get(params.id)
+      if (!community) {
+        throw new Error('Community not found')
+      }
+
+      if (!community.passkey_id) {
+        throw new Error('Community is not editable')
+      }
+
+      if (community.passkey_id !== passkeyId) {
+        throw new Error('Invalid passkey')
+      }
+
+      const action = await db.actions.getByCommunityAndType(params.id, body.type)
+      if (action) {
+        await db.actions.update(action.id, {
+          credential_id: body.credentialId,
+          credential_requirement: body.credentialRequirement,
+        })
+      } else if (body.type === ActionType.COPY_POST_FARCASTER) {
+        await db.actions.create({
+          community_id: params.id,
+          type: body.type,
+          credential_id: body.credentialId,
+          credential_requirement: body.credentialRequirement,
+          trigger: 'b6ec8ee8-f8bf-474f-8b28-f788f37e4066',
+          metadata: {
+            fid: community.fid,
+          },
+        })
+      }
+
+      return action
+    },
+    {
+      body: t.Object({
+        type: t.String(),
+        credentialId: t.String(),
+        credentialRequirement: t.Any(),
+      }),
+      params: t.Object({
+        id: t.String(),
+      }),
+    }
+  )
+  .delete(
+    '/:id/actions/:actionId',
+    async ({ params, passkeyId }) => {
+      const action = await db.actions.get(params.actionId)
+      if (action?.community_id) {
+        const community = await db.communities.get(action.community_id)
+        if (community?.passkey_id === passkeyId) {
+          await db.actions.delete(params.actionId)
+        }
+      }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+        actionId: t.String(),
       }),
     }
   )

@@ -1,10 +1,12 @@
 import {
   Action,
+  ActionType,
   ApiResponse,
   Community,
   ContractType,
   ConversationPost,
   Credential,
+  CredentialRequirement,
   CredentialWithId,
   ExecuteAction,
   FarcasterChannel,
@@ -382,10 +384,39 @@ export class AnonWorldSDK {
       chainId: number
       address: string
     }
+    minimumBalance?: string
   }) {
     return await this.request<Community>(`/communities`, {
       method: 'POST',
       body: JSON.stringify(args),
     })
+  }
+
+  async updateCommunityAction(args: {
+    communityId: string
+    type: ActionType
+    credentialId: string
+    credentialRequirement: CredentialRequirement
+  }) {
+    return await this.request<Action>(`/communities/${args.communityId}/actions`, {
+      method: 'POST',
+      body: JSON.stringify({
+        type: args.type,
+        credentialId: args.credentialId,
+        credentialRequirement: args.credentialRequirement,
+      }),
+    })
+  }
+
+  async deleteCommunityAction(args: {
+    communityId: string
+    actionId: string
+  }) {
+    return await this.request<Action>(
+      `/communities/${args.communityId}/actions/${args.actionId}`,
+      {
+        method: 'DELETE',
+      }
+    )
   }
 }

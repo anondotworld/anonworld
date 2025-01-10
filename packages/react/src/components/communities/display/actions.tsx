@@ -1,13 +1,17 @@
-import { MoreHorizontal } from '@tamagui/lucide-icons'
-import { Community, getChain } from '@anonworld/common'
-import { Popover, Text, View, YGroup } from '@anonworld/ui'
+import { MoreHorizontal, Pencil } from '@tamagui/lucide-icons'
+import { Community, ContractType, getChain } from '@anonworld/common'
+import { Dialog, Popover, Text, View, YGroup } from '@anonworld/ui'
 import { DexScreener } from '../../svg/dexscreener'
 import { Etherscan } from '../../svg/etherscan'
 import { Uniswap } from '../../svg/uniswap'
 import { Link } from 'solito/link'
+import { Clanker } from '../../svg/clanker'
+import { useAuth } from '../../../providers'
+import { CommunitySettings } from '../settings'
 
 export function CommunityActions({ community }: { community: Community }) {
   const chain = getChain(Number(community.token.chain_id))
+  const { passkeyId } = useAuth()
   return (
     <Popover size="$5" placement="bottom">
       <Popover.Trigger>
@@ -34,6 +38,27 @@ export function CommunityActions({ community }: { community: Community }) {
         userSelect="none"
       >
         <YGroup>
+          {community.passkey_id === passkeyId &&
+            community.token.type === ContractType.ERC20 && (
+              <CommunitySettings community={community}>
+                <Dialog.Trigger>
+                  <YGroup.Item>
+                    <View
+                      fd="row"
+                      gap="$2"
+                      px="$3.5"
+                      py="$2.5"
+                      hoverStyle={{ bg: '$color5' }}
+                    >
+                      <Pencil size={16} />
+                      <Text fos="$2" fow="400">
+                        Edit Actions
+                      </Text>
+                    </View>
+                  </YGroup.Item>
+                </Dialog.Trigger>
+              </CommunitySettings>
+            )}
           {community.token.platform === 'clanker' && (
             <YGroup.Item>
               <Link
@@ -47,7 +72,7 @@ export function CommunityActions({ community }: { community: Community }) {
                   py="$2.5"
                   hoverStyle={{ bg: '$color5' }}
                 >
-                  <View w={16} />
+                  <Clanker w={16} />
                   <Text fos="$2" fow="400">
                     Clanker
                   </Text>

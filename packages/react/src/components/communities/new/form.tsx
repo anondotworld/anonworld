@@ -63,7 +63,7 @@ export function NewCommunityForm() {
           <XStack ai="center" jc="space-between">
             {tokenType === 'new' && <TickerField />}
             {tokenType === 'existing' && <CredentialField />}
-            {(tokenType === 'new' || !token || token.contractType === 'ERC20') && (
+            {(tokenType === 'new' || (token && token.contractType === 'ERC20')) && (
               <AmountField />
             )}
           </XStack>
@@ -110,11 +110,18 @@ function FarcasterUsernameField() {
     }
   }, [available])
 
+  const handleSetValue = (value: string) => {
+    const sanitized = value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+    const noLeadingHyphens = sanitized.replace(/^-+/, '')
+    const truncated = noLeadingHyphens.slice(0, 16)
+    setValue(truncated)
+  }
+
   return (
     <YStack gap="$2">
       <XStack gap="$2" ai="center">
         <Text fos="$1" fow="400" color="$color11" textTransform="uppercase">
-          Farcaster
+          Farcaster Username
         </Text>
         {!available && debouncedValue !== '' && (
           <Text fos="$2" fow="400" color="$red11">
@@ -126,7 +133,7 @@ function FarcasterUsernameField() {
         <Input
           placeholder="Username"
           value={value}
-          onChangeText={setValue}
+          onChangeText={handleSetValue}
           disabled={isLoading || isChecking}
         />
         <View pos="absolute" t="$0" b="$0" r="$2.5" jc="center" ai="center">
@@ -400,7 +407,7 @@ function CredentialField() {
       >
         <Select.Trigger>
           {!selectedToken ? (
-            <Select.Value placeholder="Select a credential" fos="$2" />
+            <Select.Value placeholder="Select a token" fos="$2" />
           ) : (
             <CredentialValue token={selectedToken} />
           )}

@@ -265,7 +265,7 @@ function SubmitButton() {
 
     let txData = swapQuote.transaction.data
     let signature: `0x${string}` | undefined
-    if (swapQuote.permit2.eip712) {
+    if (swapQuote.permit2?.eip712) {
       // @ts-expect-error
       signature = await signTypedDataAsync(swapQuote.permit2.eip712)
       const signatureLengthInHex = numberToHex(size(signature), {

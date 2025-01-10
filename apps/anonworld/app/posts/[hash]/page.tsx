@@ -22,10 +22,11 @@ export async function generateMetadata({
         title = `${formatHexId(vaultId)} | anon.world`
       } else if (credential?.type === CredentialType.ERC20_BALANCE) {
         const amount =
-          BigInt(credential.metadata.balance) / BigInt(10 ** credential.token.decimals)
-        title = `${formatAmount(Number(amount))} ${credential.token.symbol} | anon.world`
+          BigInt(credential.metadata.balance) /
+          BigInt(10 ** (credential.token?.decimals ?? 18))
+        title = `${formatAmount(Number(amount))} ${credential.token?.symbol} | anon.world`
       } else if (credential?.type === CredentialType.ERC721_BALANCE) {
-        title = `${credential.token.name} Holder | anon.world`
+        title = `${credential.token?.name} Holder | anon.world`
       }
     }
   }

@@ -125,7 +125,7 @@ export function PostDisplay({
         </XStack>
         <XStack ai="center" gap="$2">
           {!disableActions && post.relationships.length > 0 && (
-            <View onPress={(e) => e.preventDefault()}>
+            <View onPress={(e) => e.stopPropagation()}>
               <PostCommunities post={post} />
             </View>
           )}

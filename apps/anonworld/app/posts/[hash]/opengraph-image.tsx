@@ -7,7 +7,7 @@ const sdk = new AnonWorldSDK()
 async function loadFont() {
   const response = await fetch(
     new URL(
-      'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap'
+      'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap'
     )
   )
   const css = await response.text()
@@ -35,7 +35,7 @@ export default async function Image({ params }: { params: { hash: string } }) {
     ...size,
     fonts: [
       {
-        name: 'Inter',
+        name: 'Geist',
         data: fontData,
         style: 'normal',
       },

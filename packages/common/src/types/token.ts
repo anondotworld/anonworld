@@ -21,4 +21,5 @@ export type Token = {
   holders: number
   balance_slot: number | null
   platform: string | null
+  type: ContractType
 }

@@ -82,16 +82,16 @@ const updateTwitterAccounts = async () => {
   }
 }
 
-const updateVaults = async () => {
-  const vaults = await db.vaults.list()
-  for (const vault of vaults) {
-    console.log(`[vault] updating vault for ${vault.id}`)
-    const posts = await db.vaults.countPosts(vault.id)
-    await db.vaults.update(vault.id, {
-      posts,
-    })
-  }
-}
+// const updateVaults = async () => {
+//   const vaults = await db.vaults.list()
+//   for (const vault of vaults) {
+//     console.log(`[vault] updating vault for ${vault.id}`)
+//     const posts = await db.vaults.countPosts(vault.id)
+//     await db.vaults.update(vault.id, {
+//       posts,
+//     })
+//   }
+// }
 
 const main = async () => {
   let i = 0
@@ -109,7 +109,7 @@ const main = async () => {
       if (i % 20 === 0) {
         await updateFarcasterAccounts()
         await updateTwitterAccounts()
-        await updateVaults()
+        // await updateVaults()
       }
     } catch (error) {
       console.error('[error]', error)

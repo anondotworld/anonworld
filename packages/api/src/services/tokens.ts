@@ -43,10 +43,10 @@ class TokensService {
     const simpleHashToken = await simplehash.getToken(token.chain_id, token.address)
 
     const fields = {
-      price_usd: zerionToken.attributes.market_data.price?.toFixed(8) ?? 0,
-      market_cap: Math.round(zerionToken.attributes.market_data.market_cap ?? 0),
-      total_supply: Math.round(zerionToken.attributes.market_data.total_supply ?? 0),
-      holders: simpleHashToken.holder_count ?? 0,
+      price_usd: zerionToken?.attributes.market_data.price?.toFixed(8) ?? 0,
+      market_cap: Math.round(zerionToken?.attributes.market_data.market_cap ?? 0),
+      total_supply: Math.round(zerionToken?.attributes.market_data.total_supply ?? 0),
+      holders: simpleHashToken?.holder_count ?? 0,
     }
     await db.tokens.update(token.id, fields)
 
@@ -115,7 +115,7 @@ class TokensService {
       total_supply: 0,
       holders: 0,
       balance_slot: null,
-      type: 'ERC20',
+      type: ContractType.ERC20,
       platform: args.platform,
     }
     await db.tokens.create(token)

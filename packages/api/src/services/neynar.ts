@@ -131,10 +131,10 @@ class NeynarService {
     let isValid = castURL.startsWith('0x')
     if (!isValid) {
       const url = new URL(castURL)
-      const isValid =
+      isValid =
         url.hostname === 'warpcast.com' &&
-        (url.pathname.match(/^\/[^/]+\/0x[a-f0-9]+$/) || // /<username>/0x<hash>
-          url.pathname.match(/^\/~\/conversations\/0x[a-f0-9]+$/)) // /~/conversations/0x<hash>
+        (!!url.pathname.match(/^\/[^/]+\/0x[a-f0-9]+$/) || // /<username>/0x<hash>
+          !!url.pathname.match(/^\/~\/conversations\/0x[a-f0-9]+$/)) // /~/conversations/0x<hash>
     }
 
     if (isValid) {
@@ -151,6 +151,10 @@ class NeynarService {
   async createCast(
     params: PostData & {
       fid: number
+      quote?: {
+        fid: number
+        hash: string
+      }
     }
   ) {
     const signerUuid = await db.socials.getFarcasterAccount(params.fid)
@@ -200,6 +204,12 @@ class NeynarService {
           url: link,
         })
       }
+    }
+
+    if (params.quote) {
+      embeds.unshift({
+        castId: params.quote,
+      })
     }
 
     const body = {

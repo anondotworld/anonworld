@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { communitiesTable, tokensTable } from '../schema'
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { DBToken } from '../types'
 
 export class TokensRepository {
@@ -34,6 +34,22 @@ export class TokensRepository {
       .select()
       .from(tokensTable)
       .where(inArray(tokensTable.id, ids))
+
+    const tokensById = tokens.reduce(
+      (acc, t) => {
+        acc[t.id] = t
+        return acc
+      },
+      {} as Record<string, DBToken>
+    )
+    return tokensById
+  }
+
+  async getClankerTokens(ids: string[]) {
+    const tokens = await this.db
+      .select()
+      .from(tokensTable)
+      .where(and(inArray(tokensTable.id, ids), eq(tokensTable.platform, 'clanker')))
 
     const tokensById = tokens.reduce(
       (acc, t) => {

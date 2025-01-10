@@ -74,7 +74,7 @@ function TokenField() {
       const impl = t.attributes.fungible_info.implementations.find(
         (i) => i.address !== null
       )
-      return impl && t.attributes.value
+      return impl && t.attributes.value !== null
     })
   }, [data])
 

@@ -1,38 +1,33 @@
-'use client'
+import { Metadata } from 'next'
+import { AnonWorldSDK } from '@anonworld/sdk'
+import { CommunityPage } from '@/components/community'
 
-import {
-  CommunityDisplay,
-  NewFeed,
-  SwapTokens,
-  NewCommunityPost,
-  useCommunity,
-} from '@anonworld/react'
-import { View, XStack } from '@anonworld/ui'
-import { Content } from '@/components/content'
+const sdk = new AnonWorldSDK()
 
-export default function CommunityPage({ params }: { params: { id: string } }) {
-  const { data: community } = useCommunity({ id: params.id })
+export async function generateMetadata({
+  params,
+}: { params: { id: string } }): Promise<Metadata> {
+  const community = await sdk.getCommunity(params.id)
+  const title = `${community.data?.name} | anon.world`
+  const description = community.data?.description
 
-  if (!community) {
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [`https://anon.world/communities/${params.id}/opengraph-image`],
+    },
+  }
+}
+
+export default async function Page({ params }: { params: { id: string } }) {
+  const community = await sdk.getCommunity(params.id)
+
+  if (!community.data) {
     return null
   }
 
-  return (
-    <Content>
-      <CommunityDisplay community={community} />
-      <XStack ai="center" jc="space-between" $xs={{ px: '$2' }}>
-        <View />
-        <XStack gap="$2">
-          <SwapTokens
-            initialBuyToken={{
-              chainId: community.token.chain_id,
-              address: community.token.address,
-            }}
-          />
-          <NewCommunityPost community={community} />
-        </XStack>
-      </XStack>
-      <NewFeed fid={community.fid} />
-    </Content>
-  )
+  return <CommunityPage community={community.data} />
 }

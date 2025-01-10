@@ -75,6 +75,7 @@ export function NewCommunityProvider({
         newToken: {
           symbol,
         },
+        minimumBalance: postAmount,
       })
       community = response.data
     } else if (tokenType === 'existing' && token) {
@@ -85,6 +86,7 @@ export function NewCommunityProvider({
         imageUrl,
         username,
         existingToken: token,
+        minimumBalance: token.contractType === 'ERC721' ? '1' : postAmount,
       })
       community = response.data
     }
