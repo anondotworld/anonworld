@@ -1,6 +1,7 @@
-import { Credential } from '@anonworld/common'
+import { Community, Credential } from '@anonworld/common'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useAuth, useSDK } from '../../../providers'
+import { useRouter } from 'solito/navigation'
 
 interface NewCommunityContextValue {
   isOpen: boolean
@@ -57,12 +58,15 @@ export function NewCommunityProvider({
   const [isLoading, setIsLoading] = useState(false)
   const { sdk } = useSDK()
   const { passkeyId } = useAuth()
+  const router = useRouter()
 
   const createCommunity = async () => {
     setIsLoading(true)
 
+    let community: Community | undefined
+
     if (tokenType === 'new' && symbol) {
-      await sdk.createCommunity({
+      const response = await sdk.createCommunity({
         passkeyId,
         name,
         description,
@@ -72,8 +76,9 @@ export function NewCommunityProvider({
           symbol,
         },
       })
+      community = response.data
     } else if (tokenType === 'existing' && token) {
-      await sdk.createCommunity({
+      const response = await sdk.createCommunity({
         passkeyId,
         name,
         description,
@@ -81,11 +86,16 @@ export function NewCommunityProvider({
         username,
         existingToken: token,
       })
-    } else {
-      throw new Error('Invalid token type')
+      community = response.data
+    }
+
+    if (!community) {
+      throw new Error('Failed to create community')
     }
 
     setIsLoading(false)
+    setIsOpen(false)
+    router.push(`/communities/${community.id}`)
   }
 
   useEffect(() => {

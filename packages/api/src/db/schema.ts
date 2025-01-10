@@ -165,6 +165,7 @@ export const tokensTable = pgTable('tokens', {
   total_supply: bigint('total_supply', { mode: 'number' }).notNull().default(0),
   holders: bigint('holders', { mode: 'number' }).notNull().default(0),
   balance_slot: integer('balance_slot'),
+  platform: varchar({ length: 255 }),
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 })

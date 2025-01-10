@@ -197,7 +197,7 @@ function ImageField() {
         hoverStyle={{ bg: '$color5' }}
         cursor="pointer"
       >
-        {isLoading ? (
+        {isUploading ? (
           <View f={1} ai="center" jc="center">
             <Spinner color="$color12" />
           </View>

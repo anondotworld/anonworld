@@ -70,6 +70,7 @@ class ProvisioningService {
       name: params.name,
       symbol: params.symbol,
       imageUrl: params.imageUrl,
+      platform: 'clanker',
     })
   }
 

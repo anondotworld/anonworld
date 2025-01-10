@@ -23,10 +23,10 @@ export class IdRegistry {
       types: this.types,
       primaryType: 'Transfer',
       message: {
-        fid: BigInt(fid),
+        fid: fid.toString(),
         to: custodyAddress,
-        nonce: BigInt(nonce),
-        deadline: BigInt(deadline),
+        nonce: nonce.toString(),
+        deadline: deadline.toString(),
       },
     }
   }
@@ -37,7 +37,7 @@ export class IdRegistry {
 
   get domain() {
     return {
-      name: 'Farcaster ID Registry',
+      name: 'Farcaster IdRegistry',
       version: '1',
       chainId: this.chain.id,
       verifyingContract: this.address,

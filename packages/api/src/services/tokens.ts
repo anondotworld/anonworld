@@ -99,6 +99,7 @@ class TokensService {
     name: string
     symbol: string
     imageUrl: string
+    platform: string
   }) {
     const id = `${args.chainId}:${args.address}`
     const token = {
@@ -115,6 +116,7 @@ class TokensService {
       holders: 0,
       balance_slot: null,
       type: 'ERC20',
+      platform: args.platform,
     }
     await db.tokens.create(token)
     await redis.setToken(args.chainId, args.address, JSON.stringify(token))

@@ -34,6 +34,27 @@ export function CommunityActions({ community }: { community: Community }) {
         userSelect="none"
       >
         <YGroup>
+          {community.token.platform === 'clanker' && (
+            <YGroup.Item>
+              <Link
+                href={`https://www.clanker.world/clanker/${community.token.address}`}
+                target="_blank"
+              >
+                <View
+                  fd="row"
+                  gap="$2"
+                  px="$3.5"
+                  py="$2.5"
+                  hoverStyle={{ bg: '$color5' }}
+                >
+                  <View w={16} />
+                  <Text fos="$2" fow="400">
+                    Clanker
+                  </Text>
+                </View>
+              </Link>
+            </YGroup.Item>
+          )}
           <YGroup.Item>
             <Link
               href={`https://app.uniswap.org/swap?outputCurrency=${community.token.address}&chain=${chain.id}&inputCurrency=ETH`}
@@ -47,6 +68,7 @@ export function CommunityActions({ community }: { community: Community }) {
               </View>
             </Link>
           </YGroup.Item>
+
           <YGroup.Item>
             <Link
               href={`https://dexscreener.com/${chain.name.toLowerCase()}/${community.token.address}`}
