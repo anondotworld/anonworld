@@ -203,8 +203,8 @@ function TokenField() {
     if (!chain?.zerionId) return
 
     setTokenId({ chainId: chain.id, address: impl.address })
-    setBalance(Math.floor(token.attributes.quantity.float / 2))
-    setMaxBalance(Math.floor(token.attributes.quantity.float))
+    setBalance(token.attributes.quantity.float / 2)
+    setMaxBalance(token.attributes.quantity.float)
     setDecimals(impl.decimals)
   }
 
@@ -326,6 +326,7 @@ function BalanceField() {
       <Slider
         value={[Math.min(balance, maxBalance)]}
         max={maxBalance}
+        step={1 / (10 ** 6)}
         onValueChange={(value) => setBalance(value[0])}
       >
         <Slider.Track bg="$color5">
